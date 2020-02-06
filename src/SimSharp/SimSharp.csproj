@@ -50,7 +50,7 @@ A very rare bug has been fixed with respect to generating normal-distributed ran
   </Target>
 
   <ItemGroup>
-    <None Include="$(SolutionDir)..\LICENSE.txt" Link="LICENSE.txt" Pack="true" />
+    <None Include="$(SolutionDir)..\LICENSE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>

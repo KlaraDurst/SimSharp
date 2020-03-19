@@ -23,6 +23,8 @@ namespace SimSharp {
 
     public int Remaining { get { return Capacity - InUse; } }
 
+    public int Requests { get { return RequestQueue.Count; } }
+
     protected Simulation Environment { get; private set; }
 
     protected LinkedList<Request> RequestQueue { get; private set; }

@@ -11,6 +11,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using SimSharp.Visualization;
+using SimSharp.Visualization.Shapes;
 
 namespace SimSharp {
   /// <summary>
@@ -781,6 +783,20 @@ namespace SimSharp {
     }
     public Timeout TimeoutLogNormal2(TimeSpan mean, TimeSpan stdev) {
       return TimeoutLogNormal2(Random, mean, stdev);
+    }
+    #endregion
+
+    #region Visualization
+    public Animation Animate(Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
+      return new RectangleAnimation(rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep);
+    }
+
+    public Animation Animate(Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
+      return new EllipseAnimation(ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep);
+    }
+
+    public Animation Animate(Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
+      return new PolygonAnimation(polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep);
     }
     #endregion
   }

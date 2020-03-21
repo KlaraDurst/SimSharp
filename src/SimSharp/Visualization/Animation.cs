@@ -15,7 +15,9 @@ namespace SimSharp.Visualization {
     public string LineColor { get; }
     public int LineWidth { get; }
 
-    protected Animation(Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth) {
+    public bool Keep { get; }
+
+    protected Animation(Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
       Shape0 = shape0;
       Shape1 = shape1;
       Time0 = time0;
@@ -23,8 +25,12 @@ namespace SimSharp.Visualization {
       FillColor = fillColor;
       LineColor = lineColor;
       LineWidth = lineWidth;
+      Keep = keep;
+
+      Animate();
     }
 
-    public abstract void Update();
+    protected abstract void Animate();
+    public abstract void Update(Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep);
   }
 }

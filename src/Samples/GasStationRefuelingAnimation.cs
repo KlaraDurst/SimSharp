@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using SimSharp.Visualization.Shapes;
+using SimSharp.Visualization;
 
 namespace SimSharp.Samples {
   public class GasStationRefuelingAnimation {
@@ -121,7 +122,7 @@ namespace SimSharp.Samples {
       while (true) {
         yield return fuelPump.WhenChange();
         // Visualization has to be updated
-        Rectangle currFuelPumpRect = fuelPumpAnimation.Rectangle;
+        Rectangle currFuelPumpRect = (Rectangle)fuelPumpAnimation.Shape0;
         Rectangle levelFuelPumpRect = new Rectangle("levelFuelPumpRect", currFuelPumpRect.X, Convert.ToInt32(currFuelPumpRect.Y - currFuelPumpRect.Height/2 + fuelPump.Level/2), 250, Convert.ToInt32(fuelPump.Level));
         fuelPumpAnimation.Update(currFuelPumpRect, levelFuelPumpRect, env.Now, env.Now, "black", "black", 1, true);
       }
@@ -168,8 +169,8 @@ namespace SimSharp.Samples {
       // Gas station visualization
       Rectangle gasStationRectLeft = new Rectangle("gasStationRectLeft", 300, 400, 50, 100);
       Rectangle gasStationRectRight = new Rectangle("gastStationRectRight", 500, 400, 50, 100);
-      env.Animate(gasStationRectLeft, gasStationRectLeft, 0, 0, "grey", "grey", 1, true);
-      env.Animate(gasStationRectRight, gasStationRectRight, 0, 0, "grey", "grey", 1, true);
+      env.Animate(gasStationRectLeft, gasStationRectLeft, env.StartDate, env.StartDate, "grey", "grey", 1, true);
+      env.Animate(gasStationRectRight, gasStationRectRight, env.StartDate, env.StartDate, "grey", "grey", 1, true);
 
       var fuelPump = new Container(env, GasStationSize, GasStationSize) {
         Fillrate = new TimeSeriesMonitor(env, name: "Tank fill rate")
@@ -177,7 +178,7 @@ namespace SimSharp.Samples {
 
       // Fuel pump visualization
       Rectangle fuelPumpRect = new Rectangle("fuelPumpRect", 400, 650, 250, GasStationSize);
-      env.Animate(fuelPumpRect, fuelPumpRect, 0, 0, "white", "black", 1, true);
+      env.Animate(fuelPumpRect, fuelPumpRect, env.StartDate, env.StartDate, "white", "black", 1, true);
 
       env.Process(GasStationControl(env, fuelPump));
       env.Process(GasStationVisualization(env, fuelPump));

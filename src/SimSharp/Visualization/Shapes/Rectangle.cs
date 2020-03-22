@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace SimSharp.Visualization.Shapes {
-  public class Rectangle : Shape {
-    public int X { get; set; }
-    public int Y { get; set; }
-    
-    public int Height { get; set; }
-    public int Width { get; set; }
+  public class Rectangle {
+    public int X { get; }
+    public int Y { get; }
 
-    public Rectangle (string name, int x, int y, int height, int width) : base (name) {
+    public int Width { get; }
+    public int Height { get; }
+
+    public Rectangle (int x, int y, int width, int height) {
       X = x;
       Y = y;
-      Height = height;
       Width = width;
+      Height = height;
     }
   }
 }

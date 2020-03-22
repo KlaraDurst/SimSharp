@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace SimSharp.Visualization.Shapes {
-  public class Ellipse : Shape {
-    public int X { get; set; }
-    public int Y { get; set; }
+  public class Ellipse {
+    public int X { get; }
+    public int Y { get; }
 
-    public int Radius1 { get; set; }
-    public int Radius2 { get; set; }
+    public int Radius1 { get; }
+    public int Radius2 { get; }
 
-    public Ellipse(string name, int x, int y, int radius1, int radius2) : base(name) {
+    public Ellipse(int x, int y, int radius1, int radius2) {
       X = x;
       Y = y;
       Radius1 = radius1;

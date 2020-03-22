@@ -64,6 +64,8 @@ namespace SimSharp {
     public TextWriter Logger { get; set; }
     public int ProcessedEvents { get; protected set; }
 
+    private AnimationData animationData;
+
     public Simulation() : this(new DateTime(1970, 1, 1)) { }
     public Simulation(TimeSpan? defaultStep) : this(new DateTime(1970, 1, 1), defaultStep) { }
     public Simulation(int randomSeed, TimeSpan? defaultStep = null) : this(new DateTime(1970, 1, 1), randomSeed, defaultStep) { }
@@ -787,16 +789,22 @@ namespace SimSharp {
     #endregion
 
     #region Visualization
-    public Animation Animate(Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      return new RectangleAnimation(rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep);
+    public Animation Animate(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
+      Animation animation = new Animation(name, rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep);
+      animationData.AddAnimation(animation);
+      return animation;
     }
 
-    public Animation Animate(Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      return new EllipseAnimation(ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep);
+    public Animation Animate(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
+      Animation animation = new Animation(name, ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep);
+      animationData.AddAnimation(animation);
+      return animation;
     }
 
-    public Animation Animate(Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      return new PolygonAnimation(polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep);
+    public Animation Animate(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
+      Animation animation = new Animation(name, polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep);
+      animationData.AddAnimation(animation);
+      return animation;
     }
     #endregion
   }

@@ -3,13 +3,23 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace SimSharp.Visualization.Shapes {
-  public class Polygon : Shape {
-    public List<int> XList { get; set; }
-    public List<int> YList { get; set; }
+  public class Polygon {
+    public List<int> XList { get; }
+    public List<int> YList { get; }
+    public List<int> XYList { get; }
 
-    public Polygon(string name, List<int> xList, List<int> yList) : base(name) {
-      XList = xList;
-      YList = yList;
-    }
+    public Polygon(params int[] xy) {
+      if (xy.Length % 2 != 0) {
+        throw new ArgumentException("A polygon needs the same number of y than x coordinates");
+      }
+      else {
+        for (int i = 0; i < xy.Length; i+=2) {
+          XList.Add(xy[i]);
+          YList.Add(xy[i + 1]);
+        }
+
+        XYList.AddRange(xy);
+      }
+    } 
   }
 }

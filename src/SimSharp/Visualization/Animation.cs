@@ -19,10 +19,12 @@ namespace SimSharp.Visualization {
 
     private bool keep;
 
+    private bool animate;
+
     private FrameObjekt currState;
 
     #region Constructors
-    public Animation(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) : this(time0, time1, keep) {
+    public Animation(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate) : this(time0, time1, keep, animate) {
       Rectangle0 = rectangle0;
       Rectangle1 = rectangle1;
 
@@ -36,7 +38,7 @@ namespace SimSharp.Visualization {
       currState = new FrameObjekt(name, FrameObjekt.Shape.Rectangle, fillColor, lineColor, lineWidth, true, props);
     }
 
-    public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) : this(time0, time1, keep) {
+    public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate) : this(time0, time1, keep, animate) {
       Ellipse0 = ellipse0;
       Ellipse1 = ellipse1;
 
@@ -50,7 +52,7 @@ namespace SimSharp.Visualization {
       currState = new FrameObjekt(name, FrameObjekt.Shape.Ellipse, fillColor, lineColor, lineWidth, true, props);
     }
 
-    public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) : this(time0, time1, keep) {
+    public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate) : this(time0, time1, keep, animate) {
       Polygon0 = polygon0;
       Polygon1 = polygon1;
 
@@ -60,10 +62,11 @@ namespace SimSharp.Visualization {
       currState = new FrameObjekt(name, FrameObjekt.Shape.Polygon, fillColor, lineColor, lineWidth, true, props);
     }
 
-    private Animation(DateTime time0, DateTime time1, bool keep) {
+    private Animation(DateTime time0, DateTime time1, bool keep, bool animate) {
       this.time0 = time0;
       this.time1 = time1;
       this.keep = keep;
+      this.animate = animate;
     }
     #endregion
 

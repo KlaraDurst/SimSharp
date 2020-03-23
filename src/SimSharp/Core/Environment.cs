@@ -64,20 +64,28 @@ namespace SimSharp {
     public TextWriter Logger { get; set; }
     public int ProcessedEvents { get; protected set; }
 
-    private AnimationData animationData;
+    private bool animate = false;
+    protected AnimationBuilder AnimationBuilder;
 
     public Simulation() : this(new DateTime(1970, 1, 1)) { }
+    public Simulation(AnimationBuilder animationBuilder) : this(new DateTime(1970, 1, 1), animationBuilder) { }
     public Simulation(TimeSpan? defaultStep) : this(new DateTime(1970, 1, 1), defaultStep) { }
+    public Simulation(AnimationBuilder animationBuilder, TimeSpan? defaultStep) : this(new DateTime(1970, 1, 1), animationBuilder, defaultStep) { }
     public Simulation(int randomSeed, TimeSpan? defaultStep = null) : this(new DateTime(1970, 1, 1), randomSeed, defaultStep) { }
-    public Simulation(DateTime initialDateTime, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, defaultStep) { }
-    public Simulation(DateTime initialDateTime, int randomSeed, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, defaultStep) { }
-    public Simulation(IRandom random, DateTime initialDateTime, TimeSpan? defaultStep = null) {
+    public Simulation(int randomSeed, AnimationBuilder animationBuilder, TimeSpan? defaultStep = null) : this(new DateTime(1970, 1, 1), randomSeed, animationBuilder, defaultStep) { }
+    public Simulation(DateTime initialDateTime, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, new AnimationBuilder(), defaultStep) { }
+    public Simulation(DateTime initialDateTime, AnimationBuilder animationBuilder, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, animationBuilder, defaultStep) { }
+    public Simulation(DateTime initialDateTime, int randomSeed, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, new AnimationBuilder(), defaultStep) { }
+    public Simulation(DateTime initialDateTime, int randomSeed, AnimationBuilder animationBuilder, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, animationBuilder, defaultStep) { }
+    public Simulation(IRandom random, DateTime initialDateTime, TimeSpan? defaultStep = null) : this(random, initialDateTime, new AnimationBuilder(), defaultStep) { }
+    public Simulation(IRandom random, DateTime initialDateTime, AnimationBuilder animationBuilder, TimeSpan? defaultStep = null) {
       DefaultTimeStepSeconds = (defaultStep ?? TimeSpan.FromSeconds(1)).Duration().TotalSeconds;
       StartDate = initialDateTime;
       Now = initialDateTime;
       Random = random;
       ScheduleQ = new EventQueue(InitialMaxEvents);
       Logger = Console.Out;
+      AnimationBuilder = animationBuilder;
     }
 
     public double ToDouble(TimeSpan span) {
@@ -208,6 +216,8 @@ namespace SimSharp {
         stopEvent.AddCallback(StopSimulation);
       }
       OnRunStarted();
+      if (animate)
+        AnimationBuilder.OpenJson();
       try {
         var stop = ScheduleQ.Count == 0 || _stop.IsCancellationRequested;
         while (!stop) {
@@ -247,6 +257,8 @@ namespace SimSharp {
       Now = next.PrimaryPriority;
       evt = next.Event;
       evt.Process();
+      if (animate)
+        AnimationBuilder.Step(Now);
       ProcessedEvents++;
     }
 
@@ -789,21 +801,25 @@ namespace SimSharp {
     #endregion
 
     #region Visualization
+    public void BuildAnimation(bool animate) {
+      this.animate = animate;
+    }
+
     public Animation Animate(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      Animation animation = new Animation(name, rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep);
-      animationData.AddAnimation(animation);
+      Animation animation = new Animation(name, rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep, animate);
+      AnimationBuilder.AddAnimation(animation);
       return animation;
     }
 
     public Animation Animate(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      Animation animation = new Animation(name, ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep);
-      animationData.AddAnimation(animation);
+      Animation animation = new Animation(name, ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep, animate);
+      AnimationBuilder.AddAnimation(animation);
       return animation;
     }
 
     public Animation Animate(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      Animation animation = new Animation(name, polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep);
-      animationData.AddAnimation(animation);
+      Animation animation = new Animation(name, polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep, animate);
+      AnimationBuilder.AddAnimation(animation);
       return animation;
     }
     #endregion

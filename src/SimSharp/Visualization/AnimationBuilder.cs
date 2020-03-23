@@ -5,7 +5,7 @@ using System.Text;
 using Newtonsoft.Json;
 
 namespace SimSharp.Visualization {
-  public class AnimationData {
+  public class AnimationBuilder {
     public string Name { get; }
     public double TimeStep { get; }
 
@@ -16,11 +16,17 @@ namespace SimSharp.Visualization {
 
     private List<Animation> animations;
 
-    public AnimationData(string name, double timeStep, string target) {
+    public AnimationBuilder() : this("Visualization") { }
+    public AnimationBuilder(string name) : this(name, 0.25) { }
+    public AnimationBuilder(string name, string target) : this(name, 0.25, target) { }
+    public AnimationBuilder(string name, double timeStep) : this(name, timeStep, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName) { }
+    public AnimationBuilder(string name, double timeStep, string target) {
       Name = name;
       TimeStep = timeStep;
       this.target = target;
+    }
 
+    public void OpenJson() {
       stringWriter = new StringWriter();
       writer = new JsonTextWriter(stringWriter);
 
@@ -38,6 +44,10 @@ namespace SimSharp.Visualization {
 
     public void AddAnimation(Animation animation) {
       animations.Add(animation);
+    }
+
+    public void Step(DateTime now) {
+
     }
 
     private void CloseJson() {

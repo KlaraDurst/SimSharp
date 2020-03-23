@@ -14,6 +14,10 @@ namespace SimSharp.Visualization {
     public bool Visible { get; }
     public List<int> Props { get; }
 
+    public FrameObjekt(string name) {
+      Name = name;
+    }
+
     public FrameObjekt(string name, Shape type, string fillColor, string lineColor, int lineWidth, bool visible, List<int> props) {
       Name = name;
       Type = type;
@@ -22,10 +26,6 @@ namespace SimSharp.Visualization {
       LineWidth = lineWidth;
       Visible = visible;
       Props = props;
-    }
-
-    public FrameObjekt(string name) {
-      Name = name;
     }
   }
 }

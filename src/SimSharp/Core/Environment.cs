@@ -68,24 +68,24 @@ namespace SimSharp {
     protected AnimationBuilder AnimationBuilder;
 
     public Simulation() : this(new DateTime(1970, 1, 1)) { }
-    public Simulation(AnimationBuilder animationBuilder) : this(new DateTime(1970, 1, 1), animationBuilder) { }
+    public Simulation(AnimationProperties animationProperties) : this(new DateTime(1970, 1, 1), animationProperties) { }
     public Simulation(TimeSpan? defaultStep) : this(new DateTime(1970, 1, 1), defaultStep) { }
-    public Simulation(AnimationBuilder animationBuilder, TimeSpan? defaultStep) : this(new DateTime(1970, 1, 1), animationBuilder, defaultStep) { }
+    public Simulation(AnimationProperties animationProperties, TimeSpan? defaultStep) : this(new DateTime(1970, 1, 1), animationProperties, defaultStep) { }
     public Simulation(int randomSeed, TimeSpan? defaultStep = null) : this(new DateTime(1970, 1, 1), randomSeed, defaultStep) { }
-    public Simulation(int randomSeed, AnimationBuilder animationBuilder, TimeSpan? defaultStep = null) : this(new DateTime(1970, 1, 1), randomSeed, animationBuilder, defaultStep) { }
-    public Simulation(DateTime initialDateTime, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, new AnimationBuilder(), defaultStep) { }
-    public Simulation(DateTime initialDateTime, AnimationBuilder animationBuilder, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, animationBuilder, defaultStep) { }
-    public Simulation(DateTime initialDateTime, int randomSeed, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, new AnimationBuilder(), defaultStep) { }
-    public Simulation(DateTime initialDateTime, int randomSeed, AnimationBuilder animationBuilder, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, animationBuilder, defaultStep) { }
-    public Simulation(IRandom random, DateTime initialDateTime, TimeSpan? defaultStep = null) : this(random, initialDateTime, new AnimationBuilder(), defaultStep) { }
-    public Simulation(IRandom random, DateTime initialDateTime, AnimationBuilder animationBuilder, TimeSpan? defaultStep = null) {
+    public Simulation(int randomSeed, AnimationProperties animationProperties, TimeSpan? defaultStep = null) : this(new DateTime(1970, 1, 1), randomSeed, animationProperties, defaultStep) { }
+    public Simulation(DateTime initialDateTime, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, new AnimationProperties(), defaultStep) { }
+    public Simulation(DateTime initialDateTime, AnimationProperties animationProperties, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, animationProperties, defaultStep) { }
+    public Simulation(DateTime initialDateTime, int randomSeed, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, new AnimationProperties(), defaultStep) { }
+    public Simulation(DateTime initialDateTime, int randomSeed, AnimationProperties animationProperties, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, animationProperties, defaultStep) { }
+    public Simulation(IRandom random, DateTime initialDateTime, TimeSpan? defaultStep = null) : this(random, initialDateTime, new AnimationProperties(), defaultStep) { }
+    public Simulation(IRandom random, DateTime initialDateTime, AnimationProperties animationProperties, TimeSpan? defaultStep = null) {
       DefaultTimeStepSeconds = (defaultStep ?? TimeSpan.FromSeconds(1)).Duration().TotalSeconds;
       StartDate = initialDateTime;
       Now = initialDateTime;
       Random = random;
       ScheduleQ = new EventQueue(InitialMaxEvents);
       Logger = Console.Out;
-      AnimationBuilder = animationBuilder;
+      AnimationBuilder = new AnimationBuilder(animationProperties, StartDate);
     }
 
     public double ToDouble(TimeSpan span) {
@@ -217,7 +217,7 @@ namespace SimSharp {
       }
       OnRunStarted();
       if (animate)
-        AnimationBuilder.OpenJson();
+        AnimationBuilder.StartBuilding();
       try {
         var stop = ScheduleQ.Count == 0 || _stop.IsCancellationRequested;
         while (!stop) {

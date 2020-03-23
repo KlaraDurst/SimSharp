@@ -6,37 +6,30 @@ using Newtonsoft.Json;
 
 namespace SimSharp.Visualization {
   public class AnimationBuilder {
-    public string Name { get; }
-    public double TimeStep { get; }
-
-    private string target;
-
+    private AnimationProperties props;
+    private DateTime startDate;
     private StringWriter stringWriter;
     private JsonTextWriter writer;
-
     private List<Animation> animations;
+    private long currFrame;
 
-    public AnimationBuilder() : this("Visualization") { }
-    public AnimationBuilder(string name) : this(name, 0.25) { }
-    public AnimationBuilder(string name, string target) : this(name, 0.25, target) { }
-    public AnimationBuilder(string name, double timeStep) : this(name, timeStep, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName) { }
-    public AnimationBuilder(string name, double timeStep, string target) {
-      Name = name;
-      TimeStep = timeStep;
-      this.target = target;
+    public AnimationBuilder(AnimationProperties props, DateTime startDate) {
+      this.props = props;
+      this.startDate = startDate;
+      this.currFrame = 0;
     }
 
-    public void OpenJson() {
+    public void StartBuilding() {
       stringWriter = new StringWriter();
       writer = new JsonTextWriter(stringWriter);
 
       writer.WriteStartObject();
 
       writer.WritePropertyName("name");
-      writer.WriteValue(Name);
+      writer.WriteValue(props.Name);
 
       writer.WritePropertyName("timeStep");
-      writer.WriteValue(TimeStep);
+      writer.WriteValue(props.TimeStep);
 
       writer.WritePropertyName("frames");
       writer.WriteStartArray();
@@ -47,10 +40,26 @@ namespace SimSharp.Visualization {
     }
 
     public void Step(DateTime now) {
+      double frame = (now - startDate).TotalSeconds / props.TimeStep;
 
+      List<IEnumerator<FrameObjekt>> states = new List<IEnumerator<FrameObjekt>>(animations.Count);
+      foreach(Animation animation in animations) {
+        IEnumerator<FrameObjekt> statesEnum = animation.StatesUntil(Convert.ToInt32(frame));
+        if (statesEnum != null)
+          states.Add(statesEnum);
+      }
+
+      for (int i = 0; i <= frame - currFrame; i++) {
+        foreach(IEnumerator<FrameObjekt> stateEnum in states) {
+          FrameObjekt obj = stateEnum.Current;
+          stateEnum.MoveNext();
+
+
+        }
+      }
     }
 
-    private void CloseJson() {
+    private void StopBuilding() {
       writer.WriteEndArray();
       writer.WriteEndObject();
     }

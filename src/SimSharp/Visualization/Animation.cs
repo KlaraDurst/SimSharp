@@ -16,11 +16,8 @@ namespace SimSharp.Visualization {
 
     private DateTime time0;
     private DateTime time1;
-
     private bool keep;
-
     private bool animate;
-
     private FrameObjekt currState;
 
     #region Constructors
@@ -95,5 +92,9 @@ namespace SimSharp.Visualization {
       }
     }
     #endregion
+
+    public IEnumerator<FrameObjekt> StatesUntil(int frame) {
+
+    }
   }
 }

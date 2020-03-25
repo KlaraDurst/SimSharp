@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json;
+using SimSharp.Visualization.Frames;
 
 namespace SimSharp.Visualization {
   public class AnimationBuilder {
@@ -40,18 +41,18 @@ namespace SimSharp.Visualization {
     }
 
     public void Step(DateTime now) {
-      double frame = (now - startDate).TotalSeconds / props.TimeStep;
+      double frameNumber = (now - startDate).TotalSeconds / props.TimeStep;
 
-      List<IEnumerator<FrameObjekt>> states = new List<IEnumerator<FrameObjekt>>(animations.Count);
+      List<IEnumerator<Frame>> states = new List<IEnumerator<Frame>>(animations.Count);
       foreach(Animation animation in animations) {
-        IEnumerator<FrameObjekt> statesEnum = animation.StatesUntil(Convert.ToInt32(frame));
+        IEnumerator<Frame> statesEnum = animation.StatesUntil(Convert.ToInt32(frameNumber));
         if (statesEnum != null)
           states.Add(statesEnum);
       }
 
-      for (int i = 0; i <= frame - currFrame; i++) {
-        foreach(IEnumerator<FrameObjekt> stateEnum in states) {
-          FrameObjekt obj = stateEnum.Current;
+      for (int i = 0; i <= frameNumber - currFrame; i++) {
+        foreach(IEnumerator<Frame> stateEnum in states) {
+          Frame obj = stateEnum.Current;
           stateEnum.MoveNext();
 
 

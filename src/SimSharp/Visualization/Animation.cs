@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using SimSharp.Visualization.Frames;
 using SimSharp.Visualization.Shapes;
 
 namespace SimSharp.Visualization {
@@ -18,7 +19,7 @@ namespace SimSharp.Visualization {
     private DateTime time1;
     private bool keep;
     private bool animate;
-    private FrameObjekt currState;
+    private Frame currState;
 
     #region Constructors
     public Animation(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate) : this(time0, time1, keep, animate) {
@@ -32,7 +33,7 @@ namespace SimSharp.Visualization {
         Rectangle0.Height
       };
 
-      currState = new FrameObjekt(name, FrameObjekt.Shape.Rectangle, fillColor, lineColor, lineWidth, true, props);
+      currState = new Frame(name, true, FrameProperties.Shape.Rectangle, fillColor, lineColor, lineWidth, props);
     }
 
     public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate) : this(time0, time1, keep, animate) {
@@ -46,7 +47,7 @@ namespace SimSharp.Visualization {
         Ellipse0.Radius2
       };
 
-      currState = new FrameObjekt(name, FrameObjekt.Shape.Ellipse, fillColor, lineColor, lineWidth, true, props);
+      currState = new Frame(name, true, FrameProperties.Shape.Ellipse, fillColor, lineColor, lineWidth, props);
     }
 
     public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate) : this(time0, time1, keep, animate) {
@@ -56,7 +57,7 @@ namespace SimSharp.Visualization {
       List<int> props = new List<int>(Polygon0.XYList.Count);
       props.AddRange(Polygon0.XYList);
 
-      currState = new FrameObjekt(name, FrameObjekt.Shape.Polygon, fillColor, lineColor, lineWidth, true, props);
+      currState = new Frame(name, true, FrameProperties.Shape.Polygon, fillColor, lineColor, lineWidth, props);
     }
 
     private Animation(DateTime time0, DateTime time1, bool keep, bool animate) {
@@ -69,7 +70,7 @@ namespace SimSharp.Visualization {
 
     #region Update
     public void Update(Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      if (currState.Type != FrameObjekt.Shape.Rectangle) {
+      if (currState.Props.Type != FrameProperties.Shape.Rectangle) {
         throw new ArgumentException("This animation is not of type 'Rectangle'");
       } else {
 
@@ -77,7 +78,7 @@ namespace SimSharp.Visualization {
     }
 
     public void Update(Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      if (currState.Type != FrameObjekt.Shape.Rectangle) {
+      if (currState.Props.Type != FrameProperties.Shape.Rectangle) {
         throw new ArgumentException("This animation is not of type 'Ellipse'");
       } else {
 
@@ -85,7 +86,7 @@ namespace SimSharp.Visualization {
     }
 
     public void Update(Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      if (currState.Type != FrameObjekt.Shape.Rectangle) {
+      if (currState.Props.Type != FrameProperties.Shape.Rectangle) {
         throw new ArgumentException("This animation is not of type 'Polygon'");
       } else {
 
@@ -93,7 +94,7 @@ namespace SimSharp.Visualization {
     }
     #endregion
 
-    public IEnumerator<FrameObjekt> StatesUntil(int frame) {
+    public IEnumerator<Frame> StatesUntil(int frameNumber) {
 
     }
   }

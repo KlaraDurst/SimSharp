@@ -85,7 +85,7 @@ namespace SimSharp {
       Random = random;
       ScheduleQ = new EventQueue(InitialMaxEvents);
       Logger = Console.Out;
-      AnimationBuilder = new AnimationBuilder(animationProperties, StartDate);
+      AnimationBuilder = new AnimationBuilder(animationProperties);
     }
 
     public double ToDouble(TimeSpan span) {
@@ -254,11 +254,12 @@ namespace SimSharp {
     public virtual void Step() {
       Event evt;
       var next = ScheduleQ.Dequeue();
+      DateTime prior = Now;
       Now = next.PrimaryPriority;
       evt = next.Event;
       evt.Process();
       if (animate)
-        AnimationBuilder.Step(Now);
+        AnimationBuilder.Step(prior, Now);
       ProcessedEvents++;
     }
 

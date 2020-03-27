@@ -17,5 +17,9 @@ namespace SimSharp.Visualization {
     public void AddFrame(string frame) {
       Frames.Add(frame);
     }
+
+    public void AddFrames(IEnumerable<string> frames) {
+      Frames.AddRange(frames);
+    }
   }
 }

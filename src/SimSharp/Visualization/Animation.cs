@@ -7,7 +7,7 @@ using SimSharp.Visualization.Shapes;
 
 namespace SimSharp.Visualization {
   public class Animation {
-    public enum Shape { Rectangle, Ellipse, Polygon }
+    public enum Shape { rectangle, ellipse, polygon }
 
     public Rectangle Rectangle0 { get; }
     public Rectangle Rectangle1 { get; }
@@ -29,13 +29,14 @@ namespace SimSharp.Visualization {
 
     private bool animate;
     private double timeStep;
+    private int framesPerSec;
     private StringWriter stringWriter;
     private JsonTextWriter writer;
     private List<AnimationUnit> units;
 
     #region Constructors
     public Animation(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate, double timeStep) 
-      : this(name, Shape.Rectangle, fillColor, lineColor, lineWidth, time0, time1, keep, animate, timeStep) {
+      : this(name, Shape.rectangle, fillColor, lineColor, lineWidth, time0, time1, keep, animate, timeStep) {
       Rectangle0 = rectangle0;
       Rectangle1 = rectangle1;
 
@@ -44,7 +45,7 @@ namespace SimSharp.Visualization {
     }
 
     public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate, double timeStep)
-      : this(name, Shape.Ellipse, fillColor, lineColor, lineWidth, time0, time1, keep, animate, timeStep) {
+      : this(name, Shape.ellipse, fillColor, lineColor, lineWidth, time0, time1, keep, animate, timeStep) {
       Ellipse0 = ellipse0;
       Ellipse1 = ellipse1;
 
@@ -53,7 +54,7 @@ namespace SimSharp.Visualization {
     }
 
     public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate, double timeStep)
-      : this(name, Shape.Polygon, fillColor, lineColor, lineWidth, time0, time1, keep, animate, timeStep) {
+      : this(name, Shape.polygon, fillColor, lineColor, lineWidth, time0, time1, keep, animate, timeStep) {
       Polygon0 = polygon0;
       Polygon1 = polygon1;
 
@@ -72,6 +73,7 @@ namespace SimSharp.Visualization {
       Keep = keep;
       this.animate = animate;
       this.timeStep = timeStep;
+      this.framesPerSec = Convert.ToInt32(1 / timeStep);
     }
     #endregion
 
@@ -80,15 +82,38 @@ namespace SimSharp.Visualization {
       writer = new JsonTextWriter(stringWriter);
       units = new List<AnimationUnit>();
 
-      int frameNumber = Convert.ToInt32((Time1 - Time0).TotalSeconds / timeStep);
-      AnimationUnit unit = new AnimationUnit(Time0, Time1, frameNumber);
+      if (ShapesEqual()) {
+        AnimationUnit makeVisibleUnit = new AnimationUnit(Time0, Time0.AddSeconds(1), framesPerSec);
+        makeVisibleUnit.AddFrame(GetInitFrame());
+        units.Add(makeVisibleUnit);
 
+        if (!Keep) {
+          AnimationUnit makeUnvisibleUnit = new AnimationUnit(Time1, Time1.AddSeconds(1), framesPerSec);
 
+          writer.WritePropertyName(Name);
+          writer.WriteStartObject();
+
+          writer.WritePropertyName("visible");
+          writer.WriteValue(false);
+
+          writer.WriteEndObject();
+          string frame = writer.ToString();
+          writer.Flush();
+
+          makeUnvisibleUnit.AddFrame(frame);
+          units.Add(makeUnvisibleUnit);
+        }
+      }
+      else {
+        int frameNumber = Convert.ToInt32((Time1 - Time0).TotalSeconds / timeStep);
+        AnimationUnit animationUnit = new AnimationUnit(Time0, Time1, frameNumber);
+
+      }
     }
 
     #region Update
     public void Update(Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      if (Type != Shape.Rectangle) {
+      if (Type != Shape.rectangle) {
         throw new ArgumentException("This animation is not of type 'Rectangle'");
       } else {
         if (animate)
@@ -97,7 +122,7 @@ namespace SimSharp.Visualization {
     }
 
     public void Update(Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      if (Type != Shape.Ellipse) {
+      if (Type != Shape.ellipse) {
         throw new ArgumentException("This animation is not of type 'Ellipse'");
       } else {
         if (animate)
@@ -106,7 +131,7 @@ namespace SimSharp.Visualization {
     }
 
     public void Update(Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      if (Type != Shape.Polygon) {
+      if (Type != Shape.polygon) {
         throw new ArgumentException("This animation is not of type 'Polygon'");
       } else {
         if (animate)
@@ -119,7 +144,58 @@ namespace SimSharp.Visualization {
     }
     #endregion
 
-    public IEnumerator<int> GetInterpolation(int x, int y) {
+    private string GetInitFrame() {
+      writer.WritePropertyName(Name);
+      writer.WriteStartObject();
+
+      writer.WritePropertyName("type");
+      writer.WriteValue(Type.ToString());
+
+      writer.WritePropertyName("fillColor");
+      writer.WriteValue(FillColor);
+
+      writer.WritePropertyName("lineColor");
+      writer.WriteValue(LineColor);
+
+      writer.WritePropertyName("lineWidth");
+      writer.WriteValue(LineWidth);
+
+      writer.WritePropertyName("visible");
+      writer.WriteValue(true);
+
+      writer.WritePropertyName("t");
+      writer.WriteStartArray();
+      foreach (int t in GetTransformation(0)) {
+        writer.WriteValue(t);
+      }
+      writer.WriteEndArray();
+
+      writer.WriteEndObject();
+      string frame = writer.ToString();
+      writer.Flush();
+
+      return frame;
+    }
+
+    private bool ShapesEqual() {
+      switch(Type) {
+        case Shape.rectangle: return Rectangle0.Equals(Rectangle1);
+        case Shape.ellipse: return Ellipse0.Equals(Ellipse1);
+        case Shape.polygon: return Polygon0.Equals(Polygon1);
+        default: return false;
+      }
+    }
+
+    private List<int> GetTransformation(int z) {
+      switch (Type) {
+        case Shape.rectangle: return z==0 ? Rectangle0.GetTransformation() : Rectangle1.GetTransformation();
+        case Shape.ellipse: return z == 0 ? Ellipse0.GetTransformation() : Ellipse1.GetTransformation();
+        case Shape.polygon: return z == 0 ? Polygon0.GetTransformation() : Polygon1.GetTransformation();
+        default: return null;
+      }
+    }
+
+    public IEnumerator<List<int>> GetInterpolation(List<int> start, List<int> stop) {
 
     }
 

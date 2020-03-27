@@ -17,6 +17,10 @@ namespace SimSharp.Visualization.Shapes {
       Height = height;
     }
 
+    public List<int> GetTransformation() {
+      return new List<int> { X, Y, Width, Height };
+    }
+
     public override bool Equals(object obj) {
       if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
         return false;
@@ -24,6 +28,10 @@ namespace SimSharp.Visualization.Shapes {
         Rectangle r = (Rectangle)obj;
         return (X == r.X) && (Y == r.Y) && (Width == r.Width) && (Height == r.Height);
       }
+    }
+
+    public override int GetHashCode() {
+      return (X, Y, Width, Height).GetHashCode();
     }
   }
 }

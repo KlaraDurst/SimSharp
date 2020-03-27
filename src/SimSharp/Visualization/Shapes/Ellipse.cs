@@ -17,6 +17,10 @@ namespace SimSharp.Visualization.Shapes {
       Radius2 = radius2;
     }
 
+    public List<int> GetTransformation() {
+      return new List<int> { X, Y, Radius1, Radius2 };
+    }
+
     public override bool Equals(object obj) {
       if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
         return false;
@@ -25,6 +29,10 @@ namespace SimSharp.Visualization.Shapes {
         Ellipse e = (Ellipse)obj;
         return (X == e.X) && (Y == e.Y) && (Radius1 == e.Radius1) && (Radius2 == e.Radius2);
       }
+    }
+
+    public override int GetHashCode() {
+      return (X, Y, Radius1, Radius2).GetHashCode();
     }
   }
 }

@@ -58,7 +58,7 @@ namespace SimSharp.Visualization {
             string frame = framesEnum.Current;
             framesEnum.MoveNext();
 
-            if (!frame.Equals(String.Empty)) {
+            if (frame != null) {
               if (!first)
                 writer.WriteRaw(",");
               writer.WriteRaw(frame);

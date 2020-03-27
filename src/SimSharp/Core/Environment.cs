@@ -807,19 +807,19 @@ namespace SimSharp {
     }
 
     public Animation Animate(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      Animation animation = new Animation(name, rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep, animate);
+      Animation animation = new Animation(name, rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep, animate, AnimationBuilder.Props.TimeStep);
       AnimationBuilder.AddAnimation(animation);
       return animation;
     }
 
     public Animation Animate(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      Animation animation = new Animation(name, ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep, animate);
+      Animation animation = new Animation(name, ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep, animate, AnimationBuilder.Props.TimeStep);
       AnimationBuilder.AddAnimation(animation);
       return animation;
     }
 
     public Animation Animate(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      Animation animation = new Animation(name, polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep, animate);
+      Animation animation = new Animation(name, polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep, animate, AnimationBuilder.Props.TimeStep);
       AnimationBuilder.AddAnimation(animation);
       return animation;
     }

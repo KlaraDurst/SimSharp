@@ -16,5 +16,15 @@ namespace SimSharp.Visualization.Shapes {
       Radius1 = radius1;
       Radius2 = radius2;
     }
+
+    public override bool Equals(object obj) {
+      if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
+        return false;
+      }
+      else {
+        Ellipse e = (Ellipse)obj;
+        return (X == e.X) && (Y == e.Y) && (Radius1 == e.Radius1) && (Radius2 == e.Radius2);
+      }
+    }
   }
 }

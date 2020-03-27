@@ -16,5 +16,14 @@ namespace SimSharp.Visualization.Shapes {
       Width = width;
       Height = height;
     }
+
+    public override bool Equals(object obj) {
+      if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
+        return false;
+      } else {
+        Rectangle r = (Rectangle)obj;
+        return (X == r.X) && (Y == r.Y) && (Width == r.Width) && (Height == r.Height);
+      }
+    }
   }
 }

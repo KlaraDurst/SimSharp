@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SimSharp.Visualization.Shapes {
   public class Polygon {
     public List<int> XList { get; }
     public List<int> YList { get; }
-    public List<int> XYList { get; }
 
     public Polygon(params int[] xy) {
       if (xy.Length % 2 != 0) {
@@ -17,9 +17,16 @@ namespace SimSharp.Visualization.Shapes {
           XList.Add(xy[i]);
           YList.Add(xy[i + 1]);
         }
-
-        XYList.AddRange(xy);
       }
-    } 
+    }
+
+    public override bool Equals(object obj) {
+      if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
+        return false;
+      } else {
+        Polygon p = (Polygon)obj;
+        return XList.SequenceEqual(p.XList) && YList.SequenceEqual(p.YList);
+      }
+    }
   }
 }

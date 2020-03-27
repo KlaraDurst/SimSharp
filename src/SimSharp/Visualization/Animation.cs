@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using Newtonsoft.Json;
 using SimSharp.Visualization.Shapes;
 
 namespace SimSharp.Visualization {
@@ -26,35 +28,40 @@ namespace SimSharp.Visualization {
     public bool Keep { get; }
 
     private bool animate;
-
-    private Array frames;
+    private double timeStep;
+    private StringWriter stringWriter;
+    private JsonTextWriter writer;
+    private List<AnimationUnit> units;
 
     #region Constructors
-    public Animation(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate) 
-      : this(name, Shape.Rectangle, fillColor, lineColor, lineWidth, time0, time1, keep, animate) {
+    public Animation(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate, double timeStep) 
+      : this(name, Shape.Rectangle, fillColor, lineColor, lineWidth, time0, time1, keep, animate, timeStep) {
       Rectangle0 = rectangle0;
       Rectangle1 = rectangle1;
 
-      Initialize();
+      if (animate)
+        Initialize();
     }
 
-    public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate)
-      : this(name, Shape.Ellipse, fillColor, lineColor, lineWidth, time0, time1, keep, animate) {
+    public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate, double timeStep)
+      : this(name, Shape.Ellipse, fillColor, lineColor, lineWidth, time0, time1, keep, animate, timeStep) {
       Ellipse0 = ellipse0;
       Ellipse1 = ellipse1;
 
-      Initialize();
+      if (animate)
+        Initialize();
     }
 
-    public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate)
-      : this(name, Shape.Polygon, fillColor, lineColor, lineWidth, time0, time1, keep, animate) {
+    public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate, double timeStep)
+      : this(name, Shape.Polygon, fillColor, lineColor, lineWidth, time0, time1, keep, animate, timeStep) {
       Polygon0 = polygon0;
       Polygon1 = polygon1;
 
-      Initialize();
+      if (animate)
+        Initialize();
     }
 
-    private Animation(string name, Shape type, string fillColor, string lineColor, int lineWidth, DateTime time0, DateTime time1, bool keep, bool animate) {
+    private Animation(string name, Shape type, string fillColor, string lineColor, int lineWidth, DateTime time0, DateTime time1, bool keep, bool animate, double timeStep) {
       Name = name;
       Type = type;
       FillColor = fillColor;
@@ -64,11 +71,19 @@ namespace SimSharp.Visualization {
       Time1 = time1;
       Keep = keep;
       this.animate = animate;
+      this.timeStep = timeStep;
     }
     #endregion
 
     private void Initialize() {
-      
+      stringWriter = new StringWriter();
+      writer = new JsonTextWriter(stringWriter);
+      units = new List<AnimationUnit>();
+
+      int frameNumber = Convert.ToInt32((Time1 - Time0).TotalSeconds / timeStep);
+      AnimationUnit unit = new AnimationUnit(Time0, Time1, frameNumber);
+
+
     }
 
     #region Update
@@ -76,7 +91,8 @@ namespace SimSharp.Visualization {
       if (Type != Shape.Rectangle) {
         throw new ArgumentException("This animation is not of type 'Rectangle'");
       } else {
-        Update();
+        if (animate)
+          Update();
       }
     }
 
@@ -84,7 +100,8 @@ namespace SimSharp.Visualization {
       if (Type != Shape.Ellipse) {
         throw new ArgumentException("This animation is not of type 'Ellipse'");
       } else {
-        Update();
+        if (animate)
+          Update();
       }
     }
 
@@ -92,7 +109,8 @@ namespace SimSharp.Visualization {
       if (Type != Shape.Polygon) {
         throw new ArgumentException("This animation is not of type 'Polygon'");
       } else {
-        Update();
+        if (animate)
+          Update();
       }
     }
 
@@ -100,6 +118,10 @@ namespace SimSharp.Visualization {
 
     }
     #endregion
+
+    public IEnumerator<int> GetInterpolation(int x, int y) {
+
+    }
 
     public IEnumerator<string> FramesFromTo(DateTime start, DateTime stop) {
       

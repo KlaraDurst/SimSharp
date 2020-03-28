@@ -28,7 +28,6 @@ namespace SimSharp.Visualization {
     public bool Keep { get; }
 
     private Simulation env;
-    private int framesPerSec;
     private StringWriter stringWriter;
     private JsonTextWriter writer;
     private List<AnimationUnit> units;
@@ -76,7 +75,6 @@ namespace SimSharp.Visualization {
       Time1 = time1;
       Keep = keep;
       this.env = env;
-      this.framesPerSec = Convert.ToInt32(1 / env.AnimationBuilder.Props.TimeStep);
     }
     #endregion
 
@@ -85,33 +83,34 @@ namespace SimSharp.Visualization {
       writer = new JsonTextWriter(stringWriter);
       units = new List<AnimationUnit>();
 
-      if (ShapesEqual()) {
-        AnimationUnit makeVisibleUnit = new AnimationUnit(Time0, Time0.AddSeconds(1), framesPerSec);
-        makeVisibleUnit.AddFrame(GetInitFrame());
-        units.Add(makeVisibleUnit);
-
-        if (!Keep) {
-          AnimationUnit makeUnvisibleUnit = new AnimationUnit(Time1, Time1.AddSeconds(1), framesPerSec);
-
-          writer.WritePropertyName(Name);
-          writer.WriteStartObject();
-
-          writer.WritePropertyName("visible");
-          writer.WriteValue(false);
-
-          writer.WriteEndObject();
-          string frame = writer.ToString();
-          writer.Flush();
-
-          makeUnvisibleUnit.AddFrame(frame);
-          units.Add(makeUnvisibleUnit);
-        }
+      if (ShapesEqual() && Keep) {
+        AnimationUnit unit = new AnimationUnit(Time0, Time0, 1);
+        unit.AddFrame(GetInitFrame());
+        units.Add(unit);
       }
-      else {
+      else if (ShapesEqual() && !Time0.Equals(Time1) && !Keep) {
+        AnimationUnit firstUnit = new AnimationUnit(Time0, Time0, 1);
+        firstUnit.AddFrame(GetInitFrame());
+        units.Add(firstUnit);
+
+        AnimationUnit secondUnit = new AnimationUnit(Time1, Time1, 1);
+        writer.WritePropertyName(Name);
+        writer.WriteStartObject();
+
+        writer.WritePropertyName("visible");
+        writer.WriteValue(false);
+
+        writer.WriteEndObject();
+        secondUnit.AddFrame(writer.ToString());
+        writer.Flush();
+        units.Add(secondUnit);
+      }
+      else if (!ShapesEqual() && !Time0.Equals(Time1) && Keep) {
         int frameNumber = Convert.ToInt32((Time1 - Time0).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
         AnimationUnit animationUnit = new AnimationUnit(Time0, Time1, frameNumber);
         animationUnit.AddFrame(GetInitFrame());
 
+        // TODO
       }
     }
 
@@ -205,11 +204,11 @@ namespace SimSharp.Visualization {
     }
 
     public IEnumerator<List<int>> GetInterpolation(List<int> start, List<int> stop) {
-
+      // TODO
     }
 
     public IEnumerator<string> FramesFromTo(DateTime start, DateTime stop) {
-      
+      // TODO
     }
   }
 }

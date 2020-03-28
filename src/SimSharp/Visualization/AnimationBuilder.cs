@@ -38,38 +38,49 @@ namespace SimSharp.Visualization {
     }
 
     public void Step(DateTime prior, DateTime now) {
-      int frameNumber = Convert.ToInt32((now - prior).TotalSeconds / Props.TimeStep);
-
       if (animations.Count > 0) {
-        List<IEnumerator<string>> frames = new List<IEnumerator<string>>(animations.Count);
+        SortedList<DateTime, IEnumerator<string>> frames = new SortedList<DateTime, IEnumerator<string>>();
 
         foreach (Animation animation in animations) {
-          IEnumerator<string> framesEnum = animation.FramesFromTo(prior, now);
+          List<AnimationUnit> units = animation.FramesFromTo(prior, now);
 
-          if (framesEnum != null)
-            frames.Add(framesEnum);
+          if (units != null) {
+            foreach(AnimationUnit unit in units) {
+              frames.Add(unit.Start, unit.Frames.GetEnumerator());
+            }
+          }
         }
 
-        for (int i = 0; i <= frameNumber; i++) {
-          writer.WriteStartObject();
+        List<IEnumerator<string>> framesEnums = new List<IEnumerator<string>>(frames.Count);
+        DateTime until = frames.Keys[0];
 
-          foreach (IEnumerator<string> framesEnum in frames) {
-            bool first = true;
-            string frame = framesEnum.Current;
-            framesEnum.MoveNext();
+        while (until <= now) {
+          while (frames.Keys[0] == until) {
+            framesEnums.Add(frames.Values[0]);
+            frames.RemoveAt(0);
+          }
 
-            if (frame != null) {
+          int frameNumber = Convert.ToInt32((now - until).TotalSeconds / Props.TimeStep);
+          for (int i = 0; i <= frameNumber; i++) {
+            writer.WriteStartObject();
+
+            for (int j = framesEnums.Count - 1; j >= 0; j--) {
+              bool first = true;
+              string frame = framesEnums[j].Current;
+
               if (!first)
                 writer.WriteRaw(",");
               writer.WriteRaw(frame);
-              first = false;
-            }
-          }
 
-          writer.WriteEndObject();
+              if (!framesEnums[j].MoveNext())
+                framesEnums.RemoveAt(j);
+            }
+            writer.WriteEndObject();
+          }
         }
-      }
+      } 
       else {
+        int frameNumber = Convert.ToInt32((now - prior).TotalSeconds / Props.TimeStep);
         for (int i = 0; i <= frameNumber; i++) {
           writer.WriteStartObject();
           writer.WriteEndObject();
@@ -83,7 +94,7 @@ namespace SimSharp.Visualization {
     }
 
     public void WriteJson() {
-      throw new NotImplementedException();
+      // TODO
     }
   }
 }

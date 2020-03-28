@@ -207,7 +207,7 @@ namespace SimSharp.Visualization {
       // TODO
     }
 
-    public IEnumerator<string> FramesFromTo(DateTime start, DateTime stop) {
+    public List<AnimationUnit> FramesFromTo(DateTime start, DateTime stop) {
       // TODO
     }
   }

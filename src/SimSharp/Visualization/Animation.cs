@@ -27,42 +27,46 @@ namespace SimSharp.Visualization {
     public DateTime Time1 { get; }
     public bool Keep { get; }
 
-    private bool animate;
-    private double timeStep;
+    private Simulation env;
     private int framesPerSec;
     private StringWriter stringWriter;
     private JsonTextWriter writer;
     private List<AnimationUnit> units;
 
     #region Constructors
-    public Animation(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate, double timeStep) 
-      : this(name, Shape.rectangle, fillColor, lineColor, lineWidth, time0, time1, keep, animate, timeStep) {
+    public Animation(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env) 
+      : this(name, Shape.rectangle, fillColor, lineColor, lineWidth, time0, time1, keep, env) {
       Rectangle0 = rectangle0;
       Rectangle1 = rectangle1;
 
-      if (animate)
+      if (env.FillAnimation)
         Initialize();
     }
 
-    public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate, double timeStep)
-      : this(name, Shape.ellipse, fillColor, lineColor, lineWidth, time0, time1, keep, animate, timeStep) {
+    public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env)
+      : this(name, Shape.ellipse, fillColor, lineColor, lineWidth, time0, time1, keep, env) {
       Ellipse0 = ellipse0;
       Ellipse1 = ellipse1;
 
-      if (animate)
+      if (env.FillAnimation)
         Initialize();
     }
 
-    public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, bool animate, double timeStep)
-      : this(name, Shape.polygon, fillColor, lineColor, lineWidth, time0, time1, keep, animate, timeStep) {
+    public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env)
+      : this(name, Shape.polygon, fillColor, lineColor, lineWidth, time0, time1, keep, env) {
       Polygon0 = polygon0;
       Polygon1 = polygon1;
 
-      if (animate)
+      if (env.FillAnimation)
         Initialize();
     }
 
-    private Animation(string name, Shape type, string fillColor, string lineColor, int lineWidth, DateTime time0, DateTime time1, bool keep, bool animate, double timeStep) {
+    private Animation(string name, Shape type, string fillColor, string lineColor, int lineWidth, DateTime time0, DateTime time1, bool keep, Simulation env) {
+      if (time0 > time1)
+        throw new ArgumentException("time1 must be after time0.");
+      if ((time1 - time0).TotalMilliseconds < 1000)
+        throw new ArgumentException("the difference between time0 and time1 must be greater than or equal to 1 second.");
+
       Name = name;
       Type = type;
       FillColor = fillColor;
@@ -71,9 +75,8 @@ namespace SimSharp.Visualization {
       Time0 = time0;
       Time1 = time1;
       Keep = keep;
-      this.animate = animate;
-      this.timeStep = timeStep;
-      this.framesPerSec = Convert.ToInt32(1 / timeStep);
+      this.env = env;
+      this.framesPerSec = Convert.ToInt32(1 / env.AnimationBuilder.Props.TimeStep);
     }
     #endregion
 
@@ -105,8 +108,9 @@ namespace SimSharp.Visualization {
         }
       }
       else {
-        int frameNumber = Convert.ToInt32((Time1 - Time0).TotalSeconds / timeStep);
+        int frameNumber = Convert.ToInt32((Time1 - Time0).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
         AnimationUnit animationUnit = new AnimationUnit(Time0, Time1, frameNumber);
+        animationUnit.AddFrame(GetInitFrame());
 
       }
     }
@@ -114,33 +118,38 @@ namespace SimSharp.Visualization {
     #region Update
     public void Update(Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
       if (Type != Shape.rectangle) {
-        throw new ArgumentException("This animation is not of type 'Rectangle'");
+        throw new ArgumentException("This animation is not of type 'Rectangle'.");
       } else {
-        if (animate)
-          Update();
+        if (env.FillAnimation)
+          Update(time0, time1, fillColor, lineColor, lineWidth, keep);
       }
     }
 
     public void Update(Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
       if (Type != Shape.ellipse) {
-        throw new ArgumentException("This animation is not of type 'Ellipse'");
+        throw new ArgumentException("This animation is not of type 'Ellipse'.");
       } else {
-        if (animate)
-          Update();
+        if (env.FillAnimation)
+          Update(time0, time1, fillColor, lineColor, lineWidth, keep);
       }
     }
 
     public void Update(Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
       if (Type != Shape.polygon) {
-        throw new ArgumentException("This animation is not of type 'Polygon'");
+        throw new ArgumentException("This animation is not of type 'Polygon'.");
       } else {
-        if (animate)
-          Update();
+        if (env.FillAnimation)
+          Update(time0, time1, fillColor, lineColor, lineWidth, keep);
       }
     }
 
-    private void Update() {
-
+    private void Update(DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
+      if (time0 > time1)
+        throw new ArgumentException("time1 must be after time0.");
+      if ((time1 - time0).TotalMilliseconds < 1000)
+        throw new ArgumentException("the difference between time0 and time1 must be greater than or equal to 1 second.");
+      if (time0 > env.Now)
+        throw new ArgumentException("time0 can not be in the past");
     }
     #endregion
 

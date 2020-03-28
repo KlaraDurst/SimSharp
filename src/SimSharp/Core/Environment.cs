@@ -64,8 +64,8 @@ namespace SimSharp {
     public TextWriter Logger { get; set; }
     public int ProcessedEvents { get; protected set; }
 
-    private bool animate = false;
-    protected AnimationBuilder AnimationBuilder;
+    public bool FillAnimation { get; protected set; }
+    public AnimationBuilder AnimationBuilder { get; }
 
     public Simulation() : this(new DateTime(1970, 1, 1)) { }
     public Simulation(AnimationProperties animationProperties) : this(new DateTime(1970, 1, 1), animationProperties) { }
@@ -85,6 +85,7 @@ namespace SimSharp {
       Random = random;
       ScheduleQ = new EventQueue(InitialMaxEvents);
       Logger = Console.Out;
+      FillAnimation = false;
       AnimationBuilder = new AnimationBuilder(animationProperties);
     }
 
@@ -216,7 +217,7 @@ namespace SimSharp {
         stopEvent.AddCallback(StopSimulation);
       }
       OnRunStarted();
-      if (animate)
+      if (FillAnimation)
         AnimationBuilder.StartBuilding();
       try {
         var stop = ScheduleQ.Count == 0 || _stop.IsCancellationRequested;
@@ -258,7 +259,7 @@ namespace SimSharp {
       Now = next.PrimaryPriority;
       evt = next.Event;
       evt.Process();
-      if (animate)
+      if (FillAnimation)
         AnimationBuilder.Step(prior, Now);
       ProcessedEvents++;
     }
@@ -802,24 +803,24 @@ namespace SimSharp {
     #endregion
 
     #region Visualization
-    public void BuildAnimation(bool animate) {
-      this.animate = animate;
+    public void BuildAnimation(bool fillAnimation) {
+      FillAnimation = fillAnimation;
     }
 
     public Animation Animate(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      Animation animation = new Animation(name, rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep, animate, AnimationBuilder.Props.TimeStep);
+      Animation animation = new Animation(name, rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep, this);
       AnimationBuilder.AddAnimation(animation);
       return animation;
     }
 
     public Animation Animate(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      Animation animation = new Animation(name, ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep, animate, AnimationBuilder.Props.TimeStep);
+      Animation animation = new Animation(name, ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep, this);
       AnimationBuilder.AddAnimation(animation);
       return animation;
     }
 
     public Animation Animate(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      Animation animation = new Animation(name, polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep, animate, AnimationBuilder.Props.TimeStep);
+      Animation animation = new Animation(name, polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep, this);
       AnimationBuilder.AddAnimation(animation);
       return animation;
     }

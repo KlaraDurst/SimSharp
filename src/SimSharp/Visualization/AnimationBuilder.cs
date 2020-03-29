@@ -38,53 +38,74 @@ namespace SimSharp.Visualization {
     }
 
     public void Step(DateTime prior, DateTime now) {
+      int totalFrameNumber = Convert.ToInt32((now - prior).TotalSeconds / Props.TimeStep);
+
       if (animations.Count > 0) {
-        SortedList<DateTime, IEnumerator<string>> frames = new SortedList<DateTime, IEnumerator<string>>();
+        SortedList<DateTime, List<IEnumerator<string>>> frames = new SortedList<DateTime, List<IEnumerator<string>>>();
 
         foreach (Animation animation in animations) {
           List<AnimationUnit> units = animation.FramesFromTo(prior, now);
 
           if (units != null) {
             foreach(AnimationUnit unit in units) {
-              frames.Add(unit.Start, unit.Frames.GetEnumerator());
+              if (frames.ContainsKey(unit.Start)) {
+                List<IEnumerator<string>> l;
+                frames.TryGetValue(unit.Start, out l);
+                l.Add(unit.Frames.GetEnumerator());
+              }
+              else {
+                frames.Add(unit.Start, new List<IEnumerator<string>>() { unit.Frames.GetEnumerator() });
+              }
             }
           }
         }
 
-        List<IEnumerator<string>> framesEnums = new List<IEnumerator<string>>(frames.Count);
-        DateTime until = frames.Keys[0];
+        if (frames.Count > 0) {
+          List<IEnumerator<string>> framesEnums = new List<IEnumerator<string>>(frames.Count);
+          DateTime start = frames.Keys[0];
+          DateTime stop = frames.Count > 1 ? frames.Keys[1] : now;
 
-        while (until <= now) {
-          while (frames.Keys[0] == until) {
-            framesEnums.Add(frames.Values[0]);
+          int precedingFramesNumber = Convert.ToInt32((start - prior).TotalSeconds / Props.TimeStep);
+          writeEmptyObjects(precedingFramesNumber);
+
+          while (start != now) {
+            framesEnums.AddRange(frames.Values[0]);
             frames.RemoveAt(0);
-          }
 
-          int frameNumber = Convert.ToInt32((now - until).TotalSeconds / Props.TimeStep);
-          for (int i = 0; i <= frameNumber; i++) {
-            writer.WriteStartObject();
+            int frameNumber = Convert.ToInt32((stop - start).TotalSeconds / Props.TimeStep);
+            for (int i = 0; i <= frameNumber; i++) {
+              writer.WriteStartObject();
 
-            for (int j = framesEnums.Count - 1; j >= 0; j--) {
-              bool first = true;
-              string frame = framesEnums[j].Current;
+              for (int j = framesEnums.Count - 1; j >= 0; j--) {
+                bool first = true;
+                string frame = framesEnums[j].Current;
 
-              if (!first)
-                writer.WriteRaw(",");
-              writer.WriteRaw(frame);
+                if (!first)
+                  writer.WriteRaw(",");
+                writer.WriteRaw(frame);
 
-              if (!framesEnums[j].MoveNext())
-                framesEnums.RemoveAt(j);
+                if (!framesEnums[j].MoveNext())
+                  framesEnums.RemoveAt(j);
+              }
+              writer.WriteEndObject();
             }
-            writer.WriteEndObject();
+            start = stop;
+            stop = frames.Count > 1 ? frames.Keys[1] : now;
           }
+        }
+        else {
+          writeEmptyObjects(totalFrameNumber);
         }
       } 
       else {
-        int frameNumber = Convert.ToInt32((now - prior).TotalSeconds / Props.TimeStep);
-        for (int i = 0; i <= frameNumber; i++) {
-          writer.WriteStartObject();
-          writer.WriteEndObject();
-        }
+        writeEmptyObjects(totalFrameNumber);
+      }
+    }
+
+    private void writeEmptyObjects(int frameNumber) {
+      for (int i = 0; i <= frameNumber; i++) {
+        writer.WriteStartObject();
+        writer.WriteEndObject();
       }
     }
 

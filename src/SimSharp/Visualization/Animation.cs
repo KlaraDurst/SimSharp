@@ -84,16 +84,21 @@ namespace SimSharp.Visualization {
       units = new List<AnimationUnit>();
 
       if (ShapesEqual() && Keep) {
-        AnimationUnit unit = new AnimationUnit(Time0, Time0, 1);
-        unit.AddFrame(GetInitFrame());
+        AnimationUnit unit = new AnimationUnit(Time0, Time0.AddSeconds(1), 1);
+        unit.AddFrame(GetInitFrame(0));
+        units.Add(unit);
+      }
+      else if (!ShapesEqual() && Time0.Equals(Time1) && Keep) {
+        AnimationUnit unit = new AnimationUnit(Time0, Time0.AddSeconds(1), 1);
+        unit.AddFrame(GetInitFrame(1));
         units.Add(unit);
       }
       else if (ShapesEqual() && !Time0.Equals(Time1) && !Keep) {
-        AnimationUnit firstUnit = new AnimationUnit(Time0, Time0, 1);
-        firstUnit.AddFrame(GetInitFrame());
+        AnimationUnit firstUnit = new AnimationUnit(Time0, Time0.AddSeconds(1), 1);
+        firstUnit.AddFrame(GetInitFrame(0));
         units.Add(firstUnit);
 
-        AnimationUnit secondUnit = new AnimationUnit(Time1, Time1, 1);
+        AnimationUnit secondUnit = new AnimationUnit(Time1, Time1.AddSeconds(1), 1); // TODO
         writer.WritePropertyName(Name);
         writer.WriteStartObject();
 
@@ -105,12 +110,12 @@ namespace SimSharp.Visualization {
         writer.Flush();
         units.Add(secondUnit);
       }
-      else if (!ShapesEqual() && !Time0.Equals(Time1) && Keep) {
+      else if (!ShapesEqual() && !Time0.Equals(Time1)) {
         int frameNumber = Convert.ToInt32((Time1 - Time0).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
-        AnimationUnit animationUnit = new AnimationUnit(Time0, Time1, frameNumber);
-        animationUnit.AddFrame(GetInitFrame());
+        AnimationUnit animationUnit = Keep ? new AnimationUnit(Time0, Time1, frameNumber) : new AnimationUnit(Time0, Time1.AddSeconds(1), frameNumber + 1);
+        animationUnit.AddFrame(GetInitFrame(0));
 
-        foreach (List<int> i in GetInterpolation(GetTransformation(0), GetTransformation(1), frameNumber)) {
+        foreach (List<int> i in GetInterpolation(GetTransformation(0), GetTransformation(1), frameNumber - 1)) {
           writer.WritePropertyName(Name);
           writer.WriteStartObject();
 
@@ -120,6 +125,18 @@ namespace SimSharp.Visualization {
             writer.WriteValue(t);
           }
           writer.WriteEndArray();
+
+          writer.WriteEndObject();
+          animationUnit.AddFrame(writer.ToString());
+          writer.Flush();
+        }
+
+        if (!Keep) {
+          writer.WritePropertyName(Name);
+          writer.WriteStartObject();
+
+          writer.WritePropertyName("visible");
+          writer.WriteValue(false);
 
           writer.WriteEndObject();
           animationUnit.AddFrame(writer.ToString());
@@ -168,7 +185,7 @@ namespace SimSharp.Visualization {
     }
     #endregion
 
-    private string GetInitFrame() {
+    private string GetInitFrame(int z) {
       writer.WritePropertyName(Name);
       writer.WriteStartObject();
 
@@ -189,7 +206,7 @@ namespace SimSharp.Visualization {
 
       writer.WritePropertyName("t");
       writer.WriteStartArray();
-      foreach (int t in GetTransformation(0)) {
+      foreach (int t in GetTransformation(z)) {
         writer.WriteValue(t);
       }
       writer.WriteEndArray();
@@ -219,10 +236,12 @@ namespace SimSharp.Visualization {
       }
     }
 
+    // start excluded
     public IEnumerable<List<int>> GetInterpolation(List<int> start, List<int> stop, int frameNumber) {
       // TODO
     }
 
+    // TODO: start and stop included or excluded?
     public List<AnimationUnit> FramesFromTo(DateTime start, DateTime stop) {
       // TODO
     }

@@ -110,7 +110,23 @@ namespace SimSharp.Visualization {
         AnimationUnit animationUnit = new AnimationUnit(Time0, Time1, frameNumber);
         animationUnit.AddFrame(GetInitFrame());
 
-        // TODO
+        foreach (List<int> i in GetInterpolation(GetTransformation(0), GetTransformation(1), frameNumber)) {
+          writer.WritePropertyName(Name);
+          writer.WriteStartObject();
+
+          writer.WritePropertyName("t");
+          writer.WriteStartArray();
+          foreach (int t in i) {
+            writer.WriteValue(t);
+          }
+          writer.WriteEndArray();
+
+          writer.WriteEndObject();
+          animationUnit.AddFrame(writer.ToString());
+          writer.Flush();
+        }
+
+        units.Add(animationUnit);
       }
     }
 
@@ -203,7 +219,7 @@ namespace SimSharp.Visualization {
       }
     }
 
-    public IEnumerator<List<int>> GetInterpolation(List<int> start, List<int> stop) {
+    public IEnumerable<List<int>> GetInterpolation(List<int> start, List<int> stop, int frameNumber) {
       // TODO
     }
 

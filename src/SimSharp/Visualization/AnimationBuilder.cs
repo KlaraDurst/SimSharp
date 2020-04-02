@@ -66,7 +66,7 @@ namespace SimSharp.Visualization {
           DateTime stop = frames.Count > 1 ? frames.Keys[1] : now;
 
           int precedingFramesNumber = Convert.ToInt32((start - prior).TotalSeconds / Props.TimeStep);
-          writeEmptyObjects(precedingFramesNumber);
+          WriteEmptyObjects(precedingFramesNumber);
 
           while (start != now) {
             framesEnums.AddRange(frames.Values[0]);
@@ -94,15 +94,15 @@ namespace SimSharp.Visualization {
           }
         }
         else {
-          writeEmptyObjects(totalFrameNumber);
+          WriteEmptyObjects(totalFrameNumber);
         }
       } 
       else {
-        writeEmptyObjects(totalFrameNumber);
+        WriteEmptyObjects(totalFrameNumber);
       }
     }
 
-    private void writeEmptyObjects(int frameNumber) {
+    private void WriteEmptyObjects(int frameNumber) {
       for (int i = 0; i <= frameNumber; i++) {
         writer.WriteStartObject();
         writer.WriteEndObject();

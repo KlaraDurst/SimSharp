@@ -17,8 +17,8 @@ namespace SimSharp.Visualization.Shapes {
       Radius2 = radius2;
     }
 
-    public List<int> GetTransformation() {
-      return new List<int> { X, Y, Radius1, Radius2 };
+    public int[] GetTransformation() {
+      return new int[] { X, Y, Radius1, Radius2 };
     }
 
     public override bool Equals(object obj) {

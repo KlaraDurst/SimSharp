@@ -103,7 +103,7 @@ namespace SimSharp.Visualization {
     }
 
     private void WriteEmptyObjects(int frameNumber) {
-      for (int i = 0; i <= frameNumber; i++) {
+      for (int i = 0; i < frameNumber; i++) {
         writer.WriteStartObject();
         writer.WriteEndObject();
       }

@@ -17,8 +17,8 @@ namespace SimSharp.Visualization.Shapes {
       Height = height;
     }
 
-    public List<int> GetTransformation() {
-      return new List<int> { X, Y, Width, Height };
+    public int[] GetTransformation() {
+      return new int[] { X, Y, Width, Height };
     }
 
     public override bool Equals(object obj) {

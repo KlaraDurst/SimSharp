@@ -7,11 +7,11 @@ namespace SimSharp.Visualization.Shapes {
   public class Polygon {
     public List<int> XList { get; }
     public List<int> YList { get; }
-    public List<int> XYList { get; }
+    public int[] XYList { get; }
 
     public Polygon(params int[] xy) {
       if (xy.Length % 2 != 0) {
-        throw new ArgumentException("A polygon needs the same number of y than x coordinates");
+        throw new ArgumentException("A polygon needs the same number of y and x coordinates");
       }
       else {
         for (int i = 0; i < xy.Length; i+=2) {
@@ -19,11 +19,11 @@ namespace SimSharp.Visualization.Shapes {
           YList.Add(xy[i + 1]);
         }
 
-        XYList.AddRange(xy);
+        XYList = xy;
       }
     }
 
-    public List<int> GetTransformation() {
+    public int[] GetTransformation() {
       return XYList;
     }
 

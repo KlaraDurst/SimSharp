@@ -99,15 +99,7 @@ namespace SimSharp.Visualization {
         units.Add(firstUnit);
 
         AnimationUnit secondUnit = new AnimationUnit(Time1, Time1.AddSeconds(1), 1); // TODO
-        writer.WritePropertyName(Name);
-        writer.WriteStartObject();
-
-        writer.WritePropertyName("visible");
-        writer.WriteValue(false);
-
-        writer.WriteEndObject();
-        secondUnit.AddFrame(writer.ToString());
-        writer.Flush();
+        secondUnit.AddFrame(GetRemoveFrame());
         units.Add(secondUnit);
       }
       else if (!ShapesEqual() && !Time0.Equals(Time1)) {
@@ -115,7 +107,7 @@ namespace SimSharp.Visualization {
         AnimationUnit animationUnit = Keep ? new AnimationUnit(Time0, Time1, frameNumber) : new AnimationUnit(Time0, Time1.AddSeconds(1), frameNumber + 1);
         animationUnit.AddFrame(GetInitFrame(0));
 
-        foreach (List<int> i in GetInterpolation(GetTransformation(0), GetTransformation(1), frameNumber - 1)) {
+        foreach (List<int> i in GetInterpolation(GetTransformation(0), GetTransformation(1), frameNumber - 2)) {
           writer.WritePropertyName(Name);
           writer.WriteStartObject();
 
@@ -131,16 +123,22 @@ namespace SimSharp.Visualization {
           writer.Flush();
         }
 
+        writer.WritePropertyName(Name);
+        writer.WriteStartObject();
+
+        writer.WritePropertyName("t");
+        writer.WriteStartArray();
+        foreach (int t in GetTransformation(1)) {
+          writer.WriteValue(t);
+        }
+        writer.WriteEndArray();
+
+        writer.WriteEndObject();
+        animationUnit.AddFrame(writer.ToString());
+        writer.Flush();
+
         if (!Keep) {
-          writer.WritePropertyName(Name);
-          writer.WriteStartObject();
-
-          writer.WritePropertyName("visible");
-          writer.WriteValue(false);
-
-          writer.WriteEndObject();
-          animationUnit.AddFrame(writer.ToString());
-          writer.Flush();
+          animationUnit.AddFrame(GetRemoveFrame());
         }
 
         units.Add(animationUnit);
@@ -174,6 +172,7 @@ namespace SimSharp.Visualization {
           Update(time0, time1, fillColor, lineColor, lineWidth, keep);
       }
     }
+    #endregion
 
     private void Update(DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
       if (time0 > time1)
@@ -183,7 +182,6 @@ namespace SimSharp.Visualization {
       if (time0 > env.Now)
         throw new ArgumentException("time0 can not be in the past");
     }
-    #endregion
 
     private string GetInitFrame(int z) {
       writer.WritePropertyName(Name);
@@ -218,6 +216,20 @@ namespace SimSharp.Visualization {
       return frame;
     }
 
+    private string GetRemoveFrame() {
+      writer.WritePropertyName(Name);
+      writer.WriteStartObject();
+
+      writer.WritePropertyName("visible");
+      writer.WriteValue(false);
+
+      writer.WriteEndObject();
+      string frame = writer.ToString();
+      writer.Flush();
+
+      return frame;
+    }
+
     private bool ShapesEqual() {
       switch(Type) {
         case Shape.rectangle: return Rectangle0.Equals(Rectangle1);
@@ -227,7 +239,7 @@ namespace SimSharp.Visualization {
       }
     }
 
-    private List<int> GetTransformation(int z) {
+    private int[] GetTransformation(int z) {
       switch (Type) {
         case Shape.rectangle: return z==0 ? Rectangle0.GetTransformation() : Rectangle1.GetTransformation();
         case Shape.ellipse: return z == 0 ? Ellipse0.GetTransformation() : Ellipse1.GetTransformation();
@@ -236,9 +248,23 @@ namespace SimSharp.Visualization {
       }
     }
 
-    // start excluded
-    public IEnumerable<List<int>> GetInterpolation(List<int> start, List<int> stop, int frameNumber) {
-      // TODO
+    private IEnumerable<List<int>> GetInterpolation(int[] start, int[] stop, int frameNumber) {
+      double interval = 1 / frameNumber;
+      List<List<int>> interpolation = new List<List<int>>(frameNumber);
+
+      for (int i = 0; i < frameNumber; i++) {
+        List<int> l = new List<int>(start.Length);
+
+        for (int j = 0; j < start.Length; j++) {
+          double t = interval * i;
+          int val = Convert.ToInt32((1 - t) * start[j] + t * stop[j]);
+          l.Add(val);
+        }
+
+        interpolation.Add(l);
+      }
+
+      return interpolation;
     }
 
     // TODO: start and stop included or excluded?

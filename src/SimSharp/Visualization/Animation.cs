@@ -61,10 +61,7 @@ namespace SimSharp.Visualization {
     }
 
     private Animation(string name, Shape type, string fillColor, string lineColor, int lineWidth, DateTime time0, DateTime time1, bool keep, Simulation env) {
-      if (time0 > time1)
-        throw new ArgumentException("time1 must be after time0.");
-      if ((time1 - time0).TotalMilliseconds < 1000)
-        throw new ArgumentException("the difference between time0 and time1 must be greater than or equal to 1 second.");
+      CheckTime(time0, time1);
 
       Name = name;
       Type = type;
@@ -175,6 +172,17 @@ namespace SimSharp.Visualization {
     #endregion
 
     private void Update(DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
+      CheckTime(time0, time1);
+
+      units.RemoveAll(unit => unit.Time0 >= time0);
+      foreach (AnimationUnit unit in units) {
+        if (unit.Time1 > time0) { // TODO: > or >=
+          // TODO
+        }
+      }
+    }
+
+    private void CheckTime(DateTime time0, DateTime time1) {
       if (time0 > time1)
         throw new ArgumentException("time1 must be after time0.");
       if ((time1 - time0).TotalMilliseconds < 1000)

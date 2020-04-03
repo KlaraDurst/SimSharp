@@ -6,13 +6,13 @@ using Newtonsoft.Json;
 
 namespace SimSharp.Visualization {
   public class AnimationBuilder {
-    public AnimationProperties Props { get; }
+    public AnimationBuilderProps Props { get; }
 
     private StringWriter stringWriter;
     private JsonTextWriter writer;
     private List<Animation> animations;
 
-    public AnimationBuilder(AnimationProperties props) {
+    public AnimationBuilder(AnimationBuilderProps props) {
       Props = props;
       this.animations = new List<Animation>();
     }
@@ -48,13 +48,13 @@ namespace SimSharp.Visualization {
 
           if (units != null) {
             foreach(AnimationUnit unit in units) {
-              if (frames.ContainsKey(unit.Start)) {
+              if (frames.ContainsKey(unit.Time0)) {
                 List<IEnumerator<string>> l;
-                frames.TryGetValue(unit.Start, out l);
+                frames.TryGetValue(unit.Time0, out l);
                 l.Add(unit.Frames.GetEnumerator());
               }
               else {
-                frames.Add(unit.Start, new List<IEnumerator<string>>() { unit.Frames.GetEnumerator() });
+                frames.Add(unit.Time0, new List<IEnumerator<string>>() { unit.Frames.GetEnumerator() });
               }
             }
           }

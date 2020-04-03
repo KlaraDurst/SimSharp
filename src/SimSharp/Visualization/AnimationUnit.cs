@@ -4,13 +4,13 @@ using System.Text;
 
 namespace SimSharp.Visualization {
   public class AnimationUnit {
-    public DateTime Start { get; }
-    public DateTime Stop { get; }
+    public DateTime Time0 { get; }
+    public DateTime Time1 { get; }
     public List<string> Frames { get; }
 
-    public AnimationUnit(DateTime start, DateTime stop, int frameNumber) {
-      Start = start;
-      Stop = stop;
+    public AnimationUnit(DateTime time0, DateTime time1, int frameNumber) {
+      Time0 = time0;
+      Time1 = time1;
       Frames = new List<string>(frameNumber);
     }
 

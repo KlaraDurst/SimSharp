@@ -15,14 +15,14 @@ namespace SimSharp.Visualization {
     private Simulation env;
     private StringWriter stringWriter;
     private JsonTextWriter writer;
-    private List<AnimationProps> propsList;
+    private SortedList<DateTime, AnimationProps> propsList;
     private List<AnimationUnit> units;
 
     #region Constructors
     public Animation(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env) 
       : this(name, Shape.rectangle, time0, time1, env) {
       AnimationProps props = new AnimationProps(rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep);
-      propsList.Add(props);
+      propsList.Add(time0, props);
 
       if (env.FillAnimation)
         Initialize(props);
@@ -31,7 +31,7 @@ namespace SimSharp.Visualization {
     public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env)
       : this(name, Shape.ellipse, time0, time1, env) {
       AnimationProps props = new AnimationProps(ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep);
-      propsList.Add(props);
+      propsList.Add(time0, props);
 
       if (env.FillAnimation)
         Initialize(props);
@@ -40,7 +40,7 @@ namespace SimSharp.Visualization {
     public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env)
       : this(name, Shape.polygon, time0, time1, env) {
       AnimationProps props = new AnimationProps(polygon0, polygon0, time0, time1, fillColor, lineColor, lineWidth, keep);
-      propsList.Add(props);
+      propsList.Add(time0, props);
 
       if (env.FillAnimation)
         Initialize(props);
@@ -124,42 +124,112 @@ namespace SimSharp.Visualization {
 
     #region Update
     public void Update(Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      if (Type != Shape.rectangle) {
-        throw new ArgumentException("This animation is not of type 'Rectangle'.");
-      } else {
-        if (env.FillAnimation)
-          Update(time0, time1, fillColor, lineColor, lineWidth, keep);
-      }
+      CheckType(Shape.rectangle);
+      CheckTime(time0, time1);
+
+      AnimationProps props = new AnimationProps(rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep);
+      Update(props);
     }
 
     public void Update(Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      if (Type != Shape.ellipse) {
-        throw new ArgumentException("This animation is not of type 'Ellipse'.");
-      } else {
-        if (env.FillAnimation)
-          Update(time0, time1, fillColor, lineColor, lineWidth, keep);
-      }
+      CheckType(Shape.ellipse);
+      CheckTime(time0, time1);
+
+      AnimationProps props = new AnimationProps(ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep);
+      Update(props);
     }
 
     public void Update(Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      if (Type != Shape.polygon) {
-        throw new ArgumentException("This animation is not of type 'Polygon'.");
-      } else {
-        if (env.FillAnimation)
-          Update(time0, time1, fillColor, lineColor, lineWidth, keep);
-      }
+      CheckType(Shape.polygon);
+      CheckTime(time0, time1);
+
+      AnimationProps props = new AnimationProps(polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep);
+      Update(props);
     }
     #endregion
 
-    private void Update(DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      CheckTime(time0, time1);
+    private void Update(AnimationProps props) {
+      for (int j = propsList.Count - 1; j >= 0; j--) {
+        if (propsList.Keys[j] >= props.Time0)
+          propsList.RemoveAt(j);
+        else
+          break;
+      }
 
-      units.RemoveAll(unit => unit.Time0 >= time0);
-      foreach (AnimationUnit unit in units) {
-        if (unit.Time1 > time0) { // TODO: > or >=
-          // TODO
+      propsList.Add(props.Time0, props);
+
+      if (env.FillAnimation) {
+        units.RemoveAll(unit => unit.Time0 >= props.Time0);
+        foreach (AnimationUnit unit in units) {
+          if (unit.Time1 > props.Time0) { // TODO: > or >=
+                                    // TODO
+          }
         }
       }
+    }
+
+    #region Get animation props
+    public Rectangle GetRectangle0() {
+      CheckType(Shape.rectangle);
+      return GetCurrentProps()?.Rectangle0;
+    }
+
+    public Rectangle GetRectangle1() {
+      CheckType(Shape.rectangle);
+      return GetCurrentProps()?.Rectangle1;
+    }
+
+    public Ellipse GetEllipse0() {
+      CheckType(Shape.ellipse);
+      return GetCurrentProps()?.Ellipse0;
+    }
+
+    public Ellipse GetEllipse1() {
+      CheckType(Shape.ellipse);
+      return GetCurrentProps()?.Ellipse1;
+    }
+
+    public Polygon GetPolygon0() {
+      CheckType(Shape.polygon);
+      return GetCurrentProps().Polygon0;
+    }
+
+    public Polygon GetPolygon1() {
+      CheckType(Shape.polygon);
+      return GetCurrentProps().Polygon1;
+    }
+
+    public string GetFillColor() {
+      return GetCurrentProps().FillColor;
+    }
+
+    public string GetLineColor() {
+      return GetCurrentProps().LineColor;
+    }
+    
+    public int GetLineWidth() {
+      return GetCurrentProps().LineWidth;
+    }
+
+    public DateTime GetTime0() {
+      return GetCurrentProps().Time0;
+    }
+
+    public DateTime GetTime1() {
+      return GetCurrentProps().Time1;
+    }
+
+    public bool GetKeep() {
+      return GetCurrentProps().Keep;
+    }
+    #endregion
+
+    private AnimationProps GetCurrentProps() {
+      for (int j = propsList.Count - 1; j >= 0; j--) {
+        if (propsList.Keys[j] <= env.Now)
+          return propsList.Values[j];
+      }
+      return propsList.Values[0];
     }
 
     private void CheckTime(DateTime time0, DateTime time1) {
@@ -169,6 +239,21 @@ namespace SimSharp.Visualization {
         throw new ArgumentException("the difference between time0 and time1 must be greater than or equal to 1 second.");
       if (time0 > env.Now)
         throw new ArgumentException("time0 can not be in the past");
+    }
+    
+    private void CheckType(Shape shape) {
+      if (Type != shape) {
+        throw new ArgumentException("This animation is not of type " + shape.ToString().ToUpper());
+      }
+    }
+
+    private bool ShapesEqual(AnimationProps props) {
+      switch (Type) {
+        case Shape.rectangle: return props.Rectangle0.Equals(props.Rectangle1);
+        case Shape.ellipse: return props.Ellipse0.Equals(props.Ellipse1);
+        case Shape.polygon: return props.Polygon0.Equals(props.Polygon1);
+        default: return false;
+      }
     }
 
     private string GetInitFrame(AnimationProps props, int z) {
@@ -216,15 +301,6 @@ namespace SimSharp.Visualization {
       writer.Flush();
 
       return frame;
-    }
-
-    private bool ShapesEqual(AnimationProps props) {
-      switch(Type) {
-        case Shape.rectangle: return props.Rectangle0.Equals(props.Rectangle1);
-        case Shape.ellipse: return props.Ellipse0.Equals(props.Ellipse1);
-        case Shape.polygon: return props.Polygon0.Equals(props.Polygon1);
-        default: return false;
-      }
     }
 
     private int[] GetTransformation(AnimationProps props, int z) {

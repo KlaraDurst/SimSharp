@@ -52,75 +52,12 @@ namespace SimSharp.Visualization {
       Name = name;
       Type = type;
       this.env = env;
+      this.stringWriter = new StringWriter();
+      this.writer = new JsonTextWriter(stringWriter);
+      this.propsList = new SortedList<DateTime, AnimationProps>();
+      this.units = new List<AnimationUnit>();
     }
     #endregion
-
-    private void Initialize(AnimationProps props) {
-      stringWriter = new StringWriter();
-      writer = new JsonTextWriter(stringWriter);
-      units = new List<AnimationUnit>();
-
-      if (ShapesEqual(props) && props.Keep) {
-        AnimationUnit unit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
-        unit.AddFrame(GetInitFrame(props, 0));
-        units.Add(unit);
-      }
-      else if (!ShapesEqual(props) && props.Time0.Equals(props.Time1) && props.Keep) {
-        AnimationUnit unit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
-        unit.AddFrame(GetInitFrame(props, 1));
-        units.Add(unit);
-      }
-      else if (ShapesEqual(props) && !props.Time0.Equals(props.Time1) && !props.Keep) {
-        AnimationUnit firstUnit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
-        firstUnit.AddFrame(GetInitFrame(props, 0));
-        units.Add(firstUnit);
-
-        AnimationUnit secondUnit = new AnimationUnit(props.Time1, props.Time1.AddSeconds(1), 1); // TODO
-        secondUnit.AddFrame(GetRemoveFrame());
-        units.Add(secondUnit);
-      }
-      else if (!ShapesEqual(props) && !props.Time0.Equals(props.Time1)) {
-        int frameNumber = Convert.ToInt32((props.Time1 - props.Time0).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
-        AnimationUnit animationUnit = props.Keep ? new AnimationUnit(props.Time0, props.Time1, frameNumber) : new AnimationUnit(props.Time0, props.Time1.AddSeconds(1), frameNumber + 1);
-        animationUnit.AddFrame(GetInitFrame(props, 0));
-
-        foreach (List<int> i in GetInterpolation(GetTransformation(props, 0), GetTransformation(props, 1), frameNumber - 2)) {
-          writer.WritePropertyName(Name);
-          writer.WriteStartObject();
-
-          writer.WritePropertyName("t");
-          writer.WriteStartArray();
-          foreach (int t in i) {
-            writer.WriteValue(t);
-          }
-          writer.WriteEndArray();
-
-          writer.WriteEndObject();
-          animationUnit.AddFrame(writer.ToString());
-          writer.Flush();
-        }
-
-        writer.WritePropertyName(Name);
-        writer.WriteStartObject();
-
-        writer.WritePropertyName("t");
-        writer.WriteStartArray();
-        foreach (int t in GetTransformation(props, 1)) {
-          writer.WriteValue(t);
-        }
-        writer.WriteEndArray();
-
-        writer.WriteEndObject();
-        animationUnit.AddFrame(writer.ToString());
-        writer.Flush();
-
-        if (!props.Keep) {
-          animationUnit.AddFrame(GetRemoveFrame());
-        }
-
-        units.Add(animationUnit);
-      }
-    }
 
     #region Update
     public void Update(Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
@@ -161,10 +98,14 @@ namespace SimSharp.Visualization {
       if (env.FillAnimation) {
         units.RemoveAll(unit => unit.Time0 >= props.Time0);
         foreach (AnimationUnit unit in units) {
-          if (unit.Time1 > props.Time0) { // TODO: > or >=
-                                    // TODO
+          if (unit.Time1 > props.Time0) {
+            int  keepFrames = Convert.ToInt32((props.Time0 - unit.Time0).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+            unit.Frames.RemoveRange(keepFrames, unit.Frames.Count - keepFrames);
+            unit.Time1 = props.Time0;
           }
         }
+
+        Initialize(props);
       }
     }
 
@@ -223,6 +164,66 @@ namespace SimSharp.Visualization {
       return GetCurrentProps().Keep;
     }
     #endregion
+
+    private void Initialize(AnimationProps props) {
+      if (ShapesEqual(props) && props.Keep) {
+        AnimationUnit unit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
+        unit.AddFrame(GetInitFrame(props, 0));
+        units.Add(unit);
+      } else if (!ShapesEqual(props) && props.Time0.Equals(props.Time1) && props.Keep) {
+        AnimationUnit unit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
+        unit.AddFrame(GetInitFrame(props, 1));
+        units.Add(unit);
+      } else if (ShapesEqual(props) && !props.Time0.Equals(props.Time1) && !props.Keep) {
+        AnimationUnit firstUnit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
+        firstUnit.AddFrame(GetInitFrame(props, 0));
+        units.Add(firstUnit);
+
+        AnimationUnit secondUnit = new AnimationUnit(props.Time1, props.Time1.AddSeconds(1), 1); // TODO
+        secondUnit.AddFrame(GetRemoveFrame());
+        units.Add(secondUnit);
+      } else if (!ShapesEqual(props) && !props.Time0.Equals(props.Time1)) {
+        int frameNumber = Convert.ToInt32((props.Time1 - props.Time0).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+        AnimationUnit animationUnit = props.Keep ? new AnimationUnit(props.Time0, props.Time1, frameNumber) : new AnimationUnit(props.Time0, props.Time1.AddSeconds(1), frameNumber + 1);
+        animationUnit.AddFrame(GetInitFrame(props, 0));
+
+        foreach (List<int> i in GetInterpolation(GetTransformation(props, 0), GetTransformation(props, 1), frameNumber - 2)) {
+          writer.WritePropertyName(Name);
+          writer.WriteStartObject();
+
+          writer.WritePropertyName("t");
+          writer.WriteStartArray();
+          foreach (int t in i) {
+            writer.WriteValue(t);
+          }
+          writer.WriteEndArray();
+
+          writer.WriteEndObject();
+          animationUnit.AddFrame(writer.ToString());
+          writer.Flush();
+        }
+
+        writer.WritePropertyName(Name);
+        writer.WriteStartObject();
+
+        writer.WritePropertyName("t");
+        writer.WriteStartArray();
+        foreach (int t in GetTransformation(props, 1)) {
+          writer.WriteValue(t);
+        }
+        writer.WriteEndArray();
+
+        writer.WriteEndObject();
+        animationUnit.AddFrame(writer.ToString());
+        writer.Flush();
+
+        if (!props.Keep) {
+          animationUnit.AddFrame(GetRemoveFrame());
+        }
+
+        units.Add(animationUnit);
+      }
+    }
 
     private AnimationProps GetCurrentProps() {
       for (int j = propsList.Count - 1; j >= 0; j--) {

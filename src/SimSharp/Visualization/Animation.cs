@@ -25,7 +25,7 @@ namespace SimSharp.Visualization {
       propsList.Add(time0, props);
 
       if (env.FillAnimation)
-        Initialize(props);
+        FillUnits(props);
     }
 
     public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env)
@@ -34,7 +34,7 @@ namespace SimSharp.Visualization {
       propsList.Add(time0, props);
 
       if (env.FillAnimation)
-        Initialize(props);
+        FillUnits(props);
     }
 
     public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env)
@@ -43,7 +43,7 @@ namespace SimSharp.Visualization {
       propsList.Add(time0, props);
 
       if (env.FillAnimation)
-        Initialize(props);
+        FillUnits(props);
     }
 
     private Animation(string name, Shape type, DateTime time0, DateTime time1, Simulation env) {
@@ -83,7 +83,6 @@ namespace SimSharp.Visualization {
       AnimationProps props = new AnimationProps(polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep);
       Update(props);
     }
-    #endregion
 
     private void Update(AnimationProps props) {
       for (int j = propsList.Count - 1; j >= 0; j--) {
@@ -92,7 +91,6 @@ namespace SimSharp.Visualization {
         else
           break;
       }
-
       propsList.Add(props.Time0, props);
 
       if (env.FillAnimation) {
@@ -104,30 +102,30 @@ namespace SimSharp.Visualization {
             unit.Time1 = props.Time0;
           }
         }
-
-        Initialize(props);
+        FillUnits(props);
       }
     }
+    #endregion
 
     #region Get animation props
     public Rectangle GetRectangle0() {
       CheckType(Shape.rectangle);
-      return GetCurrentProps()?.Rectangle0;
+      return GetCurrentProps().Rectangle0;
     }
 
     public Rectangle GetRectangle1() {
       CheckType(Shape.rectangle);
-      return GetCurrentProps()?.Rectangle1;
+      return GetCurrentProps().Rectangle1;
     }
 
     public Ellipse GetEllipse0() {
       CheckType(Shape.ellipse);
-      return GetCurrentProps()?.Ellipse0;
+      return GetCurrentProps().Ellipse0;
     }
 
     public Ellipse GetEllipse1() {
       CheckType(Shape.ellipse);
-      return GetCurrentProps()?.Ellipse1;
+      return GetCurrentProps().Ellipse1;
     }
 
     public Polygon GetPolygon0() {
@@ -165,8 +163,13 @@ namespace SimSharp.Visualization {
     }
     #endregion
 
-    private void Initialize(AnimationProps props) {
-      if (ShapesEqual(props) && props.Keep) {
+    private void FillUnits(AnimationProps props) {
+      if (propsList.Count > 1 && props.Time0.Equals(props.Time1) && !props.Keep) {
+        AnimationUnit unit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
+        unit.AddFrame(GetRemoveFrame());
+        units.Add(unit);
+      }
+      else if (ShapesEqual(props) && props.Keep) {
         AnimationUnit unit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
         unit.AddFrame(GetInitFrame(props, 0));
         units.Add(unit);
@@ -179,7 +182,7 @@ namespace SimSharp.Visualization {
         firstUnit.AddFrame(GetInitFrame(props, 0));
         units.Add(firstUnit);
 
-        AnimationUnit secondUnit = new AnimationUnit(props.Time1, props.Time1.AddSeconds(1), 1); // TODO
+        AnimationUnit secondUnit = new AnimationUnit(props.Time1, props.Time1.AddSeconds(1), 1);
         secondUnit.AddFrame(GetRemoveFrame());
         units.Add(secondUnit);
       } else if (!ShapesEqual(props) && !props.Time0.Equals(props.Time1)) {
@@ -261,17 +264,25 @@ namespace SimSharp.Visualization {
       writer.WritePropertyName(Name);
       writer.WriteStartObject();
 
-      writer.WritePropertyName("type");
-      writer.WriteValue(Type.ToString());
+      if (propsList.Count < 2) {
+        writer.WritePropertyName("type");
+        writer.WriteValue(Type.ToString());
+      }
 
-      writer.WritePropertyName("fillColor");
-      writer.WriteValue(props.FillColor);
+      if (propsList.Count >= 2 && propsList.Values[propsList.Count - 2].FillColor != props.FillColor) {
+        writer.WritePropertyName("fillColor");
+        writer.WriteValue(props.FillColor);
+      }
 
-      writer.WritePropertyName("lineColor");
-      writer.WriteValue(props.LineColor);
+      if (propsList.Count >= 2 && propsList.Values[propsList.Count - 2].LineColor != props.LineColor) {
+        writer.WritePropertyName("lineColor");
+        writer.WriteValue(props.LineColor);
+      }
 
-      writer.WritePropertyName("lineWidth");
-      writer.WriteValue(props.LineWidth);
+      if (propsList.Count >= 2 && propsList.Values[propsList.Count - 2].LineWidth != props.LineWidth) {
+        writer.WritePropertyName("lineWidth");
+        writer.WriteValue(props.LineWidth);
+      }
 
       writer.WritePropertyName("visible");
       writer.WriteValue(true);

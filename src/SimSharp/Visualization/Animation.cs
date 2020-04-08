@@ -25,7 +25,7 @@ namespace SimSharp.Visualization {
       propsList.Add(time0, props);
 
       if (env.FillAnimation)
-        FillUnits(props);
+        FillUnits(props, false);
     }
 
     public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env)
@@ -34,7 +34,7 @@ namespace SimSharp.Visualization {
       propsList.Add(time0, props);
 
       if (env.FillAnimation)
-        FillUnits(props);
+        FillUnits(props, false);
     }
 
     public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env)
@@ -43,7 +43,7 @@ namespace SimSharp.Visualization {
       propsList.Add(time0, props);
 
       if (env.FillAnimation)
-        FillUnits(props);
+        FillUnits(props, false);
     }
 
     private Animation(string name, Shape type, DateTime time0, DateTime time1, Simulation env) {
@@ -102,7 +102,9 @@ namespace SimSharp.Visualization {
             unit.Time1 = props.Time0;
           }
         }
-        FillUnits(props);
+
+        AnimationProps prev = propsList.Values[propsList.Count - 2];
+        FillUnits(props, (!prev.Keep && prev.Time1 < props.Time0) ? false : true);
       }
     }
     #endregion
@@ -163,23 +165,22 @@ namespace SimSharp.Visualization {
     }
     #endregion
 
-    private void FillUnits(AnimationProps props) {
-      if (propsList.Count > 1 && props.Time0.Equals(props.Time1) && !props.Keep) {
+    private void FillUnits(AnimationProps props, bool currVisible) {
+      if (currVisible && props.Time0.Equals(props.Time1) && !props.Keep) {
         AnimationUnit unit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
         unit.AddFrame(GetRemoveFrame());
         units.Add(unit);
-      }
-      else if (ShapesEqual(props) && props.Keep) {
+      } else if (ShapesEqual(props) && props.Keep) {
         AnimationUnit unit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
-        unit.AddFrame(GetInitFrame(props, 0));
+        unit.AddFrame(GetInitFrame(props, 0, currVisible));
         units.Add(unit);
       } else if (!ShapesEqual(props) && props.Time0.Equals(props.Time1) && props.Keep) {
         AnimationUnit unit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
-        unit.AddFrame(GetInitFrame(props, 1));
+        unit.AddFrame(GetInitFrame(props, 1, currVisible));
         units.Add(unit);
       } else if (ShapesEqual(props) && !props.Time0.Equals(props.Time1) && !props.Keep) {
         AnimationUnit firstUnit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
-        firstUnit.AddFrame(GetInitFrame(props, 0));
+        firstUnit.AddFrame(GetInitFrame(props, 0, currVisible));
         units.Add(firstUnit);
 
         AnimationUnit secondUnit = new AnimationUnit(props.Time1, props.Time1.AddSeconds(1), 1);
@@ -188,7 +189,7 @@ namespace SimSharp.Visualization {
       } else if (!ShapesEqual(props) && !props.Time0.Equals(props.Time1)) {
         int frameNumber = Convert.ToInt32((props.Time1 - props.Time0).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
         AnimationUnit animationUnit = props.Keep ? new AnimationUnit(props.Time0, props.Time1, frameNumber) : new AnimationUnit(props.Time0, props.Time1.AddSeconds(1), frameNumber + 1);
-        animationUnit.AddFrame(GetInitFrame(props, 0));
+        animationUnit.AddFrame(GetInitFrame(props, 0, currVisible));
 
         foreach (List<int> i in GetInterpolation(GetTransformation(props, 0), GetTransformation(props, 1), frameNumber - 2)) {
           writer.WritePropertyName(Name);
@@ -260,7 +261,7 @@ namespace SimSharp.Visualization {
       }
     }
 
-    private string GetInitFrame(AnimationProps props, int z) {
+    private string GetInitFrame(AnimationProps props, int z, bool currVisible) {
       writer.WritePropertyName(Name);
       writer.WriteStartObject();
 
@@ -284,8 +285,10 @@ namespace SimSharp.Visualization {
         writer.WriteValue(props.LineWidth);
       }
 
-      writer.WritePropertyName("visible");
-      writer.WriteValue(true);
+      if (!currVisible) {
+        writer.WritePropertyName("visible");
+        writer.WriteValue(true);
+      }
 
       writer.WritePropertyName("t");
       writer.WriteStartArray();

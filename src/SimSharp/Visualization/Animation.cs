@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Newtonsoft.Json;
 using SimSharp.Visualization.Shapes;
 
@@ -346,9 +345,24 @@ namespace SimSharp.Visualization {
       return interpolation;
     }
 
-    // TODO: start and stop included or excluded?
+    // incl. start, excl. stop
     public List<AnimationUnit> FramesFromTo(DateTime start, DateTime stop) {
-      // TODO
+      List<AnimationUnit> affectedUnits = new List<AnimationUnit>();
+      
+      foreach (AnimationUnit unit in units) {
+        if (unit.Time0 >= start && unit.Time0 < stop) {
+          affectedUnits.Add(unit);
+        }
+        else if (unit.Time0 <= start && unit.Time1 > start) {
+          int removeFrames = Convert.ToInt32((start - unit.Time0).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+          int keepFrames = unit.Frames.Count - removeFrames;
+          AnimationUnit temp = new AnimationUnit(start, unit.Time1, keepFrames);
+          
+          temp.AddFrameRange(unit.Frames.GetRange(removeFrames, keepFrames));
+          affectedUnits.Add(temp);
+        }
+      }
+      return affectedUnits;
     }
   }
 }

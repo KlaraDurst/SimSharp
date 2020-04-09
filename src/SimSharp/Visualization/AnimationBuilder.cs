@@ -111,13 +111,15 @@ namespace SimSharp.Visualization {
       }
     }
 
-    private void StopBuilding() {
+    public void StopBuilding() {
       writer.WriteEndArray();
       writer.WriteEndObject();
+
+      WriteJson();
     }
 
-    public void WriteJson() {
-      // TODO
+    private void WriteJson() {
+      File.WriteAllText(writer.ToString(), Props.Target);
     }
   }
 }

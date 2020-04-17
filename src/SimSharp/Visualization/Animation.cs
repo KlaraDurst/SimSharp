@@ -104,7 +104,7 @@ namespace SimSharp.Visualization {
           }
         }
 
-        if (propsList.Count <= 0) {
+        if (propsList.Count >= 2) {
           AnimationProps prev = propsList.Values[propsList.Count - 2];
           FillUnits(props, (!prev.Keep && prev.Time1 < props.Time0) ? false : true);
         }

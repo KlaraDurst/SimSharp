@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using SimSharp.Visualization.Shapes;
 
@@ -46,7 +48,7 @@ namespace SimSharp.Visualization {
     }
 
     private Animation(string name, Shape type, DateTime time0, DateTime time1, Simulation env) {
-      Name = name;
+      Name = Regex.Replace(name, @"\s+", "");
       Type = type;
       this.env = env;
       this.stringWriter = new StringWriter();
@@ -102,8 +104,13 @@ namespace SimSharp.Visualization {
           }
         }
 
-        AnimationProps prev = propsList.Values[propsList.Count - 2];
-        FillUnits(props, (!prev.Keep && prev.Time1 < props.Time0) ? false : true);
+        if (propsList.Count <= 0) {
+          AnimationProps prev = propsList.Values[propsList.Count - 2];
+          FillUnits(props, (!prev.Keep && prev.Time1 < props.Time0) ? false : true);
+        }
+        else {
+          FillUnits(props, false);
+        }
       }
     }
     #endregion
@@ -202,8 +209,8 @@ namespace SimSharp.Visualization {
           writer.WriteEndArray();
 
           writer.WriteEndObject();
-          animationUnit.AddFrame(writer.ToString());
-          writer.Flush();
+          animationUnit.AddFrame(stringWriter.ToString());
+          Flush();
         }
 
         writer.WritePropertyName(Name);
@@ -217,8 +224,8 @@ namespace SimSharp.Visualization {
         writer.WriteEndArray();
 
         writer.WriteEndObject();
-        animationUnit.AddFrame(writer.ToString());
-        writer.Flush();
+        animationUnit.AddFrame(stringWriter.ToString());
+        Flush();
 
         if (!props.Keep) {
           animationUnit.AddFrame(GetRemoveFrame());
@@ -297,8 +304,8 @@ namespace SimSharp.Visualization {
       writer.WriteEndArray();
 
       writer.WriteEndObject();
-      string frame = writer.ToString();
-      writer.Flush();
+      string frame = stringWriter.ToString();
+      Flush();
 
       return frame;
     }
@@ -311,8 +318,8 @@ namespace SimSharp.Visualization {
       writer.WriteValue(false);
 
       writer.WriteEndObject();
-      string frame = writer.ToString();
-      writer.Flush();
+      string frame = stringWriter.ToString();
+      Flush();
 
       return frame;
     }
@@ -343,6 +350,12 @@ namespace SimSharp.Visualization {
       }
 
       return interpolation;
+    }
+
+    private void Flush() {
+      writer.Flush();
+      StringBuilder sb = stringWriter.GetStringBuilder();
+      sb.Remove(0, sb.Length);
     }
 
     // incl. start, excl. stop

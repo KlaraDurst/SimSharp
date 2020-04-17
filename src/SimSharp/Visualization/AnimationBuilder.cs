@@ -119,7 +119,7 @@ namespace SimSharp.Visualization {
     }
 
     private void WriteJson() {
-      File.WriteAllText(writer.ToString(), Props.Target);
+      File.WriteAllText(Props.Target, stringWriter.ToString());
     }
   }
 }

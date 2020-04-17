@@ -87,6 +87,16 @@ namespace SimSharp {
       Logger = Console.Out;
       FillAnimation = false;
       AnimationBuilder = new AnimationBuilder(animationBuilderProps);
+
+      RunStarted += (o, e) => {
+        if (FillAnimation)
+          AnimationBuilder.StartBuilding();
+      };
+
+      RunFinished += (o, e) => {
+        if (FillAnimation)
+          AnimationBuilder.StopBuilding();
+      };
     }
 
     public double ToDouble(TimeSpan span) {
@@ -217,8 +227,6 @@ namespace SimSharp {
         stopEvent.AddCallback(StopSimulation);
       }
       OnRunStarted();
-      if (FillAnimation)
-        AnimationBuilder.StartBuilding();
       try {
         var stop = ScheduleQ.Count == 0 || _stop.IsCancellationRequested;
         while (!stop) {
@@ -227,8 +235,6 @@ namespace SimSharp {
         }
       } catch (StopSimulationException e) { OnRunFinished(); return e.Value; }
       OnRunFinished();
-      if (FillAnimation)
-        AnimationBuilder.StopBuilding();
       if (stopEvent == null) return null;
       if (!_stop.IsCancellationRequested && !stopEvent.IsTriggered) throw new InvalidOperationException("No scheduled events left but \"until\" event was not triggered.");
       return stopEvent.Value;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SimSharp.Visualization {
   public class AnimationBuilderProps {
@@ -12,7 +13,7 @@ namespace SimSharp.Visualization {
     public AnimationBuilderProps() : this("Visualization") { }
     public AnimationBuilderProps(string name) : this(name, 0.25) { }
     public AnimationBuilderProps(string name, string target) : this(name, 0.25, target) { }
-    public AnimationBuilderProps(string name, double timeStep) : this(name, timeStep, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName) { }
+    public AnimationBuilderProps(string name, double timeStep) : this(name, timeStep, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName + @"\" + Regex.Replace(name, @"\s+", "") + ".json") { }
     public AnimationBuilderProps(string name, double timeStep, string target) {
       if (timeStep > 1)
         throw new ArgumentException("The time lapsed between each pair of consecutive frames can not be more than 1 second.");

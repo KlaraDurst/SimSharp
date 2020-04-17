@@ -68,17 +68,17 @@ namespace SimSharp {
     public AnimationBuilder AnimationBuilder { get; }
 
     public Simulation() : this(new DateTime(1970, 1, 1)) { }
-    public Simulation(AnimationBuilderProps animationProperties) : this(new DateTime(1970, 1, 1), animationProperties) { }
+    public Simulation(AnimationBuilderProps animationBuilderProps) : this(new DateTime(1970, 1, 1), animationBuilderProps) { }
     public Simulation(TimeSpan? defaultStep) : this(new DateTime(1970, 1, 1), defaultStep) { }
-    public Simulation(AnimationBuilderProps animationProperties, TimeSpan? defaultStep) : this(new DateTime(1970, 1, 1), animationProperties, defaultStep) { }
+    public Simulation(AnimationBuilderProps animationBuilderProps, TimeSpan? defaultStep) : this(new DateTime(1970, 1, 1), animationBuilderProps, defaultStep) { }
     public Simulation(int randomSeed, TimeSpan? defaultStep = null) : this(new DateTime(1970, 1, 1), randomSeed, defaultStep) { }
-    public Simulation(int randomSeed, AnimationBuilderProps animationProperties, TimeSpan? defaultStep = null) : this(new DateTime(1970, 1, 1), randomSeed, animationProperties, defaultStep) { }
+    public Simulation(int randomSeed, AnimationBuilderProps animationBuilderProps, TimeSpan? defaultStep = null) : this(new DateTime(1970, 1, 1), randomSeed, animationBuilderProps, defaultStep) { }
     public Simulation(DateTime initialDateTime, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, new AnimationBuilderProps(), defaultStep) { }
-    public Simulation(DateTime initialDateTime, AnimationBuilderProps animationProperties, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, animationProperties, defaultStep) { }
+    public Simulation(DateTime initialDateTime, AnimationBuilderProps animationBuilderProps, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, animationBuilderProps, defaultStep) { }
     public Simulation(DateTime initialDateTime, int randomSeed, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, new AnimationBuilderProps(), defaultStep) { }
-    public Simulation(DateTime initialDateTime, int randomSeed, AnimationBuilderProps animationProperties, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, animationProperties, defaultStep) { }
+    public Simulation(DateTime initialDateTime, int randomSeed, AnimationBuilderProps animationBuilderProps, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, animationBuilderProps, defaultStep) { }
     public Simulation(IRandom random, DateTime initialDateTime, TimeSpan? defaultStep = null) : this(random, initialDateTime, new AnimationBuilderProps(), defaultStep) { }
-    public Simulation(IRandom random, DateTime initialDateTime, AnimationBuilderProps animationProperties, TimeSpan? defaultStep = null) {
+    public Simulation(IRandom random, DateTime initialDateTime, AnimationBuilderProps animationBuilderProps, TimeSpan? defaultStep = null) {
       DefaultTimeStepSeconds = (defaultStep ?? TimeSpan.FromSeconds(1)).Duration().TotalSeconds;
       StartDate = initialDateTime;
       Now = initialDateTime;
@@ -86,7 +86,7 @@ namespace SimSharp {
       ScheduleQ = new EventQueue(InitialMaxEvents);
       Logger = Console.Out;
       FillAnimation = false;
-      AnimationBuilder = new AnimationBuilder(animationProperties);
+      AnimationBuilder = new AnimationBuilder(animationBuilderProps);
     }
 
     public double ToDouble(TimeSpan span) {

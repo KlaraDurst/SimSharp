@@ -46,8 +46,6 @@ namespace SimSharp.Visualization {
     }
 
     private Animation(string name, Shape type, DateTime time0, DateTime time1, Simulation env) {
-      CheckTime(time0, time1);
-
       Name = name;
       Type = type;
       this.env = env;
@@ -55,6 +53,8 @@ namespace SimSharp.Visualization {
       this.writer = new JsonTextWriter(stringWriter);
       this.propsList = new SortedList<DateTime, AnimationProps>();
       this.units = new List<AnimationUnit>();
+
+      CheckTime(time0, time1);
     }
     #endregion
 
@@ -239,7 +239,7 @@ namespace SimSharp.Visualization {
     private void CheckTime(DateTime time0, DateTime time1) {
       if (time0 > time1)
         throw new ArgumentException("time1 must be after time0.");
-      if ((time1 - time0).TotalMilliseconds < 1000)
+      if (!time0.Equals(time1) && (time1 - time0).TotalMilliseconds < 1000)
         throw new ArgumentException("the difference between time0 and time1 must be greater than or equal to 1 second.");
       if (time0 > env.Now)
         throw new ArgumentException("time0 can not be in the past");

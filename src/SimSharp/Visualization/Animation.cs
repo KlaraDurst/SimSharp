@@ -274,21 +274,30 @@ namespace SimSharp.Visualization {
       if (propsList.Count < 2) {
         writer.WritePropertyName("type");
         writer.WriteValue(Type.ToString());
-      }
 
-      if (propsList.Count >= 2 && propsList.Values[propsList.Count - 2].FillColor != props.FillColor) {
         writer.WritePropertyName("fillColor");
         writer.WriteValue(props.FillColor);
-      }
 
-      if (propsList.Count >= 2 && propsList.Values[propsList.Count - 2].LineColor != props.LineColor) {
         writer.WritePropertyName("lineColor");
         writer.WriteValue(props.LineColor);
-      }
 
-      if (propsList.Count >= 2 && propsList.Values[propsList.Count - 2].LineWidth != props.LineWidth) {
         writer.WritePropertyName("lineWidth");
         writer.WriteValue(props.LineWidth);
+      } else {
+        if (propsList.Values[propsList.Count - 2].FillColor != props.FillColor) {
+          writer.WritePropertyName("fillColor");
+          writer.WriteValue(props.FillColor);
+        }
+
+        if (propsList.Values[propsList.Count - 2].LineColor != props.LineColor) {
+          writer.WritePropertyName("lineColor");
+          writer.WriteValue(props.LineColor);
+        }
+
+        if (propsList.Values[propsList.Count - 2].LineWidth != props.LineWidth) {
+          writer.WritePropertyName("lineWidth");
+          writer.WriteValue(props.LineWidth);
+        }
       }
 
       if (!currVisible) {

@@ -334,7 +334,7 @@ namespace SimSharp.Visualization {
     }
 
     private IEnumerable<List<int>> GetInterpolation(int[] start, int[] stop, int frameNumber) {
-      double interval = 1 / frameNumber;
+      double interval = 1 / Convert.ToDouble(frameNumber);
       List<List<int>> interpolation = new List<List<int>>(frameNumber);
 
       for (int i = 0; i < frameNumber; i++) {

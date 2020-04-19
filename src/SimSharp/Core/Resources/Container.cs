@@ -97,6 +97,22 @@ namespace SimSharp {
       return whenChange;
     }
 
+    public bool PutBy(Process process) {
+      foreach (ContainerPut put in PutQueue) {
+        if (put.Owner == process)
+          return true;
+      }
+      return false;
+    }
+
+    public bool GetBy(Process process) {
+      foreach (ContainerGet get in GetQueue) {
+        if (get.Owner == process)
+          return true;
+      }
+      return false;
+    }
+
     protected virtual void DoPut(ContainerPut put) {
       if (Capacity - Level >= put.Amount) {
         PutWaitingTime?.Add(Environment.ToDouble(Environment.Now - put.Time));

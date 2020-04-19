@@ -23,8 +23,6 @@ namespace SimSharp {
 
     public int Remaining { get { return Capacity - InUse; } }
 
-    public int Requests { get { return RequestQueue.Count; } }
-
     protected Simulation Environment { get; private set; }
 
     protected LinkedList<Request> RequestQueue { get; private set; }
@@ -94,6 +92,14 @@ namespace SimSharp {
       var whenChange = new Event(Environment);
       WhenChangeQueue.Add(whenChange);
       return whenChange;
+    }
+
+    public bool UsedBy(Process process) {
+      foreach (Request user in Users) {
+        if (user.Owner == process)
+          return true;
+      }
+      return false;
     }
 
     protected virtual void DisposeCallback(Event @event) {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimSharp.Visualization.Shapes {
+namespace SimSharp.Visualization.Push.Shapes {
   public class Rectangle {
     public int X { get; }
     public int Y { get; }

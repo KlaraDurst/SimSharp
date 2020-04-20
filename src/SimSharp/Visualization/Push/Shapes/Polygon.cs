@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SimSharp.Visualization.Shapes {
+namespace SimSharp.Visualization.Push.Shapes {
   public class Polygon {
     public List<int> XList { get; }
     public List<int> YList { get; }

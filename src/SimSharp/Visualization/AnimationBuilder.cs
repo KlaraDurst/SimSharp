@@ -10,11 +10,11 @@ namespace SimSharp.Visualization {
 
     private StringWriter stringWriter;
     private JsonTextWriter writer;
-    private List<Animation> animations;
+    private List<FramesProvider> providers;
 
     public AnimationBuilder(AnimationBuilderProps props) {
       Props = props;
-      this.animations = new List<Animation>();
+      this.providers = new List<FramesProvider>();
     }
 
     public void StartBuilding() {
@@ -33,19 +33,19 @@ namespace SimSharp.Visualization {
       writer.WriteStartArray();
     }
 
-    public void AddAnimation(Animation animation) {
-      animations.Add(animation);
+    public void AddProvider(FramesProvider provider) {
+      providers.Add(provider);
     }
 
     public void Step(DateTime prior, DateTime now) {
       int totalFrameNumber = Convert.ToInt32((now - prior).TotalSeconds / Props.TimeStep);
 
       if (totalFrameNumber > 0) {
-        if (animations.Count > 0) {
+        if (providers.Count > 0) {
           SortedList<DateTime, List<IEnumerator<string>>> frames = new SortedList<DateTime, List<IEnumerator<string>>>();
 
-          foreach (Animation animation in animations) {
-            List<AnimationUnit> units = animation.FramesFromTo(prior, now);
+          foreach (FramesProvider provider in providers) {
+            List<AnimationUnit> units = provider.FramesFromTo(prior, now);
 
             if (units.Count > 0) {
               foreach (AnimationUnit unit in units) {

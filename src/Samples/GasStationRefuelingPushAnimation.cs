@@ -7,7 +7,8 @@
 
 using System;
 using System.Collections.Generic;
-using SimSharp.Visualization.Shapes;
+using SimSharp.Visualization.Push.Shapes;
+using SimSharp.Visualization.Push;
 using SimSharp.Visualization;
 
 namespace SimSharp.Samples {

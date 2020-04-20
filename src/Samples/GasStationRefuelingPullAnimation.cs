@@ -7,8 +7,8 @@
 
 using System;
 using System.Collections.Generic;
-using SimSharp.Visualization.Shapes;
 using SimSharp.Visualization;
+using SimSharp.Visualization.Pull;
 
 namespace SimSharp.Samples {
   public class GasStationRefuelingPullAnimation {
@@ -57,7 +57,15 @@ namespace SimSharp.Samples {
 
       // Car visualization (at gas station)
       Process thisProcess = env.ActiveProcess;
-      RectangleAnimation fullCarAnimation = env.AnimateRectangle(name, Convert.ToInt32((gasStation.InUse < 1 ? 275 : 475) + litersRequired / 2), 275, Convert.ToInt32(litersRequired), CarHeight, "white", "yellow", 1, t => gasStation.UsedBy(thisProcess));
+      RectangleAnimation fullCarAnimation = env.AnimateRectangle(
+        name, 
+        Convert.ToInt32((gasStation.InUse < 1 ? 275 : 475) + litersRequired / 2), 
+        275, 
+        Convert.ToInt32(litersRequired), 
+        CarHeight, 
+        "white", 
+        "yellow", 1,
+        (Func<int, bool>) (t => gasStation.UsedBy(thisProcess)));
 
       using (var req = gasStation.Request()) {
         var start = env.Now;
@@ -73,34 +81,34 @@ namespace SimSharp.Samples {
           // First car tank fill visualization
           RectangleAnimation tempCarAnimation = env.AnimateRectangle(
             name + "Tank",
-            t => {
-              double i = 1 / firstRefuelDuration.TotalSeconds() / env.AnimationBuilder.Props.TimeStep * t;
-              return Convert.ToInt32((1 - i) * (fullCarAnimation.X - fullCarAnimation.Width / 2) + i * level / 2);
-            },
+            (Func<int, int>) (t => {
+              double i = 1 / (firstRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep) * t;
+              return Convert.ToInt32((1 - i) * (fullCarAnimation.X.Value - fullCarAnimation.Width.Value / 2) + i * level / 2);
+            }),
             275,
-            t => {
-              double i = 1 / firstRefuelDuration.TotalSeconds() / env.AnimationBuilder.Props.TimeStep * t;
+            (Func<int, int>) (t => {
+              double i = 1 / firstRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep * t;
               return Convert.ToInt32((1 - i) * 1 + i * level);
-            },
+            }),
             CarHeight,
             "yellow",
             "yellow",
             1,
-            t => gasStation.UsedBy(thisProcess));
+            (Func<int, bool>) (t => gasStation.UsedBy(thisProcess)));
 
           yield return env.Timeout(firstRefuelDuration);
           yield return fuelPump.Get(litersRequired - level); // wait for the rest
 
           // Second car tank fill visualization
-          tempCarAnimation.X = t => {
-            double i = 1 / secondRefuelDuration.TotalSeconds() / env.AnimationBuilder.Props.TimeStep * t;
-            return Convert.ToInt32((1 - i) * (fullCarAnimation.X - fullCarAnimation.Width / 2 + level / 2) + i * litersRequired / 2);
-          };
+          tempCarAnimation.X = (Func<int, int>) (t => {
+            double i = 1 / secondRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep * t;
+            return Convert.ToInt32((1 - i) * (fullCarAnimation.X.Value - fullCarAnimation.Width.Value / 2 + level / 2) + i * litersRequired / 2);
+          });
 
-          tempCarAnimation.Width = t => {
-            double i = 1 / secondRefuelDuration.TotalSeconds() / env.AnimationBuilder.Props.TimeStep * t;
+          tempCarAnimation.Width = (Func<int, int>) (t => {
+            double i = 1 / secondRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep * t;
             return Convert.ToInt32((1 - i) * level + i * litersRequired);
-          };
+          });
 
           yield return env.Timeout(secondRefuelDuration);
         } else {
@@ -109,21 +117,21 @@ namespace SimSharp.Samples {
 
           // Car tank fill visualization
           env.AnimateRectangle(
-            name + "Tank", 
-            t => {
-              double i = 1 / refuelDuration.TotalSeconds() / env.AnimationBuilder.Props.TimeStep * t;
-              return Convert.ToInt32((1 - i) * (fullCarAnimation.X - fullCarAnimation.Width / 2) + i * litersRequired / 2);
-            }, 
-            275, 
-            t => {
-              double i = 1 / refuelDuration.TotalSeconds() / env.AnimationBuilder.Props.TimeStep * t;
+            name + "Tank",
+            (Func<int, int>) (t => {
+              double i = 1 / refuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep * t;
+              return Convert.ToInt32((1 - i) * (fullCarAnimation.X.Value - fullCarAnimation.Width.Value / 2) + i * litersRequired / 2);
+            }), 
+            275,
+            (Func<int, int>) (t => {
+              double i = 1 / refuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep * t;
               return Convert.ToInt32((1 - i) * 1 + i * litersRequired);
-            }, 
+            }), 
             CarHeight, 
             "yellow", 
             "yellow", 
-            1, 
-            t => gasStation.UsedBy(thisProcess));
+            1,
+            (Func<int, bool>) (t => gasStation.UsedBy(thisProcess)));
 
           yield return env.Timeout(refuelDuration);
         }
@@ -149,7 +157,16 @@ namespace SimSharp.Samples {
     private IEnumerable<Event> TankTruck(string name, Simulation env, Container fuelPump) {
       // Tank truck visualization
       Process thisProcess = env.ActiveProcess;
-      env.AnimateRectangle(name, 600, 650, 50, 100, "blue", "blue", 1, t => fuelPump.PutBy(thisProcess));
+      env.AnimateRectangle(
+        name, 
+        600, 
+        650, 
+        50, 
+        100, 
+        "blue", 
+        "blue", 
+        1, 
+        (Func<int, bool>)(t => fuelPump.PutBy(thisProcess)));
 
       // Arrives at the gas station after a certain delay and refuels it.
       yield return env.Timeout(TankTruckTime);
@@ -194,7 +211,16 @@ namespace SimSharp.Samples {
 
       // Fuel pump visualization
       env.AnimateRectangle("fuelPump", 400, 650, 250, GasStationSize, "white", "black", 1, true);
-      env.AnimateRectangle("fuelPumpTank", 400, t => Convert.ToInt32(450 + fuelPump.Level / 2), 250, t => Convert.ToInt32(fuelPump.Level), "black", "black", 1, true);
+      env.AnimateRectangle(
+        "fuelPumpTank", 
+        400, 
+        (Func<int, int>)(t => Convert.ToInt32(450 + fuelPump.Level / 2)), 
+        250, 
+        (Func<int, int>)(t => Convert.ToInt32(fuelPump.Level)), 
+        "black", 
+        "black", 
+        1, 
+        true);
 
       env.Process(GasStationControl(env, fuelPump));
       env.Process(CarGenerator(env, gasStation, fuelPump));

@@ -4,10 +4,10 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using SimSharp.Visualization.Shapes;
+using SimSharp.Visualization.Push.Shapes;
 
-namespace SimSharp.Visualization {
-  public class Animation {
+namespace SimSharp.Visualization.Push {
+  public class Animation : FramesProvider {
     public enum Shape { rectangle, ellipse, polygon }
 
     public string Name { get; }
@@ -367,7 +367,6 @@ namespace SimSharp.Visualization {
       sb.Remove(0, sb.Length);
     }
 
-    // incl. start, excl. stop
     public List<AnimationUnit> FramesFromTo(DateTime start, DateTime stop) {
       List<AnimationUnit> affectedUnits = new List<AnimationUnit>();
       

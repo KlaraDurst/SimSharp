@@ -12,7 +12,10 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using SimSharp.Visualization;
-using SimSharp.Visualization.Shapes;
+using SimSharp.Visualization.Pull;
+using SimSharp.Visualization.Pull.Attributes;
+using SimSharp.Visualization.Push;
+using SimSharp.Visualization.Push.Shapes;
 
 namespace SimSharp {
   /// <summary>
@@ -817,20 +820,26 @@ namespace SimSharp {
 
     public Animation Animate(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
       Animation animation = new Animation(name, rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep, this);
-      AnimationBuilder.AddAnimation(animation);
+      AnimationBuilder.AddProvider(animation);
       return animation;
     }
 
     public Animation Animate(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
       Animation animation = new Animation(name, ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep, this);
-      AnimationBuilder.AddAnimation(animation);
+      AnimationBuilder.AddProvider(animation);
       return animation;
     }
 
     public Animation Animate(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
       Animation animation = new Animation(name, polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep, this);
-      AnimationBuilder.AddAnimation(animation);
+      AnimationBuilder.AddProvider(animation);
       return animation;
+    }
+
+    public RectangleAnimation AnimateRectangle(string name, IntAttribute x, IntAttribute y, IntAttribute width, IntAttribute height, StringAttribute fillColor, StringAttribute lineColor, IntAttribute lineWidth, BoolAttribute visible) {
+      RectangleAnimation rectangleAnimation = new RectangleAnimation(name, x, y, width, height, fillColor, lineColor, lineWidth, visible, this);
+      AnimationBuilder.AddProvider(rectangleAnimation);
+      return rectangleAnimation;
     }
     #endregion
   }

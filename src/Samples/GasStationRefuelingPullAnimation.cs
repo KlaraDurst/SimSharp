@@ -83,7 +83,7 @@ namespace SimSharp.Samples {
             name + "Tank",
             (Func<int, int>) (t => {
               double i = 1 / (firstRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep) * t;
-              return Convert.ToInt32((1 - i) * (fullCarAnimation.X.Value - fullCarAnimation.Width.Value / 2) + i * level / 2);
+              return Convert.ToInt32((1 - i) * (fullCarAnimation.GetX().Value - fullCarAnimation.GetWidth().Value / 2) + i * level / 2);
             }),
             275,
             (Func<int, int>) (t => {
@@ -100,15 +100,15 @@ namespace SimSharp.Samples {
           yield return fuelPump.Get(litersRequired - level); // wait for the rest
 
           // Second car tank fill visualization
-          tempCarAnimation.X = (Func<int, int>) (t => {
+          tempCarAnimation.SetX((Func<int, int>) (t => {
             double i = 1 / secondRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep * t;
-            return Convert.ToInt32((1 - i) * (fullCarAnimation.X.Value - fullCarAnimation.Width.Value / 2 + level / 2) + i * litersRequired / 2);
-          });
+            return Convert.ToInt32((1 - i) * (fullCarAnimation.GetX().Value - fullCarAnimation.GetWidth().Value / 2 + level / 2) + i * litersRequired / 2);
+          }));
 
-          tempCarAnimation.Width = (Func<int, int>) (t => {
+          tempCarAnimation.SetWidth((Func<int, int>) (t => {
             double i = 1 / secondRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep * t;
             return Convert.ToInt32((1 - i) * level + i * litersRequired);
-          });
+          }));
 
           yield return env.Timeout(secondRefuelDuration);
         } else {
@@ -120,7 +120,7 @@ namespace SimSharp.Samples {
             name + "Tank",
             (Func<int, int>) (t => {
               double i = 1 / refuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep * t;
-              return Convert.ToInt32((1 - i) * (fullCarAnimation.X.Value - fullCarAnimation.Width.Value / 2) + i * litersRequired / 2);
+              return Convert.ToInt32((1 - i) * (fullCarAnimation.GetX().Value - fullCarAnimation.GetWidth().Value / 2) + i * litersRequired / 2);
             }), 
             275,
             (Func<int, int>) (t => {

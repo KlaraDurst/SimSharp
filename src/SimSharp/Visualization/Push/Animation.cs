@@ -284,17 +284,19 @@ namespace SimSharp.Visualization.Push {
         writer.WritePropertyName("lineWidth");
         writer.WriteValue(props.LineWidth);
       } else {
-        if (propsList.Values[propsList.Count - 2].FillColor != props.FillColor) {
+        AnimationProps prev = propsList.Values[propsList.Count - 2];
+
+        if (prev.FillColor != props.FillColor) {
           writer.WritePropertyName("fillColor");
           writer.WriteValue(props.FillColor);
         }
 
-        if (propsList.Values[propsList.Count - 2].LineColor != props.LineColor) {
+        if (prev.LineColor != props.LineColor) {
           writer.WritePropertyName("lineColor");
           writer.WriteValue(props.LineColor);
         }
 
-        if (propsList.Values[propsList.Count - 2].LineWidth != props.LineWidth) {
+        if (prev.LineWidth != props.LineWidth) {
           writer.WritePropertyName("lineWidth");
           writer.WriteValue(props.LineWidth);
         }

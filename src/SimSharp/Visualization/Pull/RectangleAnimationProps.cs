@@ -27,5 +27,25 @@ namespace SimSharp.Visualization.Pull {
       LineWidth = lineWidth;
       Visible = visible;
     }
+
+    public bool AllValues() {
+      if (X.Function != null)
+        return false;
+      if (Y.Function != null)
+        return false;
+      if (Width.Function != null)
+        return false;
+      if (Height.Function != null)
+        return false;
+      if (FillColor.Function != null)
+        return false;
+      if (LineColor.Function != null)
+        return false;
+      if (LineWidth.Function != null)
+        return false;
+      if (Visible.Function != null)
+        return false;
+      return true;
+    }
   }
 }

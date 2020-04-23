@@ -15,6 +15,13 @@ namespace SimSharp.Visualization.Pull.Attributes {
       Function = function;
     }
 
+    public int GetValueAt(int t) {
+      if (Function == null)
+        return Value;
+      else
+        return Function(t);
+    }
+
     public static implicit operator IntAttribute(int value) {
       return new IntAttribute(value);
     }

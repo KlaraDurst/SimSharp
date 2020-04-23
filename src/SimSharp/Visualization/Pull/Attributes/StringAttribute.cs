@@ -15,6 +15,13 @@ namespace SimSharp.Visualization.Pull.Attributes {
       Function = function;
     }
 
+    public string GetValueAt(int t) {
+      if (Function == null)
+        return Value;
+      else
+        return Function(t);
+    }
+
     public static implicit operator StringAttribute(string value) {
       return new StringAttribute(value);
     }

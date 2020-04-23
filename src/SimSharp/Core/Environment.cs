@@ -269,9 +269,9 @@ namespace SimSharp {
       DateTime prior = Now;
       Now = next.PrimaryPriority;
       evt = next.Event;
-      evt.Process();
       if (FillAnimation)
         AnimationBuilder.Step(prior, Now);
+      evt.Process();
       ProcessedEvents++;
     }
 

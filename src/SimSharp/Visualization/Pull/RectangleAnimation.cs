@@ -102,23 +102,37 @@ namespace SimSharp.Visualization.Pull {
 
         writer.WritePropertyName("fillColor");
         writer.WriteValue(props.FillColor.Value);
-        props.FillColor.CurrValue = props.FillColor.Value;
 
         writer.WritePropertyName("lineColor");
         writer.WriteValue(props.LineColor.Value);
-        props.LineColor.CurrValue = props.LineColor.Value;
 
         writer.WritePropertyName("lineWidth");
         writer.WriteValue(props.LineWidth.Value);
-        props.LineWidth.CurrValue = props.LineWidth.Value;
 
         writer.WritePropertyName("visible");
         writer.WriteValue(props.Visible.Value);
-        props.Visible.CurrValue = props.Visible.Value;
       } else {
         RectangleAnimationProps prev = propsList[propsList.Count - 2];
 
-        // TODO
+        if (prev.FillColor.CurrValue != props.FillColor.Value) {
+          writer.WritePropertyName("fillColor");
+          writer.WriteValue(props.FillColor.Value);
+        }
+
+        if (prev.LineColor.CurrValue != props.LineColor.Value) {
+          writer.WritePropertyName("lineColor");
+          writer.WriteValue(props.LineColor.Value);
+        }
+
+        if (prev.LineWidth.CurrValue != props.LineWidth.Value) {
+          writer.WritePropertyName("lineWidth");
+          writer.WriteValue(props.LineWidth.Value);
+        }
+
+        if (prev.Visible.CurrValue != props.Visible.Value) {
+          writer.WritePropertyName("visible");
+          writer.WriteValue(props.Visible.Value);
+        }
       }
 
       writer.WritePropertyName("t");
@@ -132,11 +146,6 @@ namespace SimSharp.Visualization.Pull {
       string frame = stringWriter.ToString();
       Flush();
 
-      props.X.CurrValue = props.X.Value;
-      props.Y.CurrValue = props.Y.Value;
-      props.Width.CurrValue = props.Width.Value;
-      props.Height.CurrValue = props.Height.Value;
-
       return frame;
     }
 
@@ -145,7 +154,6 @@ namespace SimSharp.Visualization.Pull {
         if (propsList.Count < 2 || !attr.Value.Equals(last)) {
           writer.WritePropertyName(name);
           writer.WriteValue(attr.Value);
-          attr.CurrValue = attr.Value;
 
           string attrStr = stringWriter.ToString();
           Flush();
@@ -231,7 +239,6 @@ namespace SimSharp.Visualization.Pull {
           writer.WriteStartArray();
           for (int i = 0; i < attr.Length; i++) {
             writer.WriteValue(attr[i].Value);
-            attr[i].CurrValue = attr[i].Value;
           }
           writer.WriteEndArray();
           
@@ -314,12 +321,11 @@ namespace SimSharp.Visualization.Pull {
       } else {
         RectangleAnimationProps prev = propsList[propsList.Count - 2];
 
-        // TODO
-        prevTrans = null;
-        prevFillColor = null;
-        prevLineColor = null;
-        prevLineWidth = default;
-        prevVisible = default;
+        prevTrans = new int[] { prev.X.CurrValue, prev.Y.CurrValue, prev.Width.CurrValue, prev.Height.CurrValue };
+        prevFillColor = prev.FillColor.CurrValue;
+        prevLineColor = prev.LineColor.CurrValue;
+        prevLineWidth = prev.LineWidth.CurrValue;
+        prevVisible = prev.Visible.CurrValue;
       }
 
       return new List<IEnumerator<string>>(8) {
@@ -337,6 +343,7 @@ namespace SimSharp.Visualization.Pull {
       sb.Remove(0, sb.Length);
     }
 
+    // TODO: what to do with empty CurrValues before adding props to propsList
     // TODO: what to do with empty frames
     public List<AnimationUnit> FramesFromTo(DateTime start, DateTime stop) {
       RectangleAnimationProps props = propsList[propsList.Count - 1];

@@ -10,6 +10,7 @@ namespace SimSharp.Visualization.Pull {
 
     public AnimationAttribute(T value) {
       Value = value;
+      CurrValue = Value;
     }
 
     public AnimationAttribute(Func<int, T> function) {

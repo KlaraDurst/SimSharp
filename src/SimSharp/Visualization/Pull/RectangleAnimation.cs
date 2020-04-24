@@ -111,6 +111,13 @@ namespace SimSharp.Visualization.Pull {
 
         writer.WritePropertyName("visible");
         writer.WriteValue(props.Visible.Value);
+
+        writer.WritePropertyName("t");
+        writer.WriteStartArray();
+        foreach (int t in new int[] { props.X.Value, props.Y.Value, props.Width.Value, props.Height.Value }) {
+          writer.WriteValue(t);
+        }
+        writer.WriteEndArray();
       } else {
         RectangleAnimationProps prev = propsList[propsList.Count - 2];
 
@@ -133,20 +140,28 @@ namespace SimSharp.Visualization.Pull {
           writer.WritePropertyName("visible");
           writer.WriteValue(props.Visible.Value);
         }
-      }
 
-      writer.WritePropertyName("t");
-      writer.WriteStartArray();
-      foreach (int t in new int[] { props.X.Value, props.Y.Value, props.Width.Value, props.Height.Value }) {
-        writer.WriteValue(t);
+        int[] transformation = new int[] { props.X.Value, props.Y.Value, props.Width.Value, props.Height.Value };
+        int[] prevTransformation = new int[] { prev.X.Value, prev.Y.Value, prev.Width.Value, prev.Height.Value };
+
+        if (!AllEqual(transformation, prevTransformation)) {
+          writer.WritePropertyName("t");
+          writer.WriteStartArray();
+          foreach (int t in transformation) {
+            writer.WriteValue(t);
+          }
+          writer.WriteEndArray();
+        }
       }
-      writer.WriteEndArray();
 
       writer.WriteEndObject();
       string frame = stringWriter.ToString();
       Flush();
 
-      return frame;
+      if (frame.Length <= Name.Length + 5) // json object is empty
+        return String.Empty;
+      else
+        return frame;
     }
 
     private IEnumerator<string> GetEnum<T>(AnimationAttribute<T> attr, string name, T last, DateTime start, DateTime stop) {
@@ -206,20 +221,6 @@ namespace SimSharp.Visualization.Pull {
       bool AllValues() {
         for (int i = 0; i < attr.Length; i++) {
           if (attr[i].Function != null)
-            return false;
-        }
-        return true;
-      }
-
-      bool AllEqual(T[] a, T[] b) {
-        if (b == null)
-          return true;
-
-        if (a.Length != b.Length)
-          return false;
-
-        for (int i = 0; i < a.Length; i++) {
-          if (!a[i].Equals(b[i]))
             return false;
         }
         return true;
@@ -305,6 +306,20 @@ namespace SimSharp.Visualization.Pull {
       }
     }
 
+    private bool AllEqual<T>(T[] a, T[] b) {
+      if (b == null)
+        return true;
+
+      if (a.Length != b.Length)
+        return false;
+
+      for (int i = 0; i < a.Length; i++) {
+        if (!a[i].Equals(b[i]))
+          return false;
+      }
+      return true;
+    }
+
     private List<IEnumerator<string>> GetAttrEnums(RectangleAnimationProps props, DateTime start, DateTime stop) {
       int[] prevTrans;
       string prevFillColor;
@@ -343,7 +358,6 @@ namespace SimSharp.Visualization.Pull {
       sb.Remove(0, sb.Length);
     }
 
-    // TODO: what to do with empty CurrValues before adding props to propsList
     // TODO: what to do with empty frames
     public List<AnimationUnit> FramesFromTo(DateTime start, DateTime stop) {
       RectangleAnimationProps props = propsList[propsList.Count - 1];

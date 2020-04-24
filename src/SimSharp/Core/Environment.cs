@@ -13,7 +13,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using SimSharp.Visualization;
 using SimSharp.Visualization.Pull;
-using SimSharp.Visualization.Pull.Attributes;
 using SimSharp.Visualization.Push;
 using SimSharp.Visualization.Push.Shapes;
 
@@ -836,7 +835,7 @@ namespace SimSharp {
       return animation;
     }
 
-    public RectangleAnimation AnimateRectangle(string name, IntAttribute x, IntAttribute y, IntAttribute width, IntAttribute height, StringAttribute fillColor, StringAttribute lineColor, IntAttribute lineWidth, BoolAttribute visible) {
+    public RectangleAnimation AnimateRectangle(string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fillColor, AnimationAttribute<string> lineColor, AnimationAttribute<int> lineWidth, AnimationAttribute<bool> visible) {
       RectangleAnimation rectangleAnimation = new RectangleAnimation(name, x, y, width, height, fillColor, lineColor, lineWidth, visible, this);
       AnimationBuilder.AddProvider(rectangleAnimation);
       return rectangleAnimation;

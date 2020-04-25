@@ -159,7 +159,7 @@ namespace SimSharp.Visualization.Pull {
       Flush();
 
       if (frame.Length <= Name.Length + 5) // json object is empty
-        return String.Empty;
+        return string.Empty;
       else
         return frame;
     }
@@ -173,17 +173,39 @@ namespace SimSharp.Visualization.Pull {
           string attrStr = stringWriter.ToString();
           Flush();
 
-          yield return attrStr;
+          return new List<string>(1) { attrStr }.GetEnumerator();
         }
-        yield return null;
+        return null;
       } else {
-        T prev = last;
-        int startFrameNumber = Convert.ToInt32((start - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
-        int stopFrameNumber = Convert.ToInt32((stop - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+        return GetEnumWithFunction(attr, name, last, start, stop);
+      }
+    }
 
-        // first frame
-        T curr = attr.Function(startFrameNumber);
-        if (propsList.Count < 2 || !curr.Equals(prev)) {
+    private IEnumerator<string> GetEnumWithFunction<T>(AnimationAttribute<T> attr, string name, T last, DateTime start, DateTime stop) {
+      T prev = last;
+      int startFrameNumber = Convert.ToInt32((start - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
+      int stopFrameNumber = Convert.ToInt32((stop - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+
+      // first frame
+      T curr = attr.Function(startFrameNumber);
+      if (propsList.Count < 2 || !curr.Equals(prev)) {
+        writer.WritePropertyName(name);
+        writer.WriteValue(curr);
+        attr.CurrValue = curr;
+
+        string attrStr = stringWriter.ToString();
+        Flush();
+        prev = curr;
+
+        yield return attrStr;
+      } else {
+        yield return string.Empty;
+      }
+
+      // rest of the frames
+      for (int i = startFrameNumber + 1; i <= stopFrameNumber; i++) {
+        curr = attr.Function(i);
+        if (!curr.Equals(prev)) {
           writer.WritePropertyName(name);
           writer.WriteValue(curr);
           attr.CurrValue = curr;
@@ -194,25 +216,7 @@ namespace SimSharp.Visualization.Pull {
 
           yield return attrStr;
         } else {
-          yield return String.Empty;
-        }
-
-        // rest of the frames
-        for (int i = startFrameNumber + 1; i <= stopFrameNumber; i++) {
-          curr = attr.Function(i);
-          if (!curr.Equals(prev)) {
-            writer.WritePropertyName(name);
-            writer.WriteValue(curr);
-            attr.CurrValue = curr;
-
-            string attrStr = stringWriter.ToString();
-            Flush();
-            prev = curr;
-
-            yield return attrStr;
-          } else {
-            yield return String.Empty;
-          }
+          yield return string.Empty;
         }
       }
     }
@@ -225,9 +229,6 @@ namespace SimSharp.Visualization.Pull {
         }
         return true;
       }
-
-      int startFrameNumber = Convert.ToInt32((start - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
-      int stopFrameNumber = Convert.ToInt32((stop - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
 
       if (AllValues()) {
         List<T> attrValues = new List<T>(attr.Length);
@@ -242,24 +243,57 @@ namespace SimSharp.Visualization.Pull {
             writer.WriteValue(attr[i].Value);
           }
           writer.WriteEndArray();
-          
+
           string attrStr = stringWriter.ToString();
           Flush();
 
-          yield return attrStr;
+          return new List<string>(1) { attrStr }.GetEnumerator();
         }
-        yield return null;
+        return null;
       } else {
-        T[] prev = last;
+        return GetTransformationEnumWithFunction(attr, last, start, stop);
+      }
+    }
 
-        // first frame
-        List<T> currList = new List<T>(attr.Length);
-        for (int j = 0; j < attr.Length; j++) {
-          currList.Add(attr[startFrameNumber].GetValueAt(startFrameNumber));
+    private IEnumerator<string> GetTransformationEnumWithFunction<T>(AnimationAttribute<T>[] attr, T[] last, DateTime start, DateTime stop) {
+      int startFrameNumber = Convert.ToInt32((start - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
+      int stopFrameNumber = Convert.ToInt32((stop - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+      T[] prev = last;
+
+      // first frame
+      List<T> currList = new List<T>(attr.Length);
+      for (int j = 0; j < attr.Length; j++) {
+        currList.Add(attr[startFrameNumber].GetValueAt(startFrameNumber));
+      }
+      T[] currArray = currList.ToArray();
+
+      if (propsList.Count < 2 || !AllEqual(currArray, prev)) {
+        writer.WritePropertyName("t");
+        writer.WriteStartArray();
+        for (int z = 0; z < attr.Length; z++) {
+          writer.WriteValue(currArray[z]);
+          attr[z].CurrValue = currArray[z];
         }
-        T[] currArray = currList.ToArray();
+        writer.WriteEndArray();
 
-        if (propsList.Count < 2 || !AllEqual(currArray, prev)) {
+        string attrStr = stringWriter.ToString();
+        Flush();
+        prev = currArray;
+
+        yield return attrStr;
+      } else {
+        yield return string.Empty;
+      }
+
+      // rest of the frames
+      for (int i = startFrameNumber + 1; i <= stopFrameNumber; i++) {
+        currList = new List<T>(attr.Length);
+        for (int j = 0; j < attr.Length; j++) {
+          currList.Add(attr[i].GetValueAt(i));
+        }
+        currArray = currList.ToArray();
+
+        if (!AllEqual(currArray, prev)) {
           writer.WritePropertyName("t");
           writer.WriteStartArray();
           for (int z = 0; z < attr.Length; z++) {
@@ -274,34 +308,7 @@ namespace SimSharp.Visualization.Pull {
 
           yield return attrStr;
         } else {
-          yield return String.Empty;
-        }
-
-        // rest of the frames
-        for (int i = startFrameNumber + 1; i <= stopFrameNumber; i++) {
-          currList = new List<T>(attr.Length);
-          for (int j = 0; j < attr.Length; j++) {
-            currList.Add(attr[i].GetValueAt(i));
-          }
-          currArray = currList.ToArray();
-
-          if (!AllEqual(currArray, prev)) {
-            writer.WritePropertyName("t");
-            writer.WriteStartArray();
-            for (int z = 0; z < attr.Length; z++) {
-              writer.WriteValue(currArray[z]);
-              attr[z].CurrValue = currArray[z];
-            }
-            writer.WriteEndArray();
-
-            string attrStr = stringWriter.ToString();
-            Flush();
-            prev = currArray;
-
-            yield return attrStr;
-          } else {
-            yield return String.Empty;
-          }
+          yield return string.Empty;
         }
       }
     }
@@ -342,14 +349,25 @@ namespace SimSharp.Visualization.Pull {
         prevLineWidth = prev.LineWidth.CurrValue;
         prevVisible = prev.Visible.CurrValue;
       }
+      List<IEnumerator<string>> enums = new List<IEnumerator<string>>(8);
 
-      return new List<IEnumerator<string>>(8) {
-          GetTransformationEnum(new AnimationAttribute<int>[] {props.X, props.Y, props.Width, props.Height}, prevTrans, start, stop),
-          GetEnum(props.FillColor, "fillColor", prevFillColor, start, stop),
-          GetEnum(props.LineColor, "lineColor", prevLineColor, start, stop),
-          GetEnum(props.LineWidth, "lineWidth", prevLineWidth, start, stop),
-          GetEnum(props.Visible, "visible", prevVisible, start, stop)
-      };
+      IEnumerator<string> transformationEnum = GetTransformationEnum(new AnimationAttribute<int>[] { props.X, props.Y, props.Width, props.Height }, prevTrans, start, stop);
+      if (transformationEnum != null)
+        enums.Add(transformationEnum);
+      IEnumerator<string> fillColorEnum = GetEnum(props.FillColor, "fillColor", prevFillColor, start, stop);
+      if (fillColorEnum != null)
+        enums.Add(fillColorEnum);
+      IEnumerator<string> lineColorEnum = GetEnum(props.LineColor, "lineColor", prevLineColor, start, stop);
+      if (lineColorEnum != null)
+        enums.Add(lineColorEnum);
+      IEnumerator<string> lineWidthEnum = GetEnum(props.LineWidth, "lineWidth", prevLineWidth, start, stop);
+      if (lineWidthEnum != null)
+        enums.Add(lineWidthEnum);
+      IEnumerator<string> visibleEnum = GetEnum(props.Visible, "visible", prevVisible, start, stop);
+      if (visibleEnum != null)
+        enums.Add(visibleEnum);
+
+      return enums;
     }
 
     private void Flush() {
@@ -361,15 +379,19 @@ namespace SimSharp.Visualization.Pull {
     // TODO: what to do with empty frames
     public List<AnimationUnit> FramesFromTo(DateTime start, DateTime stop) {
       RectangleAnimationProps props = propsList[propsList.Count - 1];
-      if (props.AllValues()) {
-        AnimationUnit unit = new AnimationUnit(start, start.AddSeconds(1), 1);
-        unit.AddFrame(GetValueInitFrame(props));
+      List<AnimationUnit> affectedUnits = new List<AnimationUnit>();
 
-        return new List<AnimationUnit>(1) { unit };
+      if (props.AllValues()) {
+        string frame = GetValueInitFrame(props);
+        if (!frame.Equals(string.Empty)) {
+          AnimationUnit unit = new AnimationUnit(start, start.AddSeconds(1), 1);
+          unit.AddFrame(frame);
+          affectedUnits.Add(unit);
+        }
+        return affectedUnits;
       } else {
         int frameNumber = Convert.ToInt32((stop - start).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
         AnimationUnit unit = new AnimationUnit(start, stop, frameNumber);
-        List<AnimationUnit> affectedUnits = new List<AnimationUnit>(1) { unit };
 
         List<IEnumerator<string>> attrEnums = GetAttrEnums(props, start, stop);
 
@@ -379,10 +401,7 @@ namespace SimSharp.Visualization.Pull {
           bool first = true;
 
           for (int j = attrEnums.Count - 1; j >= 0; j--) {
-            if (!attrEnums[j].MoveNext()) {
-              attrEnums.RemoveAt(j);
-              continue;
-            }
+            attrEnums[j].MoveNext();
             string attr = attrEnums[j].Current;
 
             if (!first)
@@ -398,6 +417,7 @@ namespace SimSharp.Visualization.Pull {
 
         RectangleAnimationProps newProps = new RectangleAnimationProps(props);
         propsList.Add(newProps);
+        affectedUnits.Add(unit);
         return affectedUnits;
       }
     }

@@ -66,6 +66,7 @@ namespace SimSharp {
     public TextWriter Logger { get; set; }
     public int ProcessedEvents { get; protected set; }
 
+    public bool AddFrameNumbers { get; protected set; }
     public bool FillAnimation { get; protected set; }
     public AnimationBuilder AnimationBuilder { get; }
 
@@ -87,6 +88,7 @@ namespace SimSharp {
       Random = random;
       ScheduleQ = new EventQueue(InitialMaxEvents);
       Logger = Console.Out;
+      AddFrameNumbers = false;
       FillAnimation = false;
       AnimationBuilder = new AnimationBuilder(animationBuilderProps, this);
 
@@ -813,6 +815,10 @@ namespace SimSharp {
     #endregion
 
     #region Visualization
+    public void DebugAnimation(bool addFrameNumbers) {
+      AddFrameNumbers = addFrameNumbers;
+    }
+
     public void BuildAnimation(bool fillAnimation) {
       FillAnimation = fillAnimation;
     }

@@ -82,7 +82,7 @@ namespace SimSharp.Visualization {
               int frameNumber = stop - start;
               for (int i = 0; i < frameNumber; i++) {
                 writer.WriteStartObject();
-                frameCount++;
+                WriteFrameNumber();
                 bool first = true;
 
                 for (int j = framesEnums.Count - 1; j >= 0; j--) {
@@ -92,7 +92,7 @@ namespace SimSharp.Visualization {
                   }
                   string frame = framesEnums[j].Current;
 
-                  if (!first)
+                  if (env.AddFrameNumbers || !first)
                     writer.WriteRaw(",");
                   writer.WriteRaw(frame);
 
@@ -115,7 +115,7 @@ namespace SimSharp.Visualization {
     private void WriteEmptyObjects(int frameNumber) {
       for (int i = 0; i < frameNumber; i++) {
         writer.WriteStartObject();
-        frameCount++;
+        WriteFrameNumber();
         writer.WriteEndObject();
       }
     }
@@ -129,6 +129,14 @@ namespace SimSharp.Visualization {
 
     private void WriteJson() {
       File.WriteAllText(Props.Target, stringWriter.ToString());
+    }
+
+    private void WriteFrameNumber() {
+      if (env.AddFrameNumbers) {
+        writer.WritePropertyName("frame");
+        writer.WriteValue(frameCount);
+        frameCount++;
+      }
     }
   }
 }

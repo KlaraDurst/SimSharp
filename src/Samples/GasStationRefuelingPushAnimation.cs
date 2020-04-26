@@ -170,6 +170,7 @@ namespace SimSharp.Samples {
       };
 
       // BuildAnimation has to be turned on before first Animation is created
+      env.DebugAnimation(false);
       env.BuildAnimation(true);
 
       // Gas station visualization

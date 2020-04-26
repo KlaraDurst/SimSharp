@@ -40,7 +40,7 @@ namespace SimSharp.Visualization.Push {
 
     public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env)
       : this(name, Shape.polygon, time0, time1, env) {
-      AnimationProps props = new AnimationProps(polygon0, polygon0, time0, time1, fillColor, lineColor, lineWidth, keep);
+      AnimationProps props = new AnimationProps(polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep);
       propsList.Add(time0, props);
 
       if (env.FillAnimation)
@@ -95,12 +95,15 @@ namespace SimSharp.Visualization.Push {
       propsList.Add(props.Time0, props);
 
       if (env.FillAnimation) {
-        units.RemoveAll(unit => unit.Time0 >= props.Time0);
+        int startFrameNumber = Convert.ToInt32((props.Time0 - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
+        int stopFrameNumber = Convert.ToInt32((props.Time1 - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+
+        units.RemoveAll(unit => unit.Start >= startFrameNumber);
         foreach (AnimationUnit unit in units) {
-          if (unit.Time1 > props.Time0) {
-            int  keepFrames = Convert.ToInt32((props.Time0 - unit.Time0).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+          if (unit.Stop >= startFrameNumber) {
+            int keepFrames = startFrameNumber - unit.Start;
             unit.Frames.RemoveRange(keepFrames, unit.Frames.Count - keepFrames);
-            unit.Time1 = props.Time0;
+            unit.Stop = startFrameNumber - 1;
           }
         }
 
@@ -172,29 +175,32 @@ namespace SimSharp.Visualization.Push {
     #endregion
 
     private void FillUnits(AnimationProps props, bool currVisible) {
+      int startFrameNumber = Convert.ToInt32((props.Time0 - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
+      int stopFrameNumber = Convert.ToInt32((props.Time1 - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+
       if (currVisible && props.Time0.Equals(props.Time1) && !props.Keep) {
-        AnimationUnit unit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
+        AnimationUnit unit = new AnimationUnit(startFrameNumber, startFrameNumber, 1);
         unit.AddFrame(GetRemoveFrame());
         units.Add(unit);
       } else if (ShapesEqual(props) && props.Keep) {
-        AnimationUnit unit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
+        AnimationUnit unit = new AnimationUnit(startFrameNumber, startFrameNumber, 1);
         unit.AddFrame(GetInitFrame(props, 0, currVisible));
         units.Add(unit);
       } else if (!ShapesEqual(props) && props.Time0.Equals(props.Time1) && props.Keep) {
-        AnimationUnit unit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
+        AnimationUnit unit = new AnimationUnit(startFrameNumber, startFrameNumber, 1);
         unit.AddFrame(GetInitFrame(props, 1, currVisible));
         units.Add(unit);
       } else if (ShapesEqual(props) && !props.Time0.Equals(props.Time1) && !props.Keep) {
-        AnimationUnit firstUnit = new AnimationUnit(props.Time0, props.Time0.AddSeconds(1), 1);
+        AnimationUnit firstUnit = new AnimationUnit(startFrameNumber, startFrameNumber, 1);
         firstUnit.AddFrame(GetInitFrame(props, 0, currVisible));
         units.Add(firstUnit);
 
-        AnimationUnit secondUnit = new AnimationUnit(props.Time1, props.Time1.AddSeconds(1), 1);
+        AnimationUnit secondUnit = new AnimationUnit(stopFrameNumber + 1, stopFrameNumber + 1, 1);
         secondUnit.AddFrame(GetRemoveFrame());
         units.Add(secondUnit);
       } else if (!ShapesEqual(props) && !props.Time0.Equals(props.Time1)) {
-        int frameNumber = Convert.ToInt32((props.Time1 - props.Time0).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
-        AnimationUnit animationUnit = props.Keep ? new AnimationUnit(props.Time0, props.Time1, frameNumber) : new AnimationUnit(props.Time0, props.Time1.AddSeconds(1), frameNumber + 1);
+        int frameNumber = stopFrameNumber - startFrameNumber + 1;
+        AnimationUnit animationUnit = props.Keep ? new AnimationUnit(startFrameNumber, stopFrameNumber, frameNumber) : new AnimationUnit(startFrameNumber, stopFrameNumber + 1, frameNumber + 1);
         animationUnit.AddFrame(GetInitFrame(props, 0, currVisible));
 
         foreach (List<int> i in GetInterpolation(GetTransformation(props, 0), GetTransformation(props, 1), frameNumber - 2)) {
@@ -369,17 +375,17 @@ namespace SimSharp.Visualization.Push {
       sb.Remove(0, sb.Length);
     }
 
-    public List<AnimationUnit> FramesFromTo(DateTime start, DateTime stop) {
+    public List<AnimationUnit> FramesFromTo(int start, int stop) {
       List<AnimationUnit> affectedUnits = new List<AnimationUnit>();
       
       foreach (AnimationUnit unit in units) {
-        if (unit.Time0 >= start && unit.Time0 < stop) {
+        if (unit.Start >= start && unit.Start <= stop) {
           affectedUnits.Add(unit);
         }
-        else if (unit.Time0 <= start && unit.Time1 > start) {
-          int removeFrames = Convert.ToInt32((start - unit.Time0).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+        else if (unit.Start < start && unit.Stop >= start) {
+          int removeFrames = start - unit.Start;
           int keepFrames = unit.Frames.Count - removeFrames;
-          AnimationUnit temp = new AnimationUnit(start, unit.Time1, keepFrames);
+          AnimationUnit temp = new AnimationUnit(start, unit.Stop, keepFrames);
           
           temp.AddFrameRange(unit.Frames.GetRange(removeFrames, keepFrames));
           affectedUnits.Add(temp);

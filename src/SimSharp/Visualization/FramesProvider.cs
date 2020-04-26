@@ -5,7 +5,7 @@ using System.Text;
 namespace SimSharp.Visualization {
   public interface FramesProvider {
 
-    // incl. start, excl. stop
-    List<AnimationUnit> FramesFromTo(DateTime start, DateTime stop);
+    // incl. start and stop
+    List<AnimationUnit> FramesFromTo(int start, int stop);
   }
 }

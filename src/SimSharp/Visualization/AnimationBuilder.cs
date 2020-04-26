@@ -8,13 +8,17 @@ namespace SimSharp.Visualization {
   public class AnimationBuilder {
     public AnimationBuilderProps Props { get; }
 
+    private Simulation env;
     private StringWriter stringWriter;
     private JsonTextWriter writer;
     private List<FramesProvider> providers;
+    private int frameCount;
 
-    public AnimationBuilder(AnimationBuilderProps props) {
+    public AnimationBuilder(AnimationBuilderProps props, Simulation env) {
       Props = props;
+      this.env = env;
       this.providers = new List<FramesProvider>();
+      this.frameCount = 1;
     }
 
     public void StartBuilding() {
@@ -38,23 +42,26 @@ namespace SimSharp.Visualization {
     }
 
     public void Step(DateTime prior, DateTime now) {
+      int startFrameNumber = Convert.ToInt32((prior - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
+      int stopFrameNumber = Convert.ToInt32((now - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
       int totalFrameNumber = Convert.ToInt32((now - prior).TotalSeconds / Props.TimeStep);
+
+      Console.WriteLine(startFrameNumber + " - " + stopFrameNumber);
 
       if (totalFrameNumber > 0) {
         if (providers.Count > 0) {
-          SortedList<DateTime, List<IEnumerator<string>>> frames = new SortedList<DateTime, List<IEnumerator<string>>>();
+          SortedList<int, List<IEnumerator<string>>> frames = new SortedList<int, List<IEnumerator<string>>>();
 
           foreach (FramesProvider provider in providers) {
-            List<AnimationUnit> units = provider.FramesFromTo(prior, now);
+            List<AnimationUnit> units = provider.FramesFromTo(startFrameNumber, stopFrameNumber);
 
             if (units.Count > 0) {
               foreach (AnimationUnit unit in units) {
-                if (frames.ContainsKey(unit.Time0)) {
-                  List<IEnumerator<string>> l;
-                  frames.TryGetValue(unit.Time0, out l);
+                if (frames.ContainsKey(unit.Start)) {
+                  frames.TryGetValue(unit.Start, out List<IEnumerator<string>> l);
                   l.Add(unit.Frames.GetEnumerator());
                 } else {
-                  frames.Add(unit.Time0, new List<IEnumerator<string>>() { unit.Frames.GetEnumerator() });
+                  frames.Add(unit.Start, new List<IEnumerator<string>>() { unit.Frames.GetEnumerator() });
                 }
               }
             }
@@ -62,19 +69,20 @@ namespace SimSharp.Visualization {
 
           if (frames.Count > 0) {
             List<IEnumerator<string>> framesEnums = new List<IEnumerator<string>>(frames.Count);
-            DateTime start = frames.Keys[0];
-            DateTime stop = frames.Count > 1 ? frames.Keys[1] : now;
+            int start = frames.Keys[0];
+            int stop = frames.Count > 1 ? frames.Keys[1] : stopFrameNumber + 1;
 
-            int precedingFramesNumber = Convert.ToInt32((start - prior).TotalSeconds / Props.TimeStep);
+            int precedingFramesNumber = start - startFrameNumber;
             WriteEmptyObjects(precedingFramesNumber);
 
-            while (start != now) {
+            while (start <= stopFrameNumber) {
               framesEnums.AddRange(frames.Values[0]);
               frames.RemoveAt(0);
 
-              int frameNumber = Convert.ToInt32((stop - start).TotalSeconds / Props.TimeStep);
+              int frameNumber = stop - start;
               for (int i = 0; i < frameNumber; i++) {
                 writer.WriteStartObject();
+                frameCount++;
                 bool first = true;
 
                 for (int j = framesEnums.Count - 1; j >= 0; j--) {
@@ -93,7 +101,7 @@ namespace SimSharp.Visualization {
                 writer.WriteEndObject();
               }
               start = stop;
-              stop = frames.Count > 1 ? frames.Keys[1] : now;
+              stop = frames.Count > 1 ? frames.Keys[1] : stopFrameNumber + 1;
             }
           } else {
             WriteEmptyObjects(totalFrameNumber);
@@ -107,6 +115,7 @@ namespace SimSharp.Visualization {
     private void WriteEmptyObjects(int frameNumber) {
       for (int i = 0; i < frameNumber; i++) {
         writer.WriteStartObject();
+        frameCount++;
         writer.WriteEndObject();
       }
     }

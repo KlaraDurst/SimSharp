@@ -88,7 +88,7 @@ namespace SimSharp {
       ScheduleQ = new EventQueue(InitialMaxEvents);
       Logger = Console.Out;
       FillAnimation = false;
-      AnimationBuilder = new AnimationBuilder(animationBuilderProps);
+      AnimationBuilder = new AnimationBuilder(animationBuilderProps, this);
 
       RunStarted += (o, e) => {
         if (FillAnimation)

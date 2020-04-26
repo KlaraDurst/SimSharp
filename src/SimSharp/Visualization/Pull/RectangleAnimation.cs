@@ -164,7 +164,7 @@ namespace SimSharp.Visualization.Pull {
         return frame;
     }
 
-    private IEnumerator<string> GetEnum<T>(AnimationAttribute<T> attr, string name, T last, DateTime start, DateTime stop) {
+    private IEnumerator<string> GetEnum<T>(AnimationAttribute<T> attr, string name, T last, int start, int stop) {
       if (attr.Function == null) {
         if (propsList.Count < 2 || !attr.Value.Equals(last)) {
           writer.WritePropertyName(name);
@@ -181,13 +181,11 @@ namespace SimSharp.Visualization.Pull {
       }
     }
 
-    private IEnumerator<string> GetEnumWithFunction<T>(AnimationAttribute<T> attr, string name, T last, DateTime start, DateTime stop) {
+    private IEnumerator<string> GetEnumWithFunction<T>(AnimationAttribute<T> attr, string name, T last, int start, int stop) {
       T prev = last;
-      int startFrameNumber = Convert.ToInt32((start - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
-      int stopFrameNumber = Convert.ToInt32((stop - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
 
       // first frame
-      T curr = attr.Function(startFrameNumber);
+      T curr = attr.Function(start);
       if (propsList.Count < 2 || !curr.Equals(prev)) {
         writer.WritePropertyName(name);
         writer.WriteValue(curr);
@@ -203,7 +201,7 @@ namespace SimSharp.Visualization.Pull {
       }
 
       // rest of the frames
-      for (int i = startFrameNumber + 1; i <= stopFrameNumber; i++) {
+      for (int i = start + 1; i <= stop; i++) {
         curr = attr.Function(i);
         if (!curr.Equals(prev)) {
           writer.WritePropertyName(name);
@@ -221,7 +219,7 @@ namespace SimSharp.Visualization.Pull {
       }
     }
 
-    private IEnumerator<string> GetTransformationEnum<T>(AnimationAttribute<T>[] attr, T[] last, DateTime start, DateTime stop) {
+    private IEnumerator<string> GetTransformationEnum<T>(AnimationAttribute<T>[] attr, T[] last, int start, int stop) {
       bool AllValues() {
         for (int i = 0; i < attr.Length; i++) {
           if (attr[i].Function != null)
@@ -255,15 +253,13 @@ namespace SimSharp.Visualization.Pull {
       }
     }
 
-    private IEnumerator<string> GetTransformationEnumWithFunction<T>(AnimationAttribute<T>[] attr, T[] last, DateTime start, DateTime stop) {
-      int startFrameNumber = Convert.ToInt32((start - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
-      int stopFrameNumber = Convert.ToInt32((stop - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+    private IEnumerator<string> GetTransformationEnumWithFunction<T>(AnimationAttribute<T>[] attr, T[] last, int start, int stop) {
       T[] prev = last;
 
       // first frame
       List<T> currList = new List<T>(attr.Length);
       for (int j = 0; j < attr.Length; j++) {
-        currList.Add(attr[startFrameNumber].GetValueAt(startFrameNumber));
+        currList.Add(attr[j].GetValueAt(start));
       }
       T[] currArray = currList.ToArray();
 
@@ -286,7 +282,7 @@ namespace SimSharp.Visualization.Pull {
       }
 
       // rest of the frames
-      for (int i = startFrameNumber + 1; i <= stopFrameNumber; i++) {
+      for (int i = start + 1; i <= stop; i++) {
         currList = new List<T>(attr.Length);
         for (int j = 0; j < attr.Length; j++) {
           currList.Add(attr[i].GetValueAt(i));
@@ -327,7 +323,7 @@ namespace SimSharp.Visualization.Pull {
       return true;
     }
 
-    private List<IEnumerator<string>> GetAttrEnums(RectangleAnimationProps props, DateTime start, DateTime stop) {
+    private List<IEnumerator<string>> GetAttrEnums(RectangleAnimationProps props, int start, int stop) {
       int[] prevTrans;
       string prevFillColor;
       string prevLineColor;
@@ -376,21 +372,20 @@ namespace SimSharp.Visualization.Pull {
       sb.Remove(0, sb.Length);
     }
 
-    // TODO: what to do with empty frames
-    public List<AnimationUnit> FramesFromTo(DateTime start, DateTime stop) {
+    public List<AnimationUnit> FramesFromTo(int start, int stop) {
       RectangleAnimationProps props = propsList[propsList.Count - 1];
       List<AnimationUnit> affectedUnits = new List<AnimationUnit>();
 
       if (props.AllValues()) {
         string frame = GetValueInitFrame(props);
         if (!frame.Equals(string.Empty)) {
-          AnimationUnit unit = new AnimationUnit(start, start.AddSeconds(1), 1);
+          AnimationUnit unit = new AnimationUnit(start, start, 1);
           unit.AddFrame(frame);
           affectedUnits.Add(unit);
         }
         return affectedUnits;
       } else {
-        int frameNumber = Convert.ToInt32((stop - start).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+        int frameNumber = stop - start + 1;
         AnimationUnit unit = new AnimationUnit(start, stop, frameNumber);
 
         List<IEnumerator<string>> attrEnums = GetAttrEnums(props, start, stop);

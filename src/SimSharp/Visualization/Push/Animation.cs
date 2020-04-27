@@ -249,6 +249,15 @@ namespace SimSharp.Visualization.Push {
       return propsList.Values[0];
     }
 
+    private AnimationProps GetLastWrittenProps() {
+      for (int j = propsList.Count - 1; j >= 0; j--) {
+        AnimationProps props = propsList.Values[j];
+        if (props.Written)
+          return props;
+      }
+      return null;
+    }
+
     private void CheckTime(DateTime time0, DateTime time1) {
       if (time0 > time1)
         throw new ArgumentException("time1 must be after time0.");
@@ -277,7 +286,8 @@ namespace SimSharp.Visualization.Push {
       writer.WritePropertyName(Name);
       writer.WriteStartObject();
 
-      if (propsList.Count < 2) {
+      AnimationProps prevWritten = GetLastWrittenProps();
+      if (prevWritten == null) {
         writer.WritePropertyName("type");
         writer.WriteValue(Type.ToString());
 
@@ -290,19 +300,18 @@ namespace SimSharp.Visualization.Push {
         writer.WritePropertyName("lineWidth");
         writer.WriteValue(props.LineWidth);
       } else {
-        AnimationProps prev = propsList.Values[propsList.Count - 2];
 
-        if (prev.FillColor != props.FillColor) {
+        if (prevWritten.FillColor != props.FillColor) {
           writer.WritePropertyName("fillColor");
           writer.WriteValue(props.FillColor);
         }
 
-        if (prev.LineColor != props.LineColor) {
+        if (prevWritten.LineColor != props.LineColor) {
           writer.WritePropertyName("lineColor");
           writer.WriteValue(props.LineColor);
         }
 
-        if (prev.LineWidth != props.LineWidth) {
+        if (prevWritten.LineWidth != props.LineWidth) {
           writer.WritePropertyName("lineWidth");
           writer.WriteValue(props.LineWidth);
         }
@@ -324,6 +333,7 @@ namespace SimSharp.Visualization.Push {
       string frame = stringWriter.ToString();
       Flush();
 
+      props.Written = true;
       return frame;
     }
 

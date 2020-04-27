@@ -21,6 +21,8 @@ namespace SimSharp.Visualization.Push {
     public DateTime Time1 { get; }
     public bool Keep { get; }
 
+    public bool Written { get; set; }
+
     public AnimationProps(Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep)
       : this(fillColor, lineColor, lineWidth, time0, time1, keep) {
       Rectangle0 = rectangle0;
@@ -46,6 +48,7 @@ namespace SimSharp.Visualization.Push {
       Time0 = time0;
       Time1 = time1;
       Keep = keep;
+      Written = false;
     }
   }
 }

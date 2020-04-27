@@ -46,8 +46,6 @@ namespace SimSharp.Visualization {
       int stopFrameNumber = Convert.ToInt32((now - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
       int totalFrameNumber = Convert.ToInt32((now - prior).TotalSeconds / Props.TimeStep);
 
-      Console.WriteLine(startFrameNumber + " - " + stopFrameNumber);
-
       if (totalFrameNumber > 0) {
         if (providers.Count > 0) {
           SortedList<int, List<IEnumerator<string>>> frames = new SortedList<int, List<IEnumerator<string>>>();

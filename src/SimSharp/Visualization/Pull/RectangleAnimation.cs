@@ -219,6 +219,8 @@ namespace SimSharp.Visualization.Pull {
         }
         return affectedUnits;
       } else {
+        List<string> frames = new List<string>();
+        int unitStart = start;
         int frameNumber = stop - start + 1;
         bool init;
         int[] prevTransformation;
@@ -349,7 +351,25 @@ namespace SimSharp.Visualization.Pull {
           }
 
           writer.WriteEndObject();
+          string frame = stringWriter.ToString();
+          Flush();
+
+          if (frame.Length <= Name.Length + 5) { // json object is empty
+            int unitStop = unitStart + frames.Count;
+
+            if (frames.Count > 0) {
+              AnimationUnit unit = new AnimationUnit(unitStart, unitStop, frames.Count);
+              unit.AddFrameRange(frames);
+              affectedUnits.Add(unit);
+              frames = new List<string>();
+            }
+
+            unitStart = unitStop + 1;
+          } else {
+            frames.Add(frame);
+          }
         }
+        return affectedUnits;
       }
     }
   }

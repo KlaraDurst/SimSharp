@@ -13,6 +13,8 @@ namespace SimSharp.Visualization.Pull {
     public AnimationAttribute<int> LineWidth { get; set; }
     public AnimationAttribute<bool> Visible { get; set; }
 
+    public bool Written { get; set; }
+
     public RectangleAnimationProps(RectangleAnimationProps other) 
       : this(other.X, other.Y, other.Height, other.Width, other.FillColor, other.LineColor, other.LineWidth, other.Visible) { }
 
@@ -25,6 +27,7 @@ namespace SimSharp.Visualization.Pull {
       LineColor = lineColor;
       LineWidth = lineWidth;
       Visible = visible;
+      Written = false;
     }
 
     public bool AllValues() {

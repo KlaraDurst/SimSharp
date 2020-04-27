@@ -92,11 +92,35 @@ namespace SimSharp.Visualization.Pull {
     }
     #endregion
 
+    private RectangleAnimationProps GetLastWrittenProps() {
+      for (int j = propsList.Count - 1; j >= 0; j--) {
+        RectangleAnimationProps props = propsList[j];
+        if (props.Written)
+          return props;
+      }
+      return null;
+    }
+
+    private bool AllEqual<T>(T[] a, T[] b) {
+      if (b == null)
+        return true;
+
+      if (a.Length != b.Length)
+        return false;
+
+      for (int i = 0; i < a.Length; i++) {
+        if (!a[i].Equals(b[i]))
+          return false;
+      }
+      return true;
+    }
+
     private string GetValueInitFrame(RectangleAnimationProps props) {
       writer.WritePropertyName(Name);
       writer.WriteStartObject();
 
-      if (propsList.Count < 2) {
+      RectangleAnimationProps prevWritten = GetLastWrittenProps();
+      if (prevWritten == null && props.Visible.Value) {
         writer.WritePropertyName("type");
         writer.WriteValue("rectangle");
 
@@ -118,31 +142,31 @@ namespace SimSharp.Visualization.Pull {
           writer.WriteValue(t);
         }
         writer.WriteEndArray();
-      } else {
-        RectangleAnimationProps prev = propsList[propsList.Count - 2];
 
-        if (prev.FillColor.CurrValue != props.FillColor.Value) {
+        props.Written = true;
+      } else if (prevWritten != null && props.Visible.Value) {
+        if (prevWritten.FillColor.CurrValue != props.FillColor.Value) {
           writer.WritePropertyName("fillColor");
           writer.WriteValue(props.FillColor.Value);
         }
 
-        if (prev.LineColor.CurrValue != props.LineColor.Value) {
+        if (prevWritten.LineColor.CurrValue != props.LineColor.Value) {
           writer.WritePropertyName("lineColor");
           writer.WriteValue(props.LineColor.Value);
         }
 
-        if (prev.LineWidth.CurrValue != props.LineWidth.Value) {
+        if (prevWritten.LineWidth.CurrValue != props.LineWidth.Value) {
           writer.WritePropertyName("lineWidth");
           writer.WriteValue(props.LineWidth.Value);
         }
 
-        if (prev.Visible.CurrValue != props.Visible.Value) {
+        if (prevWritten.Visible.CurrValue != props.Visible.Value) {
           writer.WritePropertyName("visible");
           writer.WriteValue(props.Visible.Value);
         }
 
         int[] transformation = new int[] { props.X.Value, props.Y.Value, props.Width.Value, props.Height.Value };
-        int[] prevTransformation = new int[] { prev.X.Value, prev.Y.Value, prev.Width.Value, prev.Height.Value };
+        int[] prevTransformation = new int[] { prevWritten.X.Value, prevWritten.Y.Value, prevWritten.Width.Value, prevWritten.Height.Value };
 
         if (!AllEqual(transformation, prevTransformation)) {
           writer.WritePropertyName("t");
@@ -151,6 +175,13 @@ namespace SimSharp.Visualization.Pull {
             writer.WriteValue(t);
           }
           writer.WriteEndArray();
+        }
+
+        props.Written = true;
+      } else if (prevWritten != null && !props.Visible.Value) {
+        if (prevWritten.Visible.CurrValue != props.Visible.Value) {
+          writer.WritePropertyName("visible");
+          writer.WriteValue(props.Visible.Value);
         }
       }
 
@@ -164,9 +195,9 @@ namespace SimSharp.Visualization.Pull {
         return frame;
     }
 
-    private IEnumerator<string> GetEnum<T>(AnimationAttribute<T> attr, string name, T last, int start, int stop) {
+    private IEnumerator<string> GetEnum<T>(AnimationAttribute<T> attr, string name, bool isFirst, T last, int start, int stop) {
       if (attr.Function == null) {
-        if (propsList.Count < 2 || !attr.Value.Equals(last)) {
+        if (isFirst || !attr.Value.Equals(last)) {
           writer.WritePropertyName(name);
           writer.WriteValue(attr.Value);
 
@@ -177,16 +208,16 @@ namespace SimSharp.Visualization.Pull {
         }
         return null;
       } else {
-        return GetEnumWithFunction(attr, name, last, start, stop);
+        return GetEnumWithFunction(attr, name, isFirst, last, start, stop);
       }
     }
 
-    private IEnumerator<string> GetEnumWithFunction<T>(AnimationAttribute<T> attr, string name, T last, int start, int stop) {
+    private IEnumerator<string> GetEnumWithFunction<T>(AnimationAttribute<T> attr, string name, bool isFirst, T last, int start, int stop) {
       T prev = last;
 
       // first frame
       T curr = attr.Function(start);
-      if (propsList.Count < 2 || !curr.Equals(prev)) {
+      if (isFirst || !curr.Equals(prev)) {
         writer.WritePropertyName(name);
         writer.WriteValue(curr);
         attr.CurrValue = curr;
@@ -219,7 +250,7 @@ namespace SimSharp.Visualization.Pull {
       }
     }
 
-    private IEnumerator<string> GetTransformationEnum<T>(AnimationAttribute<T>[] attr, T[] last, int start, int stop) {
+    private IEnumerator<string> GetTransformationEnum<T>(AnimationAttribute<T>[] attr, bool isFirst, T[] last, int start, int stop) {
       bool AllValues() {
         for (int i = 0; i < attr.Length; i++) {
           if (attr[i].Function != null)
@@ -234,7 +265,7 @@ namespace SimSharp.Visualization.Pull {
           attrValues.Add(attr[i].Value);
         }
 
-        if (propsList.Count < 2 || !AllEqual(attrValues.ToArray(), last)) {
+        if (isFirst || !AllEqual(attrValues.ToArray(), last)) {
           writer.WritePropertyName("t");
           writer.WriteStartArray();
           for (int i = 0; i < attr.Length; i++) {
@@ -249,11 +280,11 @@ namespace SimSharp.Visualization.Pull {
         }
         return null;
       } else {
-        return GetTransformationEnumWithFunction(attr, last, start, stop);
+        return GetTransformationEnumWithFunction(attr, isFirst, last, start, stop);
       }
     }
 
-    private IEnumerator<string> GetTransformationEnumWithFunction<T>(AnimationAttribute<T>[] attr, T[] last, int start, int stop) {
+    private IEnumerator<string> GetTransformationEnumWithFunction<T>(AnimationAttribute<T>[] attr, bool isFirst, T[] last, int start, int stop) {
       T[] prev = last;
 
       // first frame
@@ -263,7 +294,7 @@ namespace SimSharp.Visualization.Pull {
       }
       T[] currArray = currList.ToArray();
 
-      if (propsList.Count < 2 || !AllEqual(currArray, prev)) {
+      if (isFirst || !AllEqual(currArray, prev)) {
         writer.WritePropertyName("t");
         writer.WriteStartArray();
         for (int z = 0; z < attr.Length; z++) {
@@ -309,57 +340,45 @@ namespace SimSharp.Visualization.Pull {
       }
     }
 
-    private bool AllEqual<T>(T[] a, T[] b) {
-      if (b == null)
-        return true;
-
-      if (a.Length != b.Length)
-        return false;
-
-      for (int i = 0; i < a.Length; i++) {
-        if (!a[i].Equals(b[i]))
-          return false;
-      }
-      return true;
-    }
-
     private List<IEnumerator<string>> GetAttrEnums(RectangleAnimationProps props, int start, int stop) {
+      bool isFirst;
       int[] prevTrans;
       string prevFillColor;
       string prevLineColor;
       int prevLineWidth;
       bool prevVisible;
 
-      if (propsList.Count < 2) {
+      RectangleAnimationProps prevWritten = GetLastWrittenProps();
+      if (prevWritten == null) {
+        isFirst = true;
         prevTrans = null;
         prevFillColor = null;
         prevLineColor = null;
         prevLineWidth = default;
         prevVisible = default;
       } else {
-        RectangleAnimationProps prev = propsList[propsList.Count - 2];
-
-        prevTrans = new int[] { prev.X.CurrValue, prev.Y.CurrValue, prev.Width.CurrValue, prev.Height.CurrValue };
-        prevFillColor = prev.FillColor.CurrValue;
-        prevLineColor = prev.LineColor.CurrValue;
-        prevLineWidth = prev.LineWidth.CurrValue;
-        prevVisible = prev.Visible.CurrValue;
+        isFirst = false;
+        prevTrans = new int[] { prevWritten.X.CurrValue, prevWritten.Y.CurrValue, prevWritten.Width.CurrValue, prevWritten.Height.CurrValue };
+        prevFillColor = prevWritten.FillColor.CurrValue;
+        prevLineColor = prevWritten.LineColor.CurrValue;
+        prevLineWidth = prevWritten.LineWidth.CurrValue;
+        prevVisible = prevWritten.Visible.CurrValue;
       }
       List<IEnumerator<string>> enums = new List<IEnumerator<string>>(8);
 
-      IEnumerator<string> transformationEnum = GetTransformationEnum(new AnimationAttribute<int>[] { props.X, props.Y, props.Width, props.Height }, prevTrans, start, stop);
+      IEnumerator<string> transformationEnum = GetTransformationEnum(new AnimationAttribute<int>[] { props.X, props.Y, props.Width, props.Height }, isFirst, prevTrans, start, stop);
       if (transformationEnum != null)
         enums.Add(transformationEnum);
-      IEnumerator<string> fillColorEnum = GetEnum(props.FillColor, "fillColor", prevFillColor, start, stop);
+      IEnumerator<string> fillColorEnum = GetEnum(props.FillColor, "fillColor", isFirst, prevFillColor, start, stop);
       if (fillColorEnum != null)
         enums.Add(fillColorEnum);
-      IEnumerator<string> lineColorEnum = GetEnum(props.LineColor, "lineColor", prevLineColor, start, stop);
+      IEnumerator<string> lineColorEnum = GetEnum(props.LineColor, "lineColor", isFirst, prevLineColor, start, stop);
       if (lineColorEnum != null)
         enums.Add(lineColorEnum);
-      IEnumerator<string> lineWidthEnum = GetEnum(props.LineWidth, "lineWidth", prevLineWidth, start, stop);
+      IEnumerator<string> lineWidthEnum = GetEnum(props.LineWidth, "lineWidth", isFirst, prevLineWidth, start, stop);
       if (lineWidthEnum != null)
         enums.Add(lineWidthEnum);
-      IEnumerator<string> visibleEnum = GetEnum(props.Visible, "visible", prevVisible, start, stop);
+      IEnumerator<string> visibleEnum = GetEnum(props.Visible, "visible", isFirst, prevVisible, start, stop);
       if (visibleEnum != null)
         enums.Add(visibleEnum);
 

@@ -364,7 +364,7 @@ namespace SimSharp.Visualization.Push {
       double interval = 1 / Convert.ToDouble(frameNumber);
       List<List<int>> interpolation = new List<List<int>>(frameNumber);
 
-      for (int i = 0; i < frameNumber; i++) {
+      for (int i = 1; i <= frameNumber; i++) {
         List<int> l = new List<int>(start.Length);
 
         for (int j = 0; j < start.Length; j++) {

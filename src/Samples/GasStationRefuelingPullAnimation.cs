@@ -64,7 +64,8 @@ namespace SimSharp.Samples {
         Convert.ToInt32(litersRequired), 
         CarHeight, 
         "white", 
-        "yellow", 1,
+        "yellow", 
+        1,
         (Func<int, bool>) (t => gasStation.UsedBy(thisProcess)));
 
       using (var req = gasStation.Request()) {
@@ -80,33 +81,32 @@ namespace SimSharp.Samples {
 
           // First car tank fill visualization
           DateTime refuelStartTime = env.Now;
-          int entryFrame = Convert.ToInt32((refuelStartTime - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
-          int firstRefuelFrames = Convert.ToInt32(firstRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+          int entryFrame = Convert.ToInt32((refuelStartTime - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
+          int firstRefuelFrames = Convert.ToInt32(firstRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep) - 1;
 
           RectangleAnimation tempCarAnimation = env.AnimateRectangle(
             name + "Tank",
             (Func<int, int>) (t => {
               int startValue = fullCarAnimation.GetX().GetValueAt(t) - fullCarAnimation.GetWidth().GetValueAt(t) / 2;
-              int endValue = Convert.ToInt32(level / 2);
+              int endValue = startValue + Convert.ToInt32(level / 2);
               int currFrame = t - entryFrame;
-              if (currFrame > 0 && currFrame <= firstRefuelFrames) {
-                double i = 1 / firstRefuelFrames * currFrame;
+              if (currFrame >= 0 && currFrame <= firstRefuelFrames) {
+                double i = 1 / Convert.ToDouble(firstRefuelFrames) * currFrame;
                 return Convert.ToInt32((1 - i) * startValue + i * endValue);
-              } else if (currFrame <= 0)
+              } else if (currFrame < 0)
                 return startValue;
               else
                 return endValue;
             }),
             275,
             (Func<int, int>) (t => {
-              int startValue = 1;
               int endValue = Convert.ToInt32(level);
               int currFrame = t - entryFrame;
-              if (currFrame > 0 && currFrame <= firstRefuelFrames) {
-                double i = 1 / firstRefuelFrames * currFrame;
-                return Convert.ToInt32((1 - i) * startValue + i * endValue);
-              } else if (currFrame <= 0)
-                return startValue;
+              if (currFrame >= 0 && currFrame <= firstRefuelFrames) {
+                double i = 1 / Convert.ToDouble(firstRefuelFrames) * currFrame;
+                return Convert.ToInt32((1 - i) * 0 + i * endValue);
+              } else if (currFrame < 0)
+                return 0;
               else
                 return endValue;
             }),
@@ -121,17 +121,17 @@ namespace SimSharp.Samples {
 
           // Second car tank fill visualization
           DateTime refuelContinueTime = env.Now;
-          int coninueFrame = Convert.ToInt32((refuelContinueTime - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
-          int secondRefuelFrames = Convert.ToInt32(secondRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+          int coninueFrame = Convert.ToInt32((refuelContinueTime - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
+          int secondRefuelFrames = Convert.ToInt32(secondRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep) - 1;
 
           tempCarAnimation.SetX((Func<int, int>) (t => {
             int startValue = fullCarAnimation.GetX().GetValueAt(t) - fullCarAnimation.GetWidth().GetValueAt(t) / 2 + Convert.ToInt32(level) / 2;
-            int endValue = Convert.ToInt32(litersRequired / 2);
+            int endValue = startValue + Convert.ToInt32(litersRequired / 2);
             int currFrame = t - coninueFrame;
-            if (currFrame > 0 && currFrame <= secondRefuelFrames) {
-              double i = 1 / secondRefuelFrames * currFrame;
+            if (currFrame >= 0 && currFrame <= secondRefuelFrames) {
+              double i = 1 / Convert.ToDouble(secondRefuelFrames) * currFrame;
               return Convert.ToInt32((1 - i) * startValue + i * endValue);
-            } else if (currFrame <= 0)
+            } else if (currFrame < 0)
               return startValue;
             else
               return endValue;
@@ -141,10 +141,10 @@ namespace SimSharp.Samples {
             int startValue = Convert.ToInt32(level);
             int endValue = Convert.ToInt32(litersRequired);
             int currFrame = t - coninueFrame;
-            if (currFrame > 0 && currFrame <= secondRefuelFrames) {
-              double i = 1 / secondRefuelFrames * currFrame;
+            if (currFrame >= 0 && currFrame <= secondRefuelFrames) {
+              double i = 1 / Convert.ToDouble(secondRefuelFrames) * currFrame;
               return Convert.ToInt32((1 - i) * startValue + i * endValue);
-            } else if (currFrame <= 0)
+            } else if (currFrame < 0)
               return startValue;
             else
               return endValue;
@@ -157,33 +157,32 @@ namespace SimSharp.Samples {
 
           // Car tank fill visualization
           DateTime refuelStartTime = env.Now;
-          int entryFrame = Convert.ToInt32((refuelStartTime - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
-          int refuelDurationFrames = Convert.ToInt32(refuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep);
-
+          int entryFrame = Convert.ToInt32((refuelStartTime - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
+          int refuelDurationFrames = Convert.ToInt32(refuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep) - 1;
+             
           env.AnimateRectangle(
             name + "Tank",
             (Func<int, int>) (t => {
               int startValue = fullCarAnimation.GetX().GetValueAt(t) - fullCarAnimation.GetWidth().GetValueAt(t) / 2;
-              int endValue = Convert.ToInt32(litersRequired / 2);
+              int endValue = startValue + Convert.ToInt32(litersRequired / 2);
               int currFrame = t - entryFrame;
-              if (currFrame > 0 && currFrame <= refuelDurationFrames) {
-                double i = 1 / refuelDurationFrames * currFrame;
+              if (currFrame >= 0 && currFrame <= refuelDurationFrames) {
+                double i = 1 / Convert.ToDouble(refuelDurationFrames) * currFrame;
                 return Convert.ToInt32((1 - i) * startValue + i * endValue);
-              } else if (currFrame <= 0)
+              } else if (currFrame < 0)
                 return startValue;
               else
                 return endValue;
             }), 
             275,
             (Func<int, int>) (t => {
-              int startValue = 1;
               int endValue = Convert.ToInt32(litersRequired);
               int currFrame = t - entryFrame;
-              if (currFrame > 0 && currFrame <= refuelDurationFrames) {
-                double i = 1 / refuelDurationFrames * currFrame;
-                return Convert.ToInt32((1 - i) * startValue + i * endValue);
-              } else if (currFrame <= 0)
-                return startValue;
+              if (currFrame >= 0 && currFrame <= refuelDurationFrames) {
+                double i = 1 / Convert.ToDouble(refuelDurationFrames) * currFrame;
+                return Convert.ToInt32((1 - i) * 0 + i * endValue);
+              } else if (currFrame < 0)
+                return 0;
               else
                 return endValue;
             }), 
@@ -263,6 +262,7 @@ namespace SimSharp.Samples {
       };
 
       // BuildAnimation has to be turned on before first Animation is created
+      env.DebugAnimation(false);
       env.BuildAnimation(true);
 
       // Gas station visualization
@@ -274,7 +274,7 @@ namespace SimSharp.Samples {
       env.AnimateRectangle(
         "fuelPumpTank", 
         400, 
-        (Func<int, int>)(t => Convert.ToInt32(450 + fuelPump.Level / 2)), 
+        (Func<int, int>)(t => Convert.ToInt32(550 + fuelPump.Level / 2)), 
         250, 
         (Func<int, int>)(t => Convert.ToInt32(fuelPump.Level)), 
         "black", 

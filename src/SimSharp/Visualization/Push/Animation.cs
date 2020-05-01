@@ -203,7 +203,7 @@ namespace SimSharp.Visualization.Push {
         AnimationUnit animationUnit = props.Keep ? new AnimationUnit(startFrameNumber, stopFrameNumber, frameNumber) : new AnimationUnit(startFrameNumber, stopFrameNumber + 1, frameNumber + 1);
         animationUnit.AddFrame(GetInitFrame(props, 0, currVisible));
 
-        foreach (List<int> i in GetInterpolation(GetTransformation(props, 0), GetTransformation(props, 1), frameNumber - 2)) {
+        foreach (List<int> i in GetInterpolation(GetTransformation(props, 0), GetTransformation(props, 1), frameNumber - 1)) {
           writer.WritePropertyName(Name);
           writer.WriteStartObject();
 
@@ -218,20 +218,6 @@ namespace SimSharp.Visualization.Push {
           animationUnit.AddFrame(stringWriter.ToString());
           Flush();
         }
-
-        writer.WritePropertyName(Name);
-        writer.WriteStartObject();
-
-        writer.WritePropertyName("t");
-        writer.WriteStartArray();
-        foreach (int t in GetTransformation(props, 1)) {
-          writer.WriteValue(t);
-        }
-        writer.WriteEndArray();
-
-        writer.WriteEndObject();
-        animationUnit.AddFrame(stringWriter.ToString());
-        Flush();
 
         if (!props.Keep) {
           animationUnit.AddFrame(GetRemoveFrame());
@@ -360,11 +346,12 @@ namespace SimSharp.Visualization.Push {
       }
     }
 
+    // excl. start, incl. stop
     private IEnumerable<List<int>> GetInterpolation(int[] start, int[] stop, int frameNumber) {
       double interval = 1 / Convert.ToDouble(frameNumber);
       List<List<int>> interpolation = new List<List<int>>(frameNumber);
 
-      for (int i = 1; i <= frameNumber; i++) {
+      for (int i = 1; i <= frameNumber; i++) { // int i = 0; i < frameNumber; i++ to test if t is compared to former t when animation is updated
         List<int> l = new List<int>(start.Length);
 
         for (int j = 0; j < start.Length; j++) {

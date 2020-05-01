@@ -158,7 +158,8 @@ namespace SimSharp.Samples {
           // Car tank fill visualization
           DateTime refuelStartTime = env.Now;
           int entryFrame = Convert.ToInt32((refuelStartTime - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
-          int refuelDurationFrames = Convert.ToInt32(refuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep) - 1;
+          int refuelDurationFrames = Convert.ToInt32(Math.Ceiling(refuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep)) - 1;
+          Console.WriteLine(name + " - " + refuelDurationFrames);
              
           env.AnimateRectangle(
             name + "Tank",

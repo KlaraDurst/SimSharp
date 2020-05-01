@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
 namespace SimSharp.Visualization.Pull {
@@ -15,7 +16,7 @@ namespace SimSharp.Visualization.Pull {
     private bool currVisible;
 
     public RectangleAnimation (string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fillColor, AnimationAttribute<string> lineColor, AnimationAttribute<int> lineWidth, AnimationAttribute<bool> visible, Simulation env) {
-      Name = name;
+      Name = Regex.Replace(name, @"\s+", "");
       this.env = env;
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
@@ -221,7 +222,6 @@ namespace SimSharp.Visualization.Pull {
       } else {
         List<string> frames = new List<string>();
         int unitStart = start;
-        int frameNumber = stop - start + 1;
         bool init;
         int[] prevTransformation;
         string prevFillColor;
@@ -243,7 +243,7 @@ namespace SimSharp.Visualization.Pull {
           prevTransformation = new int[] { prevWritten.X.CurrValue, prevWritten.Y.CurrValue, prevWritten.Width.CurrValue, prevWritten.Height.CurrValue };
         }
 
-        for (int i = 0; i < frameNumber; i++) {
+        for (int i = start; i <= stop; i++) {
           writer.WritePropertyName(Name);
           writer.WriteStartObject();
 
@@ -368,6 +368,12 @@ namespace SimSharp.Visualization.Pull {
           } else {
             frames.Add(frame);
           }
+        }
+        if (frames.Count > 0) {
+          int unitStop = unitStart + frames.Count;
+          AnimationUnit unit = new AnimationUnit(unitStart, unitStop, frames.Count);
+          unit.AddFrameRange(frames);
+          affectedUnits.Add(unit);
         }
         return affectedUnits;
       }

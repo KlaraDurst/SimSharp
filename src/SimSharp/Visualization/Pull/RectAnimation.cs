@@ -9,7 +9,7 @@ namespace SimSharp.Visualization.Pull {
   public class RectAnimation : FramesProvider {
     public string Name { get; set; }
 
-    private Simulation env;
+    private Simulation env; // TODO frames number for debugging
     private StringWriter stringWriter;
     private JsonTextWriter writer;
     private List<RectAnimationProps> propsList;
@@ -78,15 +78,15 @@ namespace SimSharp.Visualization.Pull {
       propsList[propsList.Count - 1].Height = height;
     }
 
-    public void SetFillColor(AnimationAttribute<string> fill) {
+    public void SetFill(AnimationAttribute<string> fill) {
       propsList[propsList.Count - 1].Fill = fill;
     }
 
-    public void SetLineColor(AnimationAttribute<string> stroke) {
+    public void SetStroke(AnimationAttribute<string> stroke) {
       propsList[propsList.Count - 1].Stroke = stroke;
     }
 
-    public void SetLineWidth(AnimationAttribute<int> strokeWidth) {
+    public void SetStrokeWidth(AnimationAttribute<int> strokeWidth) {
       propsList[propsList.Count - 1].StrokeWidth = strokeWidth;
     }
 
@@ -102,20 +102,6 @@ namespace SimSharp.Visualization.Pull {
           return props;
       }
       return null;
-    }
-
-    private bool AllEqual<T>(T[] a, T[] b) {
-      if (b == null)
-        return true;
-
-      if (a.Length != b.Length)
-        return false;
-
-      for (int i = 0; i < a.Length; i++) {
-        if (!a[i].Equals(b[i]))
-          return false;
-      }
-      return true;
     }
 
     private string GetValueInitFrame(RectAnimationProps props) {
@@ -140,12 +126,17 @@ namespace SimSharp.Visualization.Pull {
         writer.WriteValue(true);
         currVisible = true;
 
-        writer.WritePropertyName("t");
-        writer.WriteStartArray();
-        foreach (int t in new int[] { props.X.Value, props.Y.Value, props.Width.Value, props.Height.Value }) {
-          writer.WriteValue(t);
-        }
-        writer.WriteEndArray();
+        writer.WritePropertyName("x");
+        writer.WriteValue(props.X.Value);
+
+        writer.WritePropertyName("y");
+        writer.WriteValue(props.Y.Value);
+
+        writer.WritePropertyName("width");
+        writer.WriteValue(props.Width.Value);
+
+        writer.WritePropertyName("height");
+        writer.WriteValue(props.Height.Value);
 
         props.Written = true;
       } else if (prevWritten != null && props.Visible.Value) {
@@ -170,16 +161,24 @@ namespace SimSharp.Visualization.Pull {
           currVisible = true;
         }
 
-        int[] transformation = new int[] { props.X.Value, props.Y.Value, props.Width.Value, props.Height.Value };
-        int[] prevTransformation = new int[] { prevWritten.X.Value, prevWritten.Y.Value, prevWritten.Width.Value, prevWritten.Height.Value };
+        if (prevWritten.X.CurrValue != props.X.Value) {
+          writer.WritePropertyName("x");
+          writer.WriteValue(props.X.Value);
+        }
 
-        if (!AllEqual(transformation, prevTransformation)) {
-          writer.WritePropertyName("t");
-          writer.WriteStartArray();
-          foreach (int t in transformation) {
-            writer.WriteValue(t);
-          }
-          writer.WriteEndArray();
+        if (prevWritten.Y.CurrValue != props.Y.Value) {
+          writer.WritePropertyName("y");
+          writer.WriteValue(props.Y.Value);
+        }
+
+        if (prevWritten.Width.CurrValue != props.Width.Value) {
+          writer.WritePropertyName("width");
+          writer.WriteValue(props.Width.Value);
+        }
+
+        if (prevWritten.Height.CurrValue != props.Height.Value) {
+          writer.WritePropertyName("height");
+          writer.WriteValue(props.Height.Value);
         }
 
         props.Written = true;
@@ -223,24 +222,33 @@ namespace SimSharp.Visualization.Pull {
         List<string> frames = new List<string>();
         int unitStart = start;
         bool init;
-        int[] prevTransformation;
-        string prevFillColor;
-        string prevLineColor;
-        int prevLineWidth;
+        string prevFill;
+        string prevStroke;
+        int prevStrokeWidth;
+        int prevX;
+        int prevY;
+        int prevWidth;
+        int prevHeight;
 
         RectAnimationProps prevWritten = GetLastWrittenProps();
         if (prevWritten == null) {
           init = true;
-          prevFillColor = null;
-          prevLineColor = null;
-          prevLineWidth = default;
-          prevTransformation = null;
+          prevFill = null;
+          prevStroke = null;
+          prevStrokeWidth = default;
+          prevX = default;
+          prevY = default;
+          prevWidth = default;
+          prevHeight = default;
         } else {
           init = false;
-          prevFillColor = prevWritten.Fill.CurrValue;
-          prevLineColor = prevWritten.Stroke.CurrValue;
-          prevLineWidth = prevWritten.StrokeWidth.CurrValue;
-          prevTransformation = new int[] { prevWritten.X.CurrValue, prevWritten.Y.CurrValue, prevWritten.Width.CurrValue, prevWritten.Height.CurrValue };
+          prevFill = prevWritten.Fill.CurrValue;
+          prevStroke = prevWritten.Stroke.CurrValue;
+          prevStrokeWidth = prevWritten.StrokeWidth.CurrValue;
+          prevX = prevWritten.X.CurrValue;
+          prevY = prevWritten.Y.CurrValue;
+          prevWidth = prevWritten.Width.CurrValue;
+          prevHeight = prevWritten.Height.CurrValue;
         }
 
         for (int i = start; i <= stop; i++) {
@@ -257,63 +265,73 @@ namespace SimSharp.Visualization.Pull {
               writer.WritePropertyName("fill");
               writer.WriteValue(fill);
               props.Fill.CurrValue = fill;
-              prevFillColor = fill;
+              prevFill = fill;
 
               string stroke = props.Stroke.GetValueAt(i);
               writer.WritePropertyName("stroke");
               writer.WriteValue(stroke);
               props.Stroke.CurrValue = stroke;
-              prevLineColor = stroke;
+              prevStroke = stroke;
 
               int strokeWidth = props.StrokeWidth.GetValueAt(i);
               writer.WritePropertyName("strokeWidth");
               writer.WriteValue(strokeWidth);
               props.StrokeWidth.CurrValue = strokeWidth;
-              prevLineWidth = strokeWidth;
+              prevStrokeWidth = strokeWidth;
 
               writer.WritePropertyName("visible");
               writer.WriteValue(true);
               props.Visible.CurrValue = true;
               currVisible = true;
 
-              int[] transformation = new int[] { props.X.GetValueAt(i), props.Y.GetValueAt(i), props.Width.GetValueAt(i), props.Height.GetValueAt(i) };
-              writer.WritePropertyName("t");
-              writer.WriteStartArray();
-              foreach (int t in transformation) {
-                writer.WriteValue(t);
-              }
-              props.X.CurrValue = transformation[0];
-              props.Y.CurrValue = transformation[1];
-              props.Width.CurrValue = transformation[2];
-              props.Height.CurrValue = transformation[3];
-              prevTransformation = transformation;
+              int x = props.X.GetValueAt(i);
+              writer.WritePropertyName("x");
+              writer.WriteValue(x);
+              props.X.CurrValue = x;
+              prevX = x;
 
-              writer.WriteEndArray();
+              int y = props.Y.GetValueAt(i);
+              writer.WritePropertyName("y");
+              writer.WriteValue(y);
+              props.Y.CurrValue = y;
+              prevY = y;
+
+              int width = props.Width.GetValueAt(i);
+              writer.WritePropertyName("width");
+              writer.WriteValue(width);
+              props.Width.CurrValue = width;
+              prevWidth = width;
+
+              int height = props.Height.GetValueAt(i);
+              writer.WritePropertyName("height");
+              writer.WriteValue(height);
+              props.Height.CurrValue = height;
+              prevHeight = height;
 
               init = false;
               props.Written = true;
             } else {
               string fill = props.Fill.GetValueAt(i);
-              if (prevFillColor != fill) {
+              if (prevFill != fill) {
                 writer.WritePropertyName("fill");
                 writer.WriteValue(fill);
-                prevFillColor = fill;
+                prevFill = fill;
               }
               props.Fill.CurrValue = fill;
 
               string stroke = props.Stroke.GetValueAt(i);
-              if (prevLineColor != stroke) {
+              if (prevStroke != stroke) {
                 writer.WritePropertyName("stroke");
                 writer.WriteValue(stroke);
-                prevLineColor = stroke;
+                prevStroke = stroke;
               }
               props.Stroke.CurrValue = stroke;
 
               int strokeWidth = props.StrokeWidth.GetValueAt(i);
-              if (prevLineWidth != strokeWidth) {
+              if (prevStrokeWidth != strokeWidth) {
                 writer.WritePropertyName("strokeWidth");
                 writer.WriteValue(strokeWidth);
-                prevLineWidth = strokeWidth;
+                prevStrokeWidth = strokeWidth;
               }
               props.StrokeWidth.CurrValue = strokeWidth;
 
@@ -324,20 +342,37 @@ namespace SimSharp.Visualization.Pull {
               }
               props.Visible.CurrValue = visible;
 
-              int[] transformation = new int[] { props.X.GetValueAt(i), props.Y.GetValueAt(i), props.Width.GetValueAt(i), props.Height.GetValueAt(i) };
-              if (!AllEqual(transformation, prevTransformation)) {
-                writer.WritePropertyName("t");
-                writer.WriteStartArray();
-                foreach (int t in transformation) {
-                  writer.WriteValue(t);
-                }
-                prevTransformation = transformation;
-                writer.WriteEndArray();
+              int x = props.X.GetValueAt(i);
+              if (prevX != x) {
+                writer.WritePropertyName("x");
+                writer.WriteValue(x);
+                prevX = x;
               }
-              props.X.CurrValue = transformation[0];
-              props.Y.CurrValue = transformation[1];
-              props.Width.CurrValue = transformation[2];
-              props.Height.CurrValue = transformation[3];
+              props.X.CurrValue = x;
+
+              int y = props.Y.GetValueAt(i);
+              if (prevY != y) {
+                writer.WritePropertyName("y");
+                writer.WriteValue(y);
+                prevY = y;
+              }
+              props.Y.CurrValue = y;
+
+              int width = props.Width.GetValueAt(i);
+              if (prevWidth != width) {
+                writer.WritePropertyName("width");
+                writer.WriteValue(width);
+                prevWidth = width;
+              }
+              props.Width.CurrValue = width;
+
+              int height = props.Height.GetValueAt(i);
+              if (prevHeight != height) {
+                writer.WritePropertyName("height");
+                writer.WriteValue(height);
+                prevHeight = height;
+              }
+              props.Height.CurrValue = height;
 
               props.Written = true;
             }

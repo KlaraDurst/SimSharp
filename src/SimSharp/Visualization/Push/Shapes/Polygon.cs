@@ -5,26 +5,21 @@ using System.Text;
 
 namespace SimSharp.Visualization.Push.Shapes {
   public class Polygon {
-    public List<int> XList { get; }
-    public List<int> YList { get; }
-    public int[] XYList { get; }
+    public int[] Points { get; }
 
-    public Polygon(params int[] xy) {
-      if (xy.Length % 2 != 0) {
+    public Polygon(params int[] points) {
+      if (points.Length % 2 != 0) {
         throw new ArgumentException("A polygon needs the same number of y and x coordinates");
       }
       else {
-        for (int i = 0; i < xy.Length; i+=2) {
-          XList.Add(xy[i]);
-          YList.Add(xy[i + 1]);
-        }
-
-        XYList = xy;
+        Points = points;
       }
     }
 
-    public int[] GetTransformation() {
-      return XYList;
+    public Dictionary<string, int[]> GetTransformation() {
+      return new Dictionary<string, int[]> {
+        { "points", Points },
+      };
     }
 
     public override bool Equals(object obj) {
@@ -32,12 +27,12 @@ namespace SimSharp.Visualization.Push.Shapes {
         return false;
       } else {
         Polygon p = (Polygon)obj;
-        return XList.SequenceEqual(p.XList) && YList.SequenceEqual(p.YList);
+        return Points.SequenceEqual(p.Points);
       }
     }
 
     public override int GetHashCode() {
-      return (XList, YList).GetHashCode();
+      return Points.GetHashCode();
     }
   }
 }

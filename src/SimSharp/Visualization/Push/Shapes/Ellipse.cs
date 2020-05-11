@@ -4,21 +4,26 @@ using System.Text;
 
 namespace SimSharp.Visualization.Push.Shapes {
   public class Ellipse {
-    public int X { get; }
-    public int Y { get; }
+    public int Cx { get; }
+    public int Cy { get; }
 
-    public int Radius1 { get; }
-    public int Radius2 { get; }
+    public int Rx { get; }
+    public int Ry { get; }
 
-    public Ellipse(int x, int y, int radius1, int radius2) {
-      X = x;
-      Y = y;
-      Radius1 = radius1;
-      Radius2 = radius2;
+    public Ellipse(int cx, int cy, int rx, int ry) {
+      Cx = cx;
+      Cy = cy;
+      Rx = rx;
+      Ry = ry;
     }
 
-    public int[] GetTransformation() {
-      return new int[] { X, Y, Radius1, Radius2 };
+    public Dictionary<string, int[]> GetTransformation() {
+      return new Dictionary<string, int[]> {
+        { "cx", new int[] { Cx } },
+        { "cy", new int[] { Cy } },
+        { "rx", new int[] { Rx } },
+        { "ry", new int[] { Ry } }
+      };
     }
 
     public override bool Equals(object obj) {
@@ -27,12 +32,12 @@ namespace SimSharp.Visualization.Push.Shapes {
       }
       else {
         Ellipse e = (Ellipse)obj;
-        return (X == e.X) && (Y == e.Y) && (Radius1 == e.Radius1) && (Radius2 == e.Radius2);
+        return (Cx == e.Cx) && (Cy == e.Cy) && (Rx == e.Rx) && (Ry == e.Ry);
       }
     }
 
     public override int GetHashCode() {
-      return (X, Y, Radius1, Radius2).GetHashCode();
+      return (Cx, Cy, Rx, Ry).GetHashCode();
     }
   }
 }

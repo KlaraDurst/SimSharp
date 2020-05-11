@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
@@ -203,16 +204,32 @@ namespace SimSharp.Visualization.Push {
         AnimationUnit animationUnit = props.Keep ? new AnimationUnit(startFrameNumber, stopFrameNumber, frameNumber) : new AnimationUnit(startFrameNumber, stopFrameNumber + 1, frameNumber + 1);
         animationUnit.AddFrame(GetInitFrame(props, 0, currVisible));
 
-        foreach (List<int> i in GetInterpolation(GetTransformation(props, 0), GetTransformation(props, 1), frameNumber - 1)) {
+        Dictionary<string, int[]> startTransformation = GetTransformation(props, 0);
+        Dictionary<string, int[]> stopTransformation = GetTransformation(props, 1);
+        Dictionary<string, List<int>[]> interpolation = new Dictionary<string, List<int>[]>(startTransformation.Count);
+
+        foreach (KeyValuePair<string, int[]> attr in startTransformation) {
+          stopTransformation.TryGetValue(attr.Key, out int[] value);
+          if (!attr.Value.SequenceEqual(value))
+            interpolation.Add(attr.Key, GetInterpolation(attr.Value, value, frameNumber - 1));
+        }
+
+        for (int i = 0; i < frameNumber - 1; i++) {
           writer.WritePropertyName(Name);
           writer.WriteStartObject();
 
-          writer.WritePropertyName("t");
-          writer.WriteStartArray();
-          foreach (int t in i) {
-            writer.WriteValue(t);
+          foreach (KeyValuePair<string, List<int>[]> attr in interpolation) {
+            writer.WritePropertyName(attr.Key);
+            if (attr.Value[i].Count < 2) {
+              writer.WriteValue(attr.Value[i][0]);
+            } else {
+              writer.WriteStartArray();
+              foreach (int val in attr.Value[i]) {
+                writer.WriteValue(val);
+              }
+              writer.WriteEndArray();
+            }
           }
-          writer.WriteEndArray();
 
           writer.WriteEndObject();
           animationUnit.AddFrame(stringWriter.ToString());
@@ -308,12 +325,19 @@ namespace SimSharp.Visualization.Push {
         writer.WriteValue(true);
       }
 
-      writer.WritePropertyName("t");
-      writer.WriteStartArray();
-      foreach (int t in GetTransformation(props, z)) {
-        writer.WriteValue(t);
+      foreach (KeyValuePair<string, int[]> attr in GetTransformation(props, z)) {
+        writer.WritePropertyName(attr.Key);
+        if (attr.Value.Length < 2) {
+          writer.WriteValue(attr.Value[0]);
+        }
+        else {
+          writer.WriteStartArray();
+          foreach (int val in attr.Value) {
+            writer.WriteValue(val);
+          }
+          writer.WriteEndArray();
+        }
       }
-      writer.WriteEndArray();
 
       writer.WriteEndObject();
       string frame = stringWriter.ToString();
@@ -337,7 +361,7 @@ namespace SimSharp.Visualization.Push {
       return frame;
     }
 
-    private int[] GetTransformation(AnimationProps props, int z) {
+    private Dictionary<string, int[]> GetTransformation(AnimationProps props, int z) {
       switch (Type) {
         case Shape.rect: return z==0 ? props.Rect0.GetTransformation() : props.Rect1.GetTransformation();
         case Shape.ellipse: return z == 0 ? props.Ellipse0.GetTransformation() : props.Ellipse1.GetTransformation();
@@ -347,9 +371,9 @@ namespace SimSharp.Visualization.Push {
     }
 
     // excl. start, incl. stop
-    private IEnumerable<List<int>> GetInterpolation(int[] start, int[] stop, int frameNumber) {
+    private List<int>[] GetInterpolation(int[] start, int[] stop, int frameNumber) {
       double interval = 1 / Convert.ToDouble(frameNumber);
-      List<List<int>> interpolation = new List<List<int>>(frameNumber);
+      List<int>[] interpolation = new List<int>[frameNumber];
 
       for (int i = 1; i <= frameNumber; i++) { // int i = 0; i < frameNumber; i++ to test if t is compared to former t when animation is updated
         List<int> l = new List<int>(start.Length);
@@ -359,10 +383,8 @@ namespace SimSharp.Visualization.Push {
           int val = Convert.ToInt32((1 - t) * start[j] + t * stop[j]);
           l.Add(val);
         }
-
-        interpolation.Add(l);
+        interpolation[i - 1] = l;
       }
-
       return interpolation;
     }
 

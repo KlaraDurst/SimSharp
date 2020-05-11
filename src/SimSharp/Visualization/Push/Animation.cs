@@ -8,7 +8,7 @@ using SimSharp.Visualization.Push.Shapes;
 
 namespace SimSharp.Visualization.Push {
   public class Animation : FramesProvider {
-    public enum Shape { rectangle, ellipse, polygon }
+    public enum Shape { rect, ellipse, polygon }
 
     public string Name { get; }
     public Shape Type { get; }
@@ -20,27 +20,27 @@ namespace SimSharp.Visualization.Push {
     private List<AnimationUnit> units;
 
     #region Constructors
-    public Animation(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env) 
-      : this(name, Shape.rectangle, time0, time1, env) {
-      AnimationProps props = new AnimationProps(rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep);
+    public Animation(string name, Rect rect0, Rect rect1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, Simulation env) 
+      : this(name, Shape.rect, time0, time1, env) {
+      AnimationProps props = new AnimationProps(rect0, rect1, time0, time1, fill, stroke, strokeWidth, keep);
       propsList.Add(time0, props);
 
       if (env.FillAnimation)
         FillUnits(props, false);
     }
 
-    public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env)
+    public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, Simulation env)
       : this(name, Shape.ellipse, time0, time1, env) {
-      AnimationProps props = new AnimationProps(ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep);
+      AnimationProps props = new AnimationProps(ellipse0, ellipse1, time0, time1, fill, stroke, strokeWidth, keep);
       propsList.Add(time0, props);
 
       if (env.FillAnimation)
         FillUnits(props, false);
     }
 
-    public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep, Simulation env)
+    public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, Simulation env)
       : this(name, Shape.polygon, time0, time1, env) {
-      AnimationProps props = new AnimationProps(polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep);
+      AnimationProps props = new AnimationProps(polygon0, polygon1, time0, time1, fill, stroke, strokeWidth, keep);
       propsList.Add(time0, props);
 
       if (env.FillAnimation)
@@ -61,27 +61,27 @@ namespace SimSharp.Visualization.Push {
     #endregion
 
     #region Update
-    public void Update(Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      CheckType(Shape.rectangle);
+    public void Update(Rect rect0, Rect rect1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
+      CheckType(Shape.rect);
       CheckTime(time0, time1);
 
-      AnimationProps props = new AnimationProps(rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep);
+      AnimationProps props = new AnimationProps(rect0, rect1, time0, time1, fill, stroke, strokeWidth, keep);
       Update(props);
     }
 
-    public void Update(Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
+    public void Update(Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
       CheckType(Shape.ellipse);
       CheckTime(time0, time1);
 
-      AnimationProps props = new AnimationProps(ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep);
+      AnimationProps props = new AnimationProps(ellipse0, ellipse1, time0, time1, fill, stroke, strokeWidth, keep);
       Update(props);
     }
 
-    public void Update(Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
+    public void Update(Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
       CheckType(Shape.polygon);
       CheckTime(time0, time1);
 
-      AnimationProps props = new AnimationProps(polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep);
+      AnimationProps props = new AnimationProps(polygon0, polygon1, time0, time1, fill, stroke, strokeWidth, keep);
       Update(props);
     }
 
@@ -119,14 +119,14 @@ namespace SimSharp.Visualization.Push {
     #endregion
 
     #region Get animation props
-    public Rectangle GetRectangle0() {
-      CheckType(Shape.rectangle);
-      return GetCurrentProps().Rectangle0;
+    public Rect GetRect0() {
+      CheckType(Shape.rect);
+      return GetCurrentProps().Rect0;
     }
 
-    public Rectangle GetRectangle1() {
-      CheckType(Shape.rectangle);
-      return GetCurrentProps().Rectangle1;
+    public Rect GetRect1() {
+      CheckType(Shape.rect);
+      return GetCurrentProps().Rect1;
     }
 
     public Ellipse GetEllipse0() {
@@ -150,15 +150,15 @@ namespace SimSharp.Visualization.Push {
     }
 
     public string GetFillColor() {
-      return GetCurrentProps().FillColor;
+      return GetCurrentProps().Fill;
     }
 
     public string GetLineColor() {
-      return GetCurrentProps().LineColor;
+      return GetCurrentProps().Stroke;
     }
     
     public int GetLineWidth() {
-      return GetCurrentProps().LineWidth;
+      return GetCurrentProps().StrokeWidth;
     }
 
     public DateTime GetTime0() {
@@ -261,7 +261,7 @@ namespace SimSharp.Visualization.Push {
 
     private bool ShapesEqual(AnimationProps props) {
       switch (Type) {
-        case Shape.rectangle: return props.Rectangle0.Equals(props.Rectangle1);
+        case Shape.rect: return props.Rect0.Equals(props.Rect1);
         case Shape.ellipse: return props.Ellipse0.Equals(props.Ellipse1);
         case Shape.polygon: return props.Polygon0.Equals(props.Polygon1);
         default: return false;
@@ -277,29 +277,29 @@ namespace SimSharp.Visualization.Push {
         writer.WritePropertyName("type");
         writer.WriteValue(Type.ToString());
 
-        writer.WritePropertyName("fillColor");
-        writer.WriteValue(props.FillColor);
+        writer.WritePropertyName("fill");
+        writer.WriteValue(props.Fill);
 
-        writer.WritePropertyName("lineColor");
-        writer.WriteValue(props.LineColor);
+        writer.WritePropertyName("stroke");
+        writer.WriteValue(props.Stroke);
 
-        writer.WritePropertyName("lineWidth");
-        writer.WriteValue(props.LineWidth);
+        writer.WritePropertyName("strokeWidth");
+        writer.WriteValue(props.StrokeWidth);
       } else {
 
-        if (prevWritten.FillColor != props.FillColor) {
-          writer.WritePropertyName("fillColor");
-          writer.WriteValue(props.FillColor);
+        if (prevWritten.Fill != props.Fill) {
+          writer.WritePropertyName("fill");
+          writer.WriteValue(props.Fill);
         }
 
-        if (prevWritten.LineColor != props.LineColor) {
-          writer.WritePropertyName("lineColor");
-          writer.WriteValue(props.LineColor);
+        if (prevWritten.Stroke != props.Stroke) {
+          writer.WritePropertyName("stroke");
+          writer.WriteValue(props.Stroke);
         }
 
-        if (prevWritten.LineWidth != props.LineWidth) {
-          writer.WritePropertyName("lineWidth");
-          writer.WriteValue(props.LineWidth);
+        if (prevWritten.StrokeWidth != props.StrokeWidth) {
+          writer.WritePropertyName("strokeWidth");
+          writer.WriteValue(props.StrokeWidth);
         }
       }
 
@@ -339,7 +339,7 @@ namespace SimSharp.Visualization.Push {
 
     private int[] GetTransformation(AnimationProps props, int z) {
       switch (Type) {
-        case Shape.rectangle: return z==0 ? props.Rectangle0.GetTransformation() : props.Rectangle1.GetTransformation();
+        case Shape.rect: return z==0 ? props.Rect0.GetTransformation() : props.Rect1.GetTransformation();
         case Shape.ellipse: return z == 0 ? props.Ellipse0.GetTransformation() : props.Ellipse1.GetTransformation();
         case Shape.polygon: return z == 0 ? props.Polygon0.GetTransformation() : props.Polygon1.GetTransformation();
         default: return null;

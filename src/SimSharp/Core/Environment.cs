@@ -823,28 +823,28 @@ namespace SimSharp {
       FillAnimation = fillAnimation;
     }
 
-    public Animation Animate(string name, Rectangle rectangle0, Rectangle rectangle1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      Animation animation = new Animation(name, rectangle0, rectangle1, time0, time1, fillColor, lineColor, lineWidth, keep, this);
+    public Animation Animate(string name, Rect rect0, Rect rect1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
+      Animation animation = new Animation(name, rect0, rect1, time0, time1, fill, stroke, strokeWidth, keep, this);
       AnimationBuilder.AddProvider(animation);
       return animation;
     }
 
-    public Animation Animate(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      Animation animation = new Animation(name, ellipse0, ellipse1, time0, time1, fillColor, lineColor, lineWidth, keep, this);
+    public Animation Animate(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
+      Animation animation = new Animation(name, ellipse0, ellipse1, time0, time1, fill, stroke, strokeWidth, keep, this);
       AnimationBuilder.AddProvider(animation);
       return animation;
     }
 
-    public Animation Animate(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fillColor, string lineColor, int lineWidth, bool keep) {
-      Animation animation = new Animation(name, polygon0, polygon1, time0, time1, fillColor, lineColor, lineWidth, keep, this);
+    public Animation Animate(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
+      Animation animation = new Animation(name, polygon0, polygon1, time0, time1, fill, stroke, strokeWidth, keep, this);
       AnimationBuilder.AddProvider(animation);
       return animation;
     }
 
-    public RectangleAnimation AnimateRectangle(string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fillColor, AnimationAttribute<string> lineColor, AnimationAttribute<int> lineWidth, AnimationAttribute<bool> visible) {
-      RectangleAnimation rectangleAnimation = new RectangleAnimation(name, x, y, width, height, fillColor, lineColor, lineWidth, visible, this);
-      AnimationBuilder.AddProvider(rectangleAnimation);
-      return rectangleAnimation;
+    public RectAnimation AnimateRect(string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible) {
+      RectAnimation rectAnimation = new RectAnimation(name, x, y, width, height, fill, stroke, strokeWidth, visible, this);
+      AnimationBuilder.AddProvider(rectAnimation);
+      return rectAnimation;
     }
     #endregion
   }

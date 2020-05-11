@@ -6,24 +6,24 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
 namespace SimSharp.Visualization.Pull {
-  public class RectangleAnimation : FramesProvider {
+  public class RectAnimation : FramesProvider {
     public string Name { get; set; }
 
     private Simulation env;
     private StringWriter stringWriter;
     private JsonTextWriter writer;
-    private List<RectangleAnimationProps> propsList;
+    private List<RectAnimationProps> propsList;
     private bool currVisible;
 
-    public RectangleAnimation (string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fillColor, AnimationAttribute<string> lineColor, AnimationAttribute<int> lineWidth, AnimationAttribute<bool> visible, Simulation env) {
+    public RectAnimation (string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible, Simulation env) {
       Name = Regex.Replace(name, @"\s+", "");
       this.env = env;
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
-      this.propsList = new List<RectangleAnimationProps>();
+      this.propsList = new List<RectAnimationProps>();
       this.currVisible = false;
 
-      RectangleAnimationProps props = new RectangleAnimationProps(x, y, width, height, fillColor, lineColor, lineWidth, visible);
+      RectAnimationProps props = new RectAnimationProps(x, y, width, height, fill, stroke, strokeWidth, visible);
       propsList.Add(props);
     }
 
@@ -44,16 +44,16 @@ namespace SimSharp.Visualization.Pull {
       return propsList[propsList.Count - 1].Height;
     }
 
-    public AnimationAttribute<string> GetFillColor() {
-      return propsList[propsList.Count - 1].FillColor;
+    public AnimationAttribute<string> GetFill() {
+      return propsList[propsList.Count - 1].Fill;
     }
 
-    public AnimationAttribute<string> GetLineColor() {
-      return propsList[propsList.Count - 1].LineColor;
+    public AnimationAttribute<string> GetStroke() {
+      return propsList[propsList.Count - 1].Stroke;
     }
 
-    public AnimationAttribute<int> GetLineWidth() {
-      return propsList[propsList.Count - 1].LineWidth;
+    public AnimationAttribute<int> GetStrokeWidth() {
+      return propsList[propsList.Count - 1].StrokeWidth;
     }
 
     public AnimationAttribute<bool> GetVisible() {
@@ -78,16 +78,16 @@ namespace SimSharp.Visualization.Pull {
       propsList[propsList.Count - 1].Height = height;
     }
 
-    public void SetFillColor(AnimationAttribute<string> fillColor) {
-      propsList[propsList.Count - 1].FillColor = fillColor;
+    public void SetFillColor(AnimationAttribute<string> fill) {
+      propsList[propsList.Count - 1].Fill = fill;
     }
 
-    public void SetLineColor(AnimationAttribute<string> lineColor) {
-      propsList[propsList.Count - 1].LineColor = lineColor;
+    public void SetLineColor(AnimationAttribute<string> stroke) {
+      propsList[propsList.Count - 1].Stroke = stroke;
     }
 
-    public void SetLineWidth(AnimationAttribute<int> lineWidth) {
-      propsList[propsList.Count - 1].LineWidth = lineWidth;
+    public void SetLineWidth(AnimationAttribute<int> strokeWidth) {
+      propsList[propsList.Count - 1].StrokeWidth = strokeWidth;
     }
 
     public void SetVisible(AnimationAttribute<bool> visible) {
@@ -95,9 +95,9 @@ namespace SimSharp.Visualization.Pull {
     }
     #endregion
 
-    private RectangleAnimationProps GetLastWrittenProps() {
+    private RectAnimationProps GetLastWrittenProps() {
       for (int j = propsList.Count - 1; j >= 0; j--) {
-        RectangleAnimationProps props = propsList[j];
+        RectAnimationProps props = propsList[j];
         if (props.Written)
           return props;
       }
@@ -118,23 +118,23 @@ namespace SimSharp.Visualization.Pull {
       return true;
     }
 
-    private string GetValueInitFrame(RectangleAnimationProps props) {
+    private string GetValueInitFrame(RectAnimationProps props) {
       writer.WritePropertyName(Name);
       writer.WriteStartObject();
 
-      RectangleAnimationProps prevWritten = GetLastWrittenProps();
+      RectAnimationProps prevWritten = GetLastWrittenProps();
       if (prevWritten == null && props.Visible.Value) {
         writer.WritePropertyName("type");
-        writer.WriteValue("rectangle");
+        writer.WriteValue("rect");
 
-        writer.WritePropertyName("fillColor");
-        writer.WriteValue(props.FillColor.Value);
+        writer.WritePropertyName("fill");
+        writer.WriteValue(props.Fill.Value);
 
-        writer.WritePropertyName("lineColor");
-        writer.WriteValue(props.LineColor.Value);
+        writer.WritePropertyName("stroke");
+        writer.WriteValue(props.Stroke.Value);
 
-        writer.WritePropertyName("lineWidth");
-        writer.WriteValue(props.LineWidth.Value);
+        writer.WritePropertyName("strokeWidth");
+        writer.WriteValue(props.StrokeWidth.Value);
 
         writer.WritePropertyName("visible");
         writer.WriteValue(true);
@@ -149,19 +149,19 @@ namespace SimSharp.Visualization.Pull {
 
         props.Written = true;
       } else if (prevWritten != null && props.Visible.Value) {
-        if (prevWritten.FillColor.CurrValue != props.FillColor.Value) {
-          writer.WritePropertyName("fillColor");
-          writer.WriteValue(props.FillColor.Value);
+        if (prevWritten.Fill.CurrValue != props.Fill.Value) {
+          writer.WritePropertyName("fill");
+          writer.WriteValue(props.Fill.Value);
         }
 
-        if (prevWritten.LineColor.CurrValue != props.LineColor.Value) {
-          writer.WritePropertyName("lineColor");
-          writer.WriteValue(props.LineColor.Value);
+        if (prevWritten.Stroke.CurrValue != props.Stroke.Value) {
+          writer.WritePropertyName("stroke");
+          writer.WriteValue(props.Stroke.Value);
         }
 
-        if (prevWritten.LineWidth.CurrValue != props.LineWidth.Value) {
-          writer.WritePropertyName("lineWidth");
-          writer.WriteValue(props.LineWidth.Value);
+        if (prevWritten.StrokeWidth.CurrValue != props.StrokeWidth.Value) {
+          writer.WritePropertyName("strokeWidth");
+          writer.WriteValue(props.StrokeWidth.Value);
         }
 
         if (!currVisible) {
@@ -208,7 +208,7 @@ namespace SimSharp.Visualization.Pull {
     }
 
     public List<AnimationUnit> FramesFromTo(int start, int stop) {
-      RectangleAnimationProps props = propsList[propsList.Count - 1];
+      RectAnimationProps props = propsList[propsList.Count - 1];
       List<AnimationUnit> affectedUnits = new List<AnimationUnit>();
 
       if (props.AllValues()) {
@@ -228,7 +228,7 @@ namespace SimSharp.Visualization.Pull {
         string prevLineColor;
         int prevLineWidth;
 
-        RectangleAnimationProps prevWritten = GetLastWrittenProps();
+        RectAnimationProps prevWritten = GetLastWrittenProps();
         if (prevWritten == null) {
           init = true;
           prevFillColor = null;
@@ -237,9 +237,9 @@ namespace SimSharp.Visualization.Pull {
           prevTransformation = null;
         } else {
           init = false;
-          prevFillColor = prevWritten.FillColor.CurrValue;
-          prevLineColor = prevWritten.LineColor.CurrValue;
-          prevLineWidth = prevWritten.LineWidth.CurrValue;
+          prevFillColor = prevWritten.Fill.CurrValue;
+          prevLineColor = prevWritten.Stroke.CurrValue;
+          prevLineWidth = prevWritten.StrokeWidth.CurrValue;
           prevTransformation = new int[] { prevWritten.X.CurrValue, prevWritten.Y.CurrValue, prevWritten.Width.CurrValue, prevWritten.Height.CurrValue };
         }
 
@@ -251,25 +251,25 @@ namespace SimSharp.Visualization.Pull {
           if (visible) {
             if (init) {
               writer.WritePropertyName("type");
-              writer.WriteValue("rectangle");
+              writer.WriteValue("rect");
 
-              string fillColor = props.FillColor.GetValueAt(i);
-              writer.WritePropertyName("fillColor");
-              writer.WriteValue(fillColor);
-              props.FillColor.CurrValue = fillColor;
-              prevFillColor = fillColor;
+              string fill = props.Fill.GetValueAt(i);
+              writer.WritePropertyName("fill");
+              writer.WriteValue(fill);
+              props.Fill.CurrValue = fill;
+              prevFillColor = fill;
 
-              string lineColor = props.LineColor.GetValueAt(i);
-              writer.WritePropertyName("lineColor");
-              writer.WriteValue(lineColor);
-              props.LineColor.CurrValue = lineColor;
-              prevLineColor = lineColor;
+              string stroke = props.Stroke.GetValueAt(i);
+              writer.WritePropertyName("stroke");
+              writer.WriteValue(stroke);
+              props.Stroke.CurrValue = stroke;
+              prevLineColor = stroke;
 
-              int lineWidth = props.LineWidth.GetValueAt(i);
-              writer.WritePropertyName("lineWidth");
-              writer.WriteValue(lineWidth);
-              props.LineWidth.CurrValue = lineWidth;
-              prevLineWidth = lineWidth;
+              int strokeWidth = props.StrokeWidth.GetValueAt(i);
+              writer.WritePropertyName("strokeWidth");
+              writer.WriteValue(strokeWidth);
+              props.StrokeWidth.CurrValue = strokeWidth;
+              prevLineWidth = strokeWidth;
 
               writer.WritePropertyName("visible");
               writer.WriteValue(true);
@@ -293,29 +293,29 @@ namespace SimSharp.Visualization.Pull {
               init = false;
               props.Written = true;
             } else {
-              string fillColor = props.FillColor.GetValueAt(i);
-              if (prevFillColor != fillColor) {
-                writer.WritePropertyName("fillColor");
-                writer.WriteValue(fillColor);
-                prevFillColor = fillColor;
+              string fill = props.Fill.GetValueAt(i);
+              if (prevFillColor != fill) {
+                writer.WritePropertyName("fill");
+                writer.WriteValue(fill);
+                prevFillColor = fill;
               }
-              props.FillColor.CurrValue = fillColor;
+              props.Fill.CurrValue = fill;
 
-              string lineColor = props.LineColor.GetValueAt(i);
-              if (prevLineColor != lineColor) {
-                writer.WritePropertyName("lineColor");
-                writer.WriteValue(lineColor);
-                prevLineColor = lineColor;
+              string stroke = props.Stroke.GetValueAt(i);
+              if (prevLineColor != stroke) {
+                writer.WritePropertyName("stroke");
+                writer.WriteValue(stroke);
+                prevLineColor = stroke;
               }
-              props.LineColor.CurrValue = lineColor;
+              props.Stroke.CurrValue = stroke;
 
-              int lineWidth = props.LineWidth.GetValueAt(i);
-              if (prevLineWidth != lineWidth) {
-                writer.WritePropertyName("lineWidth");
-                writer.WriteValue(lineWidth);
-                prevLineWidth = lineWidth;
+              int strokeWidth = props.StrokeWidth.GetValueAt(i);
+              if (prevLineWidth != strokeWidth) {
+                writer.WritePropertyName("strokeWidth");
+                writer.WriteValue(strokeWidth);
+                prevLineWidth = strokeWidth;
               }
-              props.LineWidth.CurrValue = lineWidth;
+              props.StrokeWidth.CurrValue = strokeWidth;
 
               if (!currVisible) {
                 writer.WritePropertyName("visible");

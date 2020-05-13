@@ -11,12 +11,12 @@ namespace SimSharp.Visualization.Pull {
     public AnimationAttribute<string> Fill { get; set; }
     public AnimationAttribute<string> Stroke { get; set; }
     public AnimationAttribute<int> StrokeWidth { get; set; }
-    public AnimationAttribute<bool> Visible { get; set; }
+    public AnimationAttribute<bool> Visibility { get; set; }
 
     public bool Written { get; set; }
 
     public RectAnimationProps(RectAnimationProps other) 
-      : this(other.X, other.Y, other.Height, other.Width, other.Fill, other.Stroke, other.StrokeWidth, other.Visible) { }
+      : this(other.X, other.Y, other.Height, other.Width, other.Fill, other.Stroke, other.StrokeWidth, other.Visibility) { }
 
     public RectAnimationProps(AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible) {
       X = x;
@@ -26,7 +26,7 @@ namespace SimSharp.Visualization.Pull {
       Fill = fill;
       Stroke = stroke;
       StrokeWidth = strokeWidth;
-      Visible = visible;
+      Visibility = visible;
       Written = false;
     }
 
@@ -45,7 +45,7 @@ namespace SimSharp.Visualization.Pull {
         return false;
       if (StrokeWidth.Function != null)
         return false;
-      if (Visible.Function != null)
+      if (Visibility.Function != null)
         return false;
       return true;
     }

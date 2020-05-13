@@ -15,7 +15,7 @@ namespace SimSharp.Visualization.Pull {
     private List<RectAnimationProps> propsList;
     private bool currVisible;
 
-    public RectAnimation (string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible, Simulation env) {
+    public RectAnimation (string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility, Simulation env) {
       Name = Regex.Replace(name, @"\s+", "");
       this.env = env;
       this.stringWriter = new StringWriter();
@@ -23,7 +23,7 @@ namespace SimSharp.Visualization.Pull {
       this.propsList = new List<RectAnimationProps>();
       this.currVisible = false;
 
-      RectAnimationProps props = new RectAnimationProps(x, y, width, height, fill, stroke, strokeWidth, visible);
+      RectAnimationProps props = new RectAnimationProps(x, y, width, height, fill, stroke, strokeWidth, visibility);
       propsList.Add(props);
     }
 
@@ -57,7 +57,7 @@ namespace SimSharp.Visualization.Pull {
     }
 
     public AnimationAttribute<bool> GetVisible() {
-      return propsList[propsList.Count - 1].Visible;
+      return propsList[propsList.Count - 1].Visibility;
     }
     #endregion
 
@@ -90,8 +90,8 @@ namespace SimSharp.Visualization.Pull {
       propsList[propsList.Count - 1].StrokeWidth = strokeWidth;
     }
 
-    public void SetVisible(AnimationAttribute<bool> visible) {
-      propsList[propsList.Count - 1].Visible = visible;
+    public void SetVisible(AnimationAttribute<bool> visibility) {
+      propsList[propsList.Count - 1].Visibility = visibility;
     }
     #endregion
 
@@ -109,7 +109,7 @@ namespace SimSharp.Visualization.Pull {
       writer.WriteStartObject();
 
       RectAnimationProps prevWritten = GetLastWrittenProps();
-      if (prevWritten == null && props.Visible.Value) {
+      if (prevWritten == null && props.Visibility.Value) {
         writer.WritePropertyName("type");
         writer.WriteValue("rect");
 
@@ -122,7 +122,7 @@ namespace SimSharp.Visualization.Pull {
         writer.WritePropertyName("strokeWidth");
         writer.WriteValue(props.StrokeWidth.Value);
 
-        writer.WritePropertyName("visible");
+        writer.WritePropertyName("visibility");
         writer.WriteValue(true);
         currVisible = true;
 
@@ -139,7 +139,7 @@ namespace SimSharp.Visualization.Pull {
         writer.WriteValue(props.Height.Value);
 
         props.Written = true;
-      } else if (prevWritten != null && props.Visible.Value) {
+      } else if (prevWritten != null && props.Visibility.Value) {
         if (prevWritten.Fill.CurrValue != props.Fill.Value) {
           writer.WritePropertyName("fill");
           writer.WriteValue(props.Fill.Value);
@@ -156,7 +156,7 @@ namespace SimSharp.Visualization.Pull {
         }
 
         if (!currVisible) {
-          writer.WritePropertyName("visible");
+          writer.WritePropertyName("visibility");
           writer.WriteValue(true);
           currVisible = true;
         }
@@ -182,9 +182,9 @@ namespace SimSharp.Visualization.Pull {
         }
 
         props.Written = true;
-      } else if (prevWritten != null && !props.Visible.Value) {
+      } else if (prevWritten != null && !props.Visibility.Value) {
         if (currVisible) {
-          writer.WritePropertyName("visible");
+          writer.WritePropertyName("visibility");
           writer.WriteValue(false);
           currVisible = false;
         }
@@ -255,8 +255,8 @@ namespace SimSharp.Visualization.Pull {
           writer.WritePropertyName(Name);
           writer.WriteStartObject();
 
-          bool visible = props.Visible.GetValueAt(i);
-          if (visible) {
+          bool visibility = props.Visibility.GetValueAt(i);
+          if (visibility) {
             if (init) {
               writer.WritePropertyName("type");
               writer.WriteValue("rect");
@@ -279,9 +279,9 @@ namespace SimSharp.Visualization.Pull {
               props.StrokeWidth.CurrValue = strokeWidth;
               prevStrokeWidth = strokeWidth;
 
-              writer.WritePropertyName("visible");
+              writer.WritePropertyName("visibility");
               writer.WriteValue(true);
-              props.Visible.CurrValue = true;
+              props.Visibility.CurrValue = true;
               currVisible = true;
 
               int x = props.X.GetValueAt(i);
@@ -336,11 +336,11 @@ namespace SimSharp.Visualization.Pull {
               props.StrokeWidth.CurrValue = strokeWidth;
 
               if (!currVisible) {
-                writer.WritePropertyName("visible");
+                writer.WritePropertyName("visibility");
                 writer.WriteValue(true);
                 currVisible = true;
               }
-              props.Visible.CurrValue = visible;
+              props.Visibility.CurrValue = visibility;
 
               int x = props.X.GetValueAt(i);
               if (prevX != x) {
@@ -378,9 +378,9 @@ namespace SimSharp.Visualization.Pull {
             }
           } else {
             if (currVisible) {
-              writer.WritePropertyName("visible");
+              writer.WritePropertyName("visibility");
               writer.WriteValue(false);
-              props.Visible.CurrValue = false;
+              props.Visibility.CurrValue = false;
               currVisible = false;
             }
           }

@@ -321,7 +321,7 @@ namespace SimSharp.Visualization.Push {
       }
 
       if (!currVisible) {
-        writer.WritePropertyName("visible");
+        writer.WritePropertyName("visibility");
         writer.WriteValue(true);
       }
 
@@ -351,7 +351,7 @@ namespace SimSharp.Visualization.Push {
       writer.WritePropertyName(Name);
       writer.WriteStartObject();
 
-      writer.WritePropertyName("visible");
+      writer.WritePropertyName("visibility");
       writer.WriteValue(false);
 
       writer.WriteEndObject();
@@ -375,7 +375,7 @@ namespace SimSharp.Visualization.Push {
       double interval = 1 / Convert.ToDouble(frameNumber);
       List<int>[] interpolation = new List<int>[frameNumber];
 
-      for (int i = 1; i <= frameNumber; i++) { // int i = 0; i < frameNumber; i++ to test if t is compared to former t when animation is updated
+      for (int i = 1; i <= frameNumber; i++) {
         List<int> l = new List<int>(start.Length);
 
         for (int j = 0; j < start.Length; j++) {

@@ -63,7 +63,7 @@ namespace SimSharp.Samples {
         275, 
         Convert.ToInt32(litersRequired), 
         CarHeight, 
-        "white", 
+        "none", 
         "yellow", 
         1,
         (Func<int, bool>) (t => gasStation.UsedBy(thisProcess)));
@@ -271,7 +271,7 @@ namespace SimSharp.Samples {
       env.AnimateRect("gasStationRight", 500, 400, 50, 100, "grey", "grey", 1, true);
 
       // Fuel pump visualization
-      env.AnimateRect("fuelPump", 400, 650, 250, GasStationSize, "white", "black", 1, true);
+      env.AnimateRect("fuelPump", 400, 650, 250, GasStationSize, "none", "black", 1, true);
       env.AnimateRect(
         "fuelPumpTank", 
         400, 

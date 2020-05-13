@@ -65,7 +65,7 @@ namespace SimSharp.Samples {
         // Car visualization (at gas station)
         Rect fullCarRect = new Rect(Convert.ToInt32((gasStation.InUse < 2 ? 275 : 475) + litersRequired/2), 275, Convert.ToInt32(litersRequired), CarHeight);
         Rect emptyCarRect = new Rect(fullCarRect.X - fullCarRect.Width / 2, fullCarRect.Y, 0, CarHeight);
-        Animation carAnimation = env.Animate(name, fullCarRect, fullCarRect, env.Now, env.Now, "white", "yellow", 1, true);
+        Animation carAnimation = env.Animate(name, fullCarRect, fullCarRect, env.Now, env.Now, "none", "yellow", 1, true);
 
         if (litersRequired > fuelPump.Level) {
           var level = fuelPump.Level;
@@ -82,7 +82,7 @@ namespace SimSharp.Samples {
 
           // Second car tank fill visualization
           fillCarAnimation.Update(tempCarRect, fullCarRect, env.Now, env.Now + secondRefuelDuration, "yellow", "yellow", 1, false);
-          carAnimation.Update(fullCarRect, fullCarRect, env.Now, env.Now + secondRefuelDuration, "white", "yellow", 1, false); 
+          carAnimation.Update(fullCarRect, fullCarRect, env.Now, env.Now + secondRefuelDuration, "none", "yellow", 1, false); 
 
           yield return env.Timeout(secondRefuelDuration);
         } else {
@@ -91,7 +91,7 @@ namespace SimSharp.Samples {
 
           // Car tank fill visualization
           env.Animate(name+"Tank", emptyCarRect, fullCarRect, env.Now, env.Now + refuelDuration, "yellow", "yellow", 1, false);
-          carAnimation.Update(fullCarRect, fullCarRect, env.Now, env.Now + refuelDuration, "white", "yellow", 1, false);
+          carAnimation.Update(fullCarRect, fullCarRect, env.Now, env.Now + refuelDuration, "none", "yellow", 1, false);
 
           yield return env.Timeout(refuelDuration);
         }
@@ -185,7 +185,7 @@ namespace SimSharp.Samples {
 
       // Fuel pump visualization
       Rect fuelPumpRect = new Rect(400, 650, 250, GasStationSize);
-      env.Animate("fuelPump", fuelPumpRect, fuelPumpRect, env.StartDate, env.StartDate, "white", "black", 1, true);
+      env.Animate("fuelPump", fuelPumpRect, fuelPumpRect, env.StartDate, env.StartDate, "none", "black", 1, true);
 
       env.Process(GasStationControl(env, fuelPump));
       env.Process(GasStationVisualization(env, fuelPump));

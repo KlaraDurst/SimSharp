@@ -28,11 +28,15 @@
         var frames = json["frames"];
 
         svgDocument = document.getElementById('canvas');
-        if (json.hasOwnProperty('width') && json.hasOwnProperty('height')) {
-          svgDocument.setAttributeNS(null, 'width', json['width']);
-          svgDocument.setAttributeNS(null, 'height', json['height']);
-          if (json.hasOwnProperty('startX') && json.hasOwnProperty('startY'))
-            svgDocument.setAttributeNS(null, 'viewBox', json['startX'].toString().concat(" ", json['startY'].toString(), " ", json['width'].toString(), " ", json['height'].toString()));
+        if (json.hasOwnProperty('width')) {
+          if (json.hasOwnProperty('height')) {
+            svgDocument.setAttributeNS(null, 'width', json['width']);
+            svgDocument.setAttributeNS(null, 'height', json['height']);
+            if (json.hasOwnProperty('startX')) {
+              if (json.hasOwnProperty('startY')) 
+                svgDocument.setAttributeNS(null, 'viewBox', json['startX'].toString().concat(" ", json['startY'].toString(), " ", json['width'].toString(), " ", json['height'].toString()));
+            }
+          }
         }
 
         svgns = "http://www.w3.org/2000/svg";

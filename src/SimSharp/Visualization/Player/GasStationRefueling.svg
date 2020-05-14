@@ -9,8 +9,8 @@
       var timeFromLastUpdate;
 
       function init() {
-        var json = JSON.parse(data);
-        var frames = json["frames"];
+        let json = JSON.parse(data);
+        let frames = json["frames"];
 
         svgDocument = document.getElementById('canvas');
         if (json.hasOwnProperty('width')) {
@@ -33,9 +33,10 @@
 
       function animate(timestamp) {
         if (!timeWhenLastUpdate)
-          timeWhenLastUpdate = timestamp;
-
-        timeFromLastUpdate = timestamp - timeWhenLastUpdate;
+          timeFromLastUpdate = timePerFrame + 1;
+        else
+          timeFromLastUpdate = timestamp - timeWhenLastUpdate;
+          
         if (timeFromLastUpdate > timePerFrame) {
           let result = it.next(); 
           if (!result.done) {

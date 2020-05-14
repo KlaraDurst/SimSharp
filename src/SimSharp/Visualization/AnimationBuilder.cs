@@ -33,6 +33,20 @@ namespace SimSharp.Visualization {
       writer.WritePropertyName("timeStep");
       writer.WriteValue(Props.TimeStep);
 
+      if (Props.SetCanvas) {
+        writer.WritePropertyName("width");
+        writer.WriteValue(Props.Width);
+
+        writer.WritePropertyName("height");
+        writer.WriteValue(Props.Height);
+
+        writer.WritePropertyName("startX");
+        writer.WriteValue(Props.StartX);
+
+        writer.WritePropertyName("startY");
+        writer.WriteValue(Props.StartY);
+      }
+
       writer.WritePropertyName("frames");
       writer.WriteStartArray();
     }

@@ -13,20 +13,20 @@
         let frames = json["frames"];
 
         svgDocument = document.getElementById('canvas');
-        if (json.hasOwnProperty('width')) {
-          if (json.hasOwnProperty('height')) {
-            svgDocument.setAttributeNS(null, 'width', json['width']);
-            svgDocument.setAttributeNS(null, 'height', json['height']);
-            if (json.hasOwnProperty('startX')) {
-              if (json.hasOwnProperty('startY')) 
-                svgDocument.setAttributeNS(null, 'viewBox', json['startX'].toString().concat(" ", json['startY'].toString(), " ", json['width'].toString(), " ", json['height'].toString()));
-            }
-          }
-        }
-
         svgns = "http://www.w3.org/2000/svg";
         timePerFrame = json["timeStep"] * 1000;
         it = makeFrameIterator(frames);
+
+        if (json.hasOwnProperty('width')) {
+          if (json.hasOwnProperty('height')) {
+            svgDocument.setAttribute('width', json['width']);
+            svgDocument.setAttribute('height', json['height']);
+            if (json.hasOwnProperty('startX')) {
+              if (json.hasOwnProperty('startY')) 
+                svgDocument.setAttribute('viewBox', json['startX'].toString().concat(" ", json['startY'].toString(), " ", json['width'].toString(), " ", json['height'].toString()));
+            }
+          }
+        }
 
         window.requestAnimationFrame(animate);
       }
@@ -51,7 +51,7 @@
         let shape = document.getElementById(key);
         if (shape == null) {
           shape = document.createElementNS(svgns, value['type']);
-          shape.setAttributeNS(null, "id", key);
+          shape.setAttribute("id", key);
           svgDocument.appendChild(shape);
         }
         Object.keys(value).forEach(e => updateAttr(shape, e, value[e]));
@@ -64,7 +64,7 @@
           else
             value = 'hidden';
         }
-        shape.setAttributeNS(null, key, value);
+        shape.setAttribute(key, value);
       }
 
       function makeFrameIterator(frames) {

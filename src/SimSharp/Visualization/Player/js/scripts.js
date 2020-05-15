@@ -25,7 +25,7 @@ function init() {
   prevSliderVal = 0;
   svgns = "http://www.w3.org/2000/svg";
   timePerFrame = json["timeStep"] * 1000;
-  speedStep = timePerFrame / 5;
+  speedStep = 100;
   it = makeFrameIterator(frames);
   requestId = undefined;
   totalFrameNumber = frames.length;
@@ -71,6 +71,7 @@ function init() {
     prevSliderVal = slider.value;
   })
 
+  numberInput.max = timePerFrame / speedStep;
   numberInput.addEventListener('input', () => {
     if (numberInput.value >= 0) {
       timePerFrame = json["timeStep"] * 1000 - speedStep * numberInput.value;

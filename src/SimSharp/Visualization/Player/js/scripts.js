@@ -17,11 +17,11 @@ function init() {
   let json = JSON.parse(data);
   let frames = json["frames"];
 
+  svgDocument = document.getElementById('canvas');
   btnIcon = document.getElementById('btnIcon')
   slider = document.getElementById('slider');
   textInput = document.getElementById('textInput');
   numberInput = document.getElementById('numberInput');
-  svgDocument = document.getElementById('canvas');
   prevSliderVal = 0;
   svgns = "http://www.w3.org/2000/svg";
   timePerFrame = json["timeStep"] * 1000;
@@ -53,12 +53,21 @@ function init() {
     if (wasPlaying) 
       start();
   })
-  slider.addEventListener('input', () => {
+  slider.addEventListener('change', () => {
     let sliderDiff = slider.value - prevSliderVal;
     textInput.value = slider.value;
     for (let i = 0; i < sliderDiff; i++) {
       animate();
     }
+
+    if (prevSliderVal > slider.value) {
+      svgDocument.textContent = '';
+      it = makeFrameIterator(frames);
+      for (let i = 0; i < slider.value; i++) {
+        animate();
+      }
+    }
+
     prevSliderVal = slider.value;
   })
 
@@ -113,7 +122,6 @@ function increment(timestamp) {
 }
 
 function animate() {
-  console.log("animate");
   let result = it.next();
   if (!result.done) {
     Object.keys(result.value).forEach(e => updateObj(e, result.value[e]));

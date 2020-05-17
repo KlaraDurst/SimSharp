@@ -60,7 +60,7 @@ function init() {
       animate();
     }
 
-    if (prevSliderVal > slider.value) {
+    if (parseInt(prevSliderVal) > parseInt(slider.value)) {
       svgDocument.textContent = '';
       it = makeFrameIterator(frames);
       for (let i = 0; i < slider.value; i++) {
@@ -73,10 +73,10 @@ function init() {
 
   numberInput.max = timePerFrame / speedStep;
   numberInput.addEventListener('input', () => {
-    if (numberInput.value >= 0) {
+    if (parseInt(numberInput.value) >= 0) {
       timePerFrame = timePerStep - speedStep * numberInput.value;
     }
-    else if (0 > numberInput.value){
+    else if (0 > parseInt(numberInput.value)){
       timePerFrame = timePerStep + speedStep * numberInput.value * -1;
     }
   }) 
@@ -116,7 +116,7 @@ function increment(timestamp) {
     timeWhenLastUpdate = timestamp;
   }
   
-  if (slider.value >= totalFrameNumber)
+  if (parseInt(slider.value) >= totalFrameNumber)
     stop();
   else 
     requestId = window.requestAnimationFrame(increment);

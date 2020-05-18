@@ -19,10 +19,10 @@ namespace SimSharp.Visualization.Push.Shapes {
 
     public Dictionary<string, int[]> GetTransformation() {
       return new Dictionary<string, int[]> {
-        { "x", new int[] { X } },
-        { "y", new int[] { Y } },
         { "width", new int[] { Width } },
-        { "height", new int[] { Height } }
+        { "height", new int[] { Height } },
+        { "x", new int[] { X } },
+        { "y", new int[] { Y } }
       };
     }
 

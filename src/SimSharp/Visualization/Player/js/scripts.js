@@ -1,5 +1,6 @@
 var svgDocument;
 var svgns;
+var frames;
 var timePerStep;
 var timePerFrame;
 var it;
@@ -16,8 +17,8 @@ var totalFrameNumber;
 
 function init() {
   let json = JSON.parse(data);
-  let frames = json["frames"];
 
+  frames = json["frames"];
   svgDocument = document.getElementById('canvas');
   playBtn = document.getElementById('playBtn');
   slider = document.getElementById('slider');
@@ -28,9 +29,9 @@ function init() {
   timePerStep = json["timeStep"] * 1000;
   timePerFrame = timePerStep;
   speedStep = 100;
-  it = makeFrameIterator(frames);
+  it = makeFrameIterator();
   requestId = undefined;
-  totalFrameNumber = frames.length;
+  totalFrameNumber = frames.length - 1;
 
   if (json.hasOwnProperty('width')) {
     if (json.hasOwnProperty('height')) {
@@ -54,45 +55,57 @@ function init() {
       start();
   })
   slider.addEventListener('change', () => {
-    let sliderDiff = slider.value - prevSliderVal;
-    textInput.value = msToTime(slider.value * timePerStep);
+    let sliderInt = parseInt(slider.value);
+    let sliderDiff = sliderInt - prevSliderVal;
+    textInput.value = msToTime(sliderInt * timePerStep);
     for (let i = 0; i < sliderDiff; i++) {
       animate();
     }
 
-    if (parseInt(prevSliderVal) > parseInt(slider.value)) {
-      svgDocument.textContent = '';
-      it = makeFrameIterator(frames);
-      for (let i = 0; i < slider.value; i++) {
+    if (prevSliderVal > sliderInt) {
+      reset();
+      for (let i = 0; i < sliderInt; i++) {
         animate();
       }
     }
 
-    prevSliderVal = slider.value;
+    prevSliderVal = sliderInt;
   })
 
   numberInput.max = timePerFrame / speedStep;
   numberInput.addEventListener('input', () => {
-    if (parseInt(numberInput.value) >= 0) {
-      timePerFrame = timePerStep - speedStep * numberInput.value;
+    let numberInputInt = parseInt(numberInput.value);
+    if (numberInputInt >= 0) {
+      timePerFrame = timePerStep - speedStep * numberInputInt;
     }
-    else if (0 > parseInt(numberInput.value)){
-      timePerFrame = timePerStep + speedStep * numberInput.value * -1;
+    else if (0 > numberInputInt){
+      timePerFrame = timePerStep + speedStep * numberInputInt * -1;
     }
   }) 
+
+  animate();
 }
 
 function start() {
-  if (slider.value < totalFrameNumber) {
-    playBtn.innerHTML = "&#10074;&#10074;";
-    requestId = window.requestAnimationFrame(increment);
+  if (parseInt(slider.value) >= totalFrameNumber) {
+    reset();
+    slider.value = 0;
+    prevSliderVal = 0;
   }
+  playBtn.innerHTML = "&#10074;&#10074;";
+  requestId = window.requestAnimationFrame(increment);
 }
 
 function stop() {
   playBtn.innerHTML = "&#9658;";
   window.cancelAnimationFrame(requestId);
   requestId = undefined;
+}
+
+function reset() {
+  svgDocument.textContent = '';
+  it = makeFrameIterator();
+  animate();
 }
 
 function toggle() {
@@ -149,7 +162,7 @@ function updateAttr(shape, key, value) {
   shape.setAttribute(key, value);
 }
 
-function makeFrameIterator(frames) {
+function makeFrameIterator() {
   let nextIndex = 0;
 
   const frameIterator = {

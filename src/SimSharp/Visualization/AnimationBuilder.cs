@@ -12,13 +12,17 @@ namespace SimSharp.Visualization {
     private StringWriter stringWriter;
     private JsonTextWriter writer;
     private List<FramesProvider> providers;
+    private DateTime prior;
     private int frameCount;
 
     public AnimationBuilder(AnimationBuilderProps props, Simulation env) {
       Props = props;
       this.env = env;
       this.providers = new List<FramesProvider>();
+      this.prior = env.StartDate;
       this.frameCount = 1;
+
+      Console.WriteLine(prior);
     }
 
     public void StartBuilding() {
@@ -55,10 +59,12 @@ namespace SimSharp.Visualization {
       providers.Add(provider);
     }
 
-    public void Step(DateTime prior, DateTime now) {
+    public void Step(DateTime now) {
       int startFrameNumber = Convert.ToInt32((prior - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
       int stopFrameNumber = Convert.ToInt32((now - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
-      int totalFrameNumber = Convert.ToInt32((now - prior).TotalSeconds / Props.TimeStep);
+      int totalFrameNumber = stopFrameNumber - startFrameNumber + 1;
+      // Console.WriteLine(prior + " - " + now);
+      // Console.WriteLine(startFrameNumber + " - " + stopFrameNumber + ": " + totalFrameNumber);
 
       if (totalFrameNumber > 0) {
         if (providers.Count > 0) {
@@ -121,6 +127,7 @@ namespace SimSharp.Visualization {
         } else {
           WriteEmptyObjects(totalFrameNumber);
         }
+        prior = now;
       }
     }
 

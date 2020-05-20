@@ -267,11 +267,10 @@ namespace SimSharp {
     public virtual void Step() {
       Event evt;
       var next = ScheduleQ.Dequeue();
-      DateTime prior = Now;
       Now = next.PrimaryPriority;
       evt = next.Event;
       if (FillAnimation)
-        AnimationBuilder.Step(prior, Now);
+        AnimationBuilder.Step(Now);
       evt.Process();
       ProcessedEvents++;
     }

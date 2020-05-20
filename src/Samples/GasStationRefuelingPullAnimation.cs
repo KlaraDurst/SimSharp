@@ -214,7 +214,7 @@ namespace SimSharp.Samples {
     public void Simulate(int rseed = RandomSeed) {
       // Setup and start the simulation
       // Create environment and start processes
-      var env = new Simulation(DateTime.Now.Date, rseed, new AnimationBuilderProps(1000, 1000, "Gas Station Refuelling", 1));
+      var env = new Simulation(DateTime.Now.Date, rseed, new AnimationBuilderProps(1000, 1000, "Gas Station Refueling", 1));
       env.Log("== Gas Station refuelling pull animation ==");
       var gasStation = new Resource(env, 2) {
         QueueLength = new TimeSeriesMonitor(env, name: "Waiting cars", collect: true),

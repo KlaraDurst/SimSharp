@@ -59,8 +59,8 @@ namespace SimSharp.Samples {
       Process thisProcess = env.ActiveProcess;
       RectAnimation fullCarAnimation = env.AnimateRect(
         name, 
-        Convert.ToInt32((gasStation.InUse < 1 ? 275 : 475) + litersRequired / 2), 
-        275, 
+        gasStation.InUse < 1 ? 275 : 475, 
+        250, 
         Convert.ToInt32(litersRequired), 
         CarHeight, 
         "none", 
@@ -86,19 +86,8 @@ namespace SimSharp.Samples {
 
           RectAnimation tempCarAnimation = env.AnimateRect(
             name + "Tank",
-            (Func<int, int>) (t => {
-              int startValue = fullCarAnimation.GetX().GetValueAt(t) - fullCarAnimation.GetWidth().GetValueAt(t) / 2;
-              int endValue = startValue + Convert.ToInt32(level / 2);
-              int currFrame = t - entryFrame;
-              if (currFrame >= 0 && currFrame <= firstRefuelFrames) {
-                double i = 1 / Convert.ToDouble(firstRefuelFrames) * currFrame;
-                return Convert.ToInt32((1 - i) * startValue + i * endValue);
-              } else if (currFrame < 0)
-                return startValue;
-              else
-                return endValue;
-            }),
-            275,
+            fullCarAnimation.GetX().GetValueAt(entryFrame),
+            250,
             (Func<int, int>) (t => {
               int endValue = Convert.ToInt32(level);
               int currFrame = t - entryFrame;
@@ -124,19 +113,6 @@ namespace SimSharp.Samples {
           int coninueFrame = Convert.ToInt32((refuelContinueTime - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
           int secondRefuelFrames = Convert.ToInt32(secondRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep) - 1;
 
-          tempCarAnimation.SetX((Func<int, int>) (t => {
-            int startValue = fullCarAnimation.GetX().GetValueAt(t) - fullCarAnimation.GetWidth().GetValueAt(t) / 2 + Convert.ToInt32(level) / 2;
-            int endValue = startValue + Convert.ToInt32(litersRequired / 2);
-            int currFrame = t - coninueFrame;
-            if (currFrame >= 0 && currFrame <= secondRefuelFrames) {
-              double i = 1 / Convert.ToDouble(secondRefuelFrames) * currFrame;
-              return Convert.ToInt32((1 - i) * startValue + i * endValue);
-            } else if (currFrame < 0)
-              return startValue;
-            else
-              return endValue;
-          }));
-
           tempCarAnimation.SetWidth((Func<int, int>) (t => {
             int startValue = Convert.ToInt32(level);
             int endValue = Convert.ToInt32(litersRequired);
@@ -159,23 +135,11 @@ namespace SimSharp.Samples {
           DateTime refuelStartTime = env.Now;
           int entryFrame = Convert.ToInt32((refuelStartTime - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
           int refuelDurationFrames = Convert.ToInt32(Math.Ceiling(refuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep)) - 1;
-          Console.WriteLine(name + " - " + refuelDurationFrames);
              
           env.AnimateRect(
             name + "Tank",
-            (Func<int, int>) (t => {
-              int startValue = fullCarAnimation.GetX().GetValueAt(t) - fullCarAnimation.GetWidth().GetValueAt(t) / 2;
-              int endValue = startValue + Convert.ToInt32(litersRequired / 2);
-              int currFrame = t - entryFrame;
-              if (currFrame >= 0 && currFrame <= refuelDurationFrames) {
-                double i = 1 / Convert.ToDouble(refuelDurationFrames) * currFrame;
-                return Convert.ToInt32((1 - i) * startValue + i * endValue);
-              } else if (currFrame < 0)
-                return startValue;
-              else
-                return endValue;
-            }), 
-            275,
+            fullCarAnimation.GetX().GetValueAt(entryFrame), 
+            250,
             (Func<int, int>) (t => {
               int endValue = Convert.ToInt32(litersRequired);
               int currFrame = t - entryFrame;
@@ -219,8 +183,8 @@ namespace SimSharp.Samples {
       Process thisProcess = env.ActiveProcess;
       env.AnimateRect(
         name, 
-        600, 
-        650, 
+        575, 
+        550, 
         50, 
         100, 
         "blue", 
@@ -267,15 +231,15 @@ namespace SimSharp.Samples {
       env.BuildAnimation(true);
 
       // Gas station visualization
-      env.AnimateRect("gasStationLeft", 300, 400, 50, 100, "grey", "grey", 1, true);
-      env.AnimateRect("gasStationRight", 500, 400, 50, 100, "grey", "grey", 1, true);
+      env.AnimateRect("gasStationLeft", 275, 350, 50, 100, "grey", "grey", 1, true);
+      env.AnimateRect("gasStationRight", 475, 350, 50, 100, "grey", "grey", 1, true);
 
       // Fuel pump visualization
-      env.AnimateRect("fuelPump", 400, 650, 250, GasStationSize, "none", "black", 1, true);
+      env.AnimateRect("fuelPump", 275, 550, 250, GasStationSize, "none", "black", 1, true);
       env.AnimateRect(
         "fuelPumpTank", 
-        400, 
-        (Func<int, int>)(t => Convert.ToInt32(550 + fuelPump.Level / 2)), 
+        275, 
+        (Func<int, int>)(t => Convert.ToInt32(550 + (GasStationSize - fuelPump.Level))), 
         250, 
         (Func<int, int>)(t => Convert.ToInt32(fuelPump.Level)), 
         "black", 

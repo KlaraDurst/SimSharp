@@ -66,40 +66,35 @@ namespace SimSharp {
     public TextWriter Logger { get; set; }
     public int ProcessedEvents { get; protected set; }
 
-    public bool AddFrameNumbers { get; protected set; }
-    public bool FillAnimation { get; protected set; }
     public AnimationBuilder AnimationBuilder { get; }
 
     public Simulation() : this(new DateTime(1970, 1, 1)) { }
-    public Simulation(AnimationBuilderProps animationBuilderProps) : this(new DateTime(1970, 1, 1), animationBuilderProps) { }
+    public Simulation(AnimationBuilder animationBuilder) : this(new DateTime(1970, 1, 1), animationBuilder) { }
     public Simulation(TimeSpan? defaultStep) : this(new DateTime(1970, 1, 1), defaultStep) { }
-    public Simulation(AnimationBuilderProps animationBuilderProps, TimeSpan? defaultStep) : this(new DateTime(1970, 1, 1), animationBuilderProps, defaultStep) { }
+    public Simulation(AnimationBuilder animationBuilder, TimeSpan? defaultStep) : this(new DateTime(1970, 1, 1), animationBuilder, defaultStep) { }
     public Simulation(int randomSeed, TimeSpan? defaultStep = null) : this(new DateTime(1970, 1, 1), randomSeed, defaultStep) { }
-    public Simulation(int randomSeed, AnimationBuilderProps animationBuilderProps, TimeSpan? defaultStep = null) : this(new DateTime(1970, 1, 1), randomSeed, animationBuilderProps, defaultStep) { }
-    public Simulation(DateTime initialDateTime, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, new AnimationBuilderProps(), defaultStep) { }
-    public Simulation(DateTime initialDateTime, AnimationBuilderProps animationBuilderProps, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, animationBuilderProps, defaultStep) { }
-    public Simulation(DateTime initialDateTime, int randomSeed, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, new AnimationBuilderProps(), defaultStep) { }
-    public Simulation(DateTime initialDateTime, int randomSeed, AnimationBuilderProps animationBuilderProps, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, animationBuilderProps, defaultStep) { }
-    public Simulation(IRandom random, DateTime initialDateTime, TimeSpan? defaultStep = null) : this(random, initialDateTime, new AnimationBuilderProps(), defaultStep) { }
-    public Simulation(IRandom random, DateTime initialDateTime, AnimationBuilderProps animationBuilderProps, TimeSpan? defaultStep = null) {
+    public Simulation(int randomSeed, AnimationBuilder animationBuilder, TimeSpan? defaultStep = null) : this(new DateTime(1970, 1, 1), randomSeed, animationBuilder, defaultStep) { }
+    public Simulation(DateTime initialDateTime, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, new AnimationBuilder(), defaultStep) { }
+    public Simulation(DateTime initialDateTime, AnimationBuilder animationBuilder, TimeSpan? defaultStep = null) : this(new PcgRandom(), initialDateTime, animationBuilder, defaultStep) { }
+    public Simulation(DateTime initialDateTime, int randomSeed, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, new AnimationBuilder(), defaultStep) { }
+    public Simulation(DateTime initialDateTime, int randomSeed, AnimationBuilder animationBuilder, TimeSpan? defaultStep = null) : this(new PcgRandom(randomSeed), initialDateTime, animationBuilder, defaultStep) { }
+    public Simulation(IRandom random, DateTime initialDateTime, TimeSpan? defaultStep = null) : this(random, initialDateTime, new AnimationBuilder(), defaultStep) { }
+    public Simulation(IRandom random, DateTime initialDateTime, AnimationBuilder animationBuilder, TimeSpan? defaultStep = null) {
       DefaultTimeStepSeconds = (defaultStep ?? TimeSpan.FromSeconds(1)).Duration().TotalSeconds;
       StartDate = initialDateTime;
       Now = initialDateTime;
       Random = random;
       ScheduleQ = new EventQueue(InitialMaxEvents);
       Logger = Console.Out;
-      AddFrameNumbers = false;
-      FillAnimation = false;
-      AnimationBuilder = new AnimationBuilder(animationBuilderProps, this);
+      AnimationBuilder = animationBuilder;
+      AnimationBuilder.Env = this;
 
       RunStarted += (o, e) => {
-        if (FillAnimation)
-          AnimationBuilder.StartBuilding();
+        AnimationBuilder.StartBuilding();
       };
 
       RunFinished += (o, e) => {
-        if (FillAnimation)
-          AnimationBuilder.StopBuilding();
+        AnimationBuilder.StopBuilding();
       };
     }
 
@@ -269,8 +264,7 @@ namespace SimSharp {
       var next = ScheduleQ.Dequeue();
       Now = next.PrimaryPriority;
       evt = next.Event;
-      if (FillAnimation)
-        AnimationBuilder.Step(Now);
+      AnimationBuilder.Step(Now);
       evt.Process();
       ProcessedEvents++;
     }
@@ -810,40 +804,6 @@ namespace SimSharp {
     }
     public Timeout TimeoutLogNormal2(TimeSpan mean, TimeSpan stdev) {
       return TimeoutLogNormal2(Random, mean, stdev);
-    }
-    #endregion
-
-    #region Visualization
-    public void DebugAnimation(bool addFrameNumbers) {
-      AddFrameNumbers = addFrameNumbers;
-    }
-
-    public void BuildAnimation(bool fillAnimation) {
-      FillAnimation = fillAnimation;
-    }
-
-    public Animation Animate(string name, Rect rect0, Rect rect1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
-      Animation animation = new Animation(name, rect0, rect1, time0, time1, fill, stroke, strokeWidth, keep, this);
-      AnimationBuilder.AddProvider(animation);
-      return animation;
-    }
-
-    public Animation Animate(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
-      Animation animation = new Animation(name, ellipse0, ellipse1, time0, time1, fill, stroke, strokeWidth, keep, this);
-      AnimationBuilder.AddProvider(animation);
-      return animation;
-    }
-
-    public Animation Animate(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
-      Animation animation = new Animation(name, polygon0, polygon1, time0, time1, fill, stroke, strokeWidth, keep, this);
-      AnimationBuilder.AddProvider(animation);
-      return animation;
-    }
-
-    public RectAnimation AnimateRect(string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible) {
-      RectAnimation rectAnimation = new RectAnimation(name, x, y, width, height, fill, stroke, strokeWidth, visible, this);
-      AnimationBuilder.AddProvider(rectAnimation);
-      return rectAnimation;
     }
     #endregion
   }

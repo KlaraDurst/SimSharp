@@ -14,44 +14,44 @@ namespace SimSharp.Visualization.Push {
     public string Name { get; }
     public Shape Type { get; }
 
-    private Simulation env;
+    private AnimationBuilder animationBuilder;
     private StringWriter stringWriter;
     private JsonTextWriter writer;
     private SortedList<DateTime, AnimationProps> propsList;
     private List<AnimationUnit> units;
 
     #region Constructors
-    public Animation(string name, Rect rect0, Rect rect1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, Simulation env) 
-      : this(name, Shape.rect, time0, time1, env) {
+    public Animation(string name, Rect rect0, Rect rect1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, AnimationBuilder animationBuilder) 
+      : this(name, Shape.rect, time0, time1, animationBuilder) {
       AnimationProps props = new AnimationProps(rect0, rect1, time0, time1, fill, stroke, strokeWidth, keep);
       propsList.Add(time0, props);
 
-      if (env.FillAnimation)
+      if (animationBuilder.EnableAnimation)
         FillUnits(props, false);
     }
 
-    public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, Simulation env)
-      : this(name, Shape.ellipse, time0, time1, env) {
+    public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, AnimationBuilder animationBuilder)
+      : this(name, Shape.ellipse, time0, time1, animationBuilder) {
       AnimationProps props = new AnimationProps(ellipse0, ellipse1, time0, time1, fill, stroke, strokeWidth, keep);
       propsList.Add(time0, props);
 
-      if (env.FillAnimation)
+      if (animationBuilder.EnableAnimation)
         FillUnits(props, false);
     }
 
-    public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, Simulation env)
-      : this(name, Shape.polygon, time0, time1, env) {
+    public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, AnimationBuilder animationBuilder)
+      : this(name, Shape.polygon, time0, time1, animationBuilder) {
       AnimationProps props = new AnimationProps(polygon0, polygon1, time0, time1, fill, stroke, strokeWidth, keep);
       propsList.Add(time0, props);
 
-      if (env.FillAnimation)
+      if (animationBuilder.EnableAnimation)
         FillUnits(props, false);
     }
 
-    private Animation(string name, Shape type, DateTime time0, DateTime time1, Simulation env) {
+    private Animation(string name, Shape type, DateTime time0, DateTime time1, AnimationBuilder animationBuilder) {
       Name = Regex.Replace(name, @"\s+", "");
       Type = type;
-      this.env = env;
+      this.animationBuilder = animationBuilder;
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
       this.propsList = new SortedList<DateTime, AnimationProps>();
@@ -95,9 +95,9 @@ namespace SimSharp.Visualization.Push {
       }
       propsList.Add(props.Time0, props);
 
-      if (env.FillAnimation) {
-        int startFrameNumber = Convert.ToInt32((props.Time0 - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
-        int stopFrameNumber = Convert.ToInt32((props.Time1 - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+      if (animationBuilder.EnableAnimation) {
+        int startFrameNumber = Convert.ToInt32((props.Time0 - animationBuilder.Env.StartDate).TotalSeconds / animationBuilder.TimeStep) + 1;
+        int stopFrameNumber = Convert.ToInt32((props.Time1 - animationBuilder.Env.StartDate).TotalSeconds / animationBuilder.TimeStep);
 
         units.RemoveAll(unit => unit.Start >= startFrameNumber);
         foreach (AnimationUnit unit in units) {
@@ -176,8 +176,8 @@ namespace SimSharp.Visualization.Push {
     #endregion
 
     private void FillUnits(AnimationProps props, bool currVisible) {
-      int startFrameNumber = Convert.ToInt32((props.Time0 - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
-      int stopFrameNumber = Convert.ToInt32((props.Time1 - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep);
+      int startFrameNumber = Convert.ToInt32((props.Time0 - animationBuilder.Env.StartDate).TotalSeconds / animationBuilder.TimeStep) + 1;
+      int stopFrameNumber = Convert.ToInt32((props.Time1 - animationBuilder.Env.StartDate).TotalSeconds / animationBuilder.TimeStep);
 
       if (currVisible && props.Time0.Equals(props.Time1) && !props.Keep) {
         AnimationUnit unit = new AnimationUnit(startFrameNumber, startFrameNumber, 1);
@@ -246,7 +246,7 @@ namespace SimSharp.Visualization.Push {
 
     private AnimationProps GetCurrentProps() {
       for (int j = propsList.Count - 1; j >= 0; j--) {
-        if (propsList.Keys[j] <= env.Now)
+        if (propsList.Keys[j] <= animationBuilder.Env.Now)
           return propsList.Values[j];
       }
       return propsList.Values[0];
@@ -266,7 +266,7 @@ namespace SimSharp.Visualization.Push {
         throw new ArgumentException("time1 must be after time0.");
       if (!time0.Equals(time1) && (time1 - time0).TotalMilliseconds < 1000)
         throw new ArgumentException("the difference between time0 and time1 must be greater than or equal to 1 second.");
-      if (time0 > env.Now)
+      if (time0 > animationBuilder.Env.Now)
         throw new ArgumentException("time0 can not be in the past");
     }
     

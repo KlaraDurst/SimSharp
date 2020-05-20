@@ -57,7 +57,7 @@ namespace SimSharp.Samples {
 
       // Car visualization (at gas station)
       Process thisProcess = env.ActiveProcess;
-      RectAnimation fullCarAnimation = env.AnimateRect(
+      RectAnimation fullCarAnimation = env.AnimationBuilder.AnimateRect(
         name, 
         gasStation.InUse < 1 ? 275 : 475, 
         250, 
@@ -81,10 +81,10 @@ namespace SimSharp.Samples {
 
           // First car tank fill visualization
           DateTime refuelStartTime = env.Now;
-          int entryFrame = Convert.ToInt32((refuelStartTime - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
-          int firstRefuelFrames = Convert.ToInt32(firstRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep) - 1;
+          int entryFrame = Convert.ToInt32((refuelStartTime - env.StartDate).TotalSeconds / env.AnimationBuilder.TimeStep) + 1;
+          int firstRefuelFrames = Convert.ToInt32(firstRefuelDuration.TotalSeconds / env.AnimationBuilder.TimeStep) - 1;
 
-          RectAnimation tempCarAnimation = env.AnimateRect(
+          RectAnimation tempCarAnimation = env.AnimationBuilder.AnimateRect(
             name + "Tank",
             fullCarAnimation.GetX().GetValueAt(entryFrame),
             250,
@@ -110,8 +110,8 @@ namespace SimSharp.Samples {
 
           // Second car tank fill visualization
           DateTime refuelContinueTime = env.Now;
-          int coninueFrame = Convert.ToInt32((refuelContinueTime - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
-          int secondRefuelFrames = Convert.ToInt32(secondRefuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep) - 1;
+          int coninueFrame = Convert.ToInt32((refuelContinueTime - env.StartDate).TotalSeconds / env.AnimationBuilder.TimeStep) + 1;
+          int secondRefuelFrames = Convert.ToInt32(secondRefuelDuration.TotalSeconds / env.AnimationBuilder.TimeStep) - 1;
 
           tempCarAnimation.SetWidth((Func<int, int>) (t => {
             int startValue = Convert.ToInt32(level);
@@ -133,10 +133,10 @@ namespace SimSharp.Samples {
 
           // Car tank fill visualization
           DateTime refuelStartTime = env.Now;
-          int entryFrame = Convert.ToInt32((refuelStartTime - env.StartDate).TotalSeconds / env.AnimationBuilder.Props.TimeStep) + 1;
-          int refuelDurationFrames = Convert.ToInt32(Math.Ceiling(refuelDuration.TotalSeconds / env.AnimationBuilder.Props.TimeStep)) - 1;
-             
-          env.AnimateRect(
+          int entryFrame = Convert.ToInt32((refuelStartTime - env.StartDate).TotalSeconds / env.AnimationBuilder.TimeStep) + 1;
+          int refuelDurationFrames = Convert.ToInt32(Math.Ceiling(refuelDuration.TotalSeconds / env.AnimationBuilder.TimeStep)) - 1;
+
+          env.AnimationBuilder.AnimateRect(
             name + "Tank",
             fullCarAnimation.GetX().GetValueAt(entryFrame), 
             250,
@@ -181,7 +181,7 @@ namespace SimSharp.Samples {
     private IEnumerable<Event> TankTruck(string name, Simulation env, Container fuelPump) {
       // Tank truck visualization
       Process thisProcess = env.ActiveProcess;
-      env.AnimateRect(
+      env.AnimationBuilder.AnimateRect(
         name, 
         575, 
         550, 
@@ -214,7 +214,7 @@ namespace SimSharp.Samples {
     public void Simulate(int rseed = RandomSeed) {
       // Setup and start the simulation
       // Create environment and start processes
-      var env = new Simulation(DateTime.Now.Date, rseed, new AnimationBuilderProps(1000, 1000, "Gas Station Refueling", 1));
+      var env = new Simulation(DateTime.Now.Date, rseed, new AnimationBuilder(1000, 1000, "Gas Station Refueling", 1));
       env.Log("== Gas Station refuelling pull animation ==");
       var gasStation = new Resource(env, 2) {
         QueueLength = new TimeSeriesMonitor(env, name: "Waiting cars", collect: true),
@@ -227,16 +227,16 @@ namespace SimSharp.Samples {
       };
 
       // BuildAnimation has to be turned on before first Animation is created
-      env.DebugAnimation(false);
-      env.BuildAnimation(true);
+      env.AnimationBuilder.DebugAnimation = false;
+      env.AnimationBuilder.EnableAnimation = true;
 
       // Gas station visualization
-      env.AnimateRect("gasStationLeft", 275, 350, 50, 100, "grey", "grey", 1, true);
-      env.AnimateRect("gasStationRight", 475, 350, 50, 100, "grey", "grey", 1, true);
+      env.AnimationBuilder.AnimateRect("gasStationLeft", 275, 350, 50, 100, "grey", "grey", 1, true);
+      env.AnimationBuilder.AnimateRect("gasStationRight", 475, 350, 50, 100, "grey", "grey", 1, true);
 
       // Fuel pump visualization
-      env.AnimateRect("fuelPump", 275, 550, 250, GasStationSize, "none", "black", 1, true);
-      env.AnimateRect(
+      env.AnimationBuilder.AnimateRect("fuelPump", 275, 550, 250, GasStationSize, "none", "black", 1, true);
+      env.AnimationBuilder.AnimateRect(
         "fuelPumpTank", 
         275, 
         (Func<int, int>)(t => Convert.ToInt32(550 + (GasStationSize - fuelPump.Level))), 

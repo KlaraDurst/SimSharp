@@ -9,15 +9,13 @@ namespace SimSharp.Visualization.Pull {
   public class RectAnimation : FramesProvider {
     public string Name { get; set; }
 
-    private Simulation env; // TODO frames number for debugging
     private StringWriter stringWriter;
     private JsonTextWriter writer;
     private List<RectAnimationProps> propsList;
     private bool currVisible;
 
-    public RectAnimation (string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility, Simulation env) {
+    public RectAnimation (string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
       Name = Regex.Replace(name, @"\s+", "");
-      this.env = env;
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
       this.propsList = new List<RectAnimationProps>();

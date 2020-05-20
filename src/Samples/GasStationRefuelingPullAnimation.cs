@@ -275,7 +275,7 @@ namespace SimSharp.Samples {
       env.AnimateRect(
         "fuelPumpTank", 
         400, 
-        (Func<int, int>)(t => Convert.ToInt32(550 + (GasStationSize - fuelPump.Level / 2))), 
+        (Func<int, int>)(t => Convert.ToInt32(550 + fuelPump.Level / 2)), 
         250, 
         (Func<int, int>)(t => Convert.ToInt32(fuelPump.Level)), 
         "black", 

@@ -126,17 +126,17 @@ namespace SimSharp.Visualization.Pull {
         writer.WriteValue(true);
         currVisible = true;
 
-        writer.WritePropertyName("width");
-        writer.WriteValue(props.Width.Value);
-
-        writer.WritePropertyName("height");
-        writer.WriteValue(props.Height.Value);
-
         writer.WritePropertyName("x");
         writer.WriteValue(props.X.Value);
 
         writer.WritePropertyName("y");
         writer.WriteValue(props.Y.Value);
+
+        writer.WritePropertyName("width");
+        writer.WriteValue(props.Width.Value);
+
+        writer.WritePropertyName("height");
+        writer.WriteValue(props.Height.Value);
 
         props.Written = true;
       } else if (prevWritten != null && props.Visibility.Value) {
@@ -161,16 +161,6 @@ namespace SimSharp.Visualization.Pull {
           currVisible = true;
         }
 
-        if (prevWritten.Width.CurrValue != props.Width.Value) {
-          writer.WritePropertyName("width");
-          writer.WriteValue(props.Width.Value);
-        }
-
-        if (prevWritten.Height.CurrValue != props.Height.Value) {
-          writer.WritePropertyName("height");
-          writer.WriteValue(props.Height.Value);
-        }
-
         if (prevWritten.X.CurrValue != props.X.Value) {
           writer.WritePropertyName("x");
           writer.WriteValue(props.X.Value);
@@ -179,6 +169,16 @@ namespace SimSharp.Visualization.Pull {
         if (prevWritten.Y.CurrValue != props.Y.Value) {
           writer.WritePropertyName("y");
           writer.WriteValue(props.Y.Value);
+        }
+
+        if (prevWritten.Width.CurrValue != props.Width.Value) {
+          writer.WritePropertyName("width");
+          writer.WriteValue(props.Width.Value);
+        }
+
+        if (prevWritten.Height.CurrValue != props.Height.Value) {
+          writer.WritePropertyName("height");
+          writer.WriteValue(props.Height.Value);
         }
 
         props.Written = true;
@@ -284,18 +284,6 @@ namespace SimSharp.Visualization.Pull {
               props.Visibility.CurrValue = true;
               currVisible = true;
 
-              int width = props.Width.GetValueAt(i);
-              writer.WritePropertyName("width");
-              writer.WriteValue(width);
-              props.Width.CurrValue = width;
-              prevWidth = width;
-
-              int height = props.Height.GetValueAt(i);
-              writer.WritePropertyName("height");
-              writer.WriteValue(height);
-              props.Height.CurrValue = height;
-              prevHeight = height;
-
               int x = props.X.GetValueAt(i);
               writer.WritePropertyName("x");
               writer.WriteValue(x);
@@ -307,6 +295,18 @@ namespace SimSharp.Visualization.Pull {
               writer.WriteValue(y);
               props.Y.CurrValue = y;
               prevY = y;
+
+              int width = props.Width.GetValueAt(i);
+              writer.WritePropertyName("width");
+              writer.WriteValue(width);
+              props.Width.CurrValue = width;
+              prevWidth = width;
+
+              int height = props.Height.GetValueAt(i);
+              writer.WritePropertyName("height");
+              writer.WriteValue(height);
+              props.Height.CurrValue = height;
+              prevHeight = height;
 
               init = false;
               props.Written = true;
@@ -342,22 +342,6 @@ namespace SimSharp.Visualization.Pull {
               }
               props.Visibility.CurrValue = visibility;
 
-              int width = props.Width.GetValueAt(i);
-              if (prevWidth != width) {
-                writer.WritePropertyName("width");
-                writer.WriteValue(width);
-                prevWidth = width;
-              }
-              props.Width.CurrValue = width;
-
-              int height = props.Height.GetValueAt(i);
-              if (prevHeight != height) {
-                writer.WritePropertyName("height");
-                writer.WriteValue(height);
-                prevHeight = height;
-              }
-              props.Height.CurrValue = height;
-
               int x = props.X.GetValueAt(i);
               if (prevX != x) {
                 writer.WritePropertyName("x");
@@ -373,6 +357,22 @@ namespace SimSharp.Visualization.Pull {
                 prevY = y;
               }
               props.Y.CurrValue = y;
+
+              int width = props.Width.GetValueAt(i);
+              if (prevWidth != width) {
+                writer.WritePropertyName("width");
+                writer.WriteValue(width);
+                prevWidth = width;
+              }
+              props.Width.CurrValue = width;
+
+              int height = props.Height.GetValueAt(i);
+              if (prevHeight != height) {
+                writer.WritePropertyName("height");
+                writer.WriteValue(height);
+                prevHeight = height;
+              }
+              props.Height.CurrValue = height;
 
               props.Written = true;
             }

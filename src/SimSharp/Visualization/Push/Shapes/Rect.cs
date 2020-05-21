@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace SimSharp.Visualization.Push.Shapes {
-  public class Rect {
+  public class Rect : Shape {
     public int X { get; }
     public int Y { get; }
 
@@ -17,7 +17,7 @@ namespace SimSharp.Visualization.Push.Shapes {
       Height = height;
     }
 
-    public Dictionary<string, int[]> GetTransformation() {
+    public override Dictionary<string, int[]> GetAttributes() {
       return new Dictionary<string, int[]> {
         { "x", new int[] { X } },
         { "y", new int[] { Y } },

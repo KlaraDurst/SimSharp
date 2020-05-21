@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 namespace SimSharp.Visualization.Push.Shapes {
-  public class Polygon {
+  public class Polygon : Shape {
     public int[] Points { get; }
 
     public Polygon(params int[] points) {
@@ -16,7 +16,7 @@ namespace SimSharp.Visualization.Push.Shapes {
       }
     }
 
-    public Dictionary<string, int[]> GetTransformation() {
+    public override Dictionary<string, int[]> GetAttributes() {
       return new Dictionary<string, int[]> {
         { "points", Points },
       };

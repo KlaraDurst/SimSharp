@@ -125,7 +125,7 @@ namespace SimSharp.Samples {
       while (true) {
         yield return fuelPump.WhenChange();
         // Visualization has to be updated
-        Rect currFuelPumpRect = fuelPumpAnimation.GetRect0();
+        Rect currFuelPumpRect = (Rect) fuelPumpAnimation.GetShape0();
         Rect levelFuelPumpRect = new Rect(currFuelPumpRect.X, Convert.ToInt32(currFuelPumpRect.Y + currFuelPumpRect.Height - fuelPump.Level), 250, Convert.ToInt32(fuelPump.Level));
         fuelPumpAnimation.Update(currFuelPumpRect, levelFuelPumpRect, env.Now, env.Now, "black", "black", 1, true);
       }

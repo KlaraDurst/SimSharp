@@ -9,7 +9,6 @@ using SimSharp.Visualization.Push.Shapes;
 
 namespace SimSharp.Visualization.Push {
   public class Animation : FramesProvider {
-    public enum Shape { rect, ellipse, polygon }
 
     public string Name { get; }
     public Shape Type { get; }
@@ -21,36 +20,17 @@ namespace SimSharp.Visualization.Push {
     private List<AnimationUnit> units;
 
     #region Constructors
-    public Animation(string name, Rect rect0, Rect rect1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, AnimationBuilder animationBuilder) 
-      : this(name, Shape.rect, time0, time1, animationBuilder) {
-      AnimationProps props = new AnimationProps(rect0, rect1, time0, time1, fill, stroke, strokeWidth, keep);
+    public Animation(string name, Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, AnimationBuilder animationBuilder) 
+      : this(name, time0, time1, animationBuilder) {
+      AnimationProps props = new AnimationProps(shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep);
       propsList.Add(time0, props);
 
       if (animationBuilder.EnableAnimation)
         FillUnits(props, false);
     }
 
-    public Animation(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, AnimationBuilder animationBuilder)
-      : this(name, Shape.ellipse, time0, time1, animationBuilder) {
-      AnimationProps props = new AnimationProps(ellipse0, ellipse1, time0, time1, fill, stroke, strokeWidth, keep);
-      propsList.Add(time0, props);
-
-      if (animationBuilder.EnableAnimation)
-        FillUnits(props, false);
-    }
-
-    public Animation(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, AnimationBuilder animationBuilder)
-      : this(name, Shape.polygon, time0, time1, animationBuilder) {
-      AnimationProps props = new AnimationProps(polygon0, polygon1, time0, time1, fill, stroke, strokeWidth, keep);
-      propsList.Add(time0, props);
-
-      if (animationBuilder.EnableAnimation)
-        FillUnits(props, false);
-    }
-
-    private Animation(string name, Shape type, DateTime time0, DateTime time1, AnimationBuilder animationBuilder) {
+    private Animation(string name, DateTime time0, DateTime time1, AnimationBuilder animationBuilder) {
       Name = Regex.Replace(name, @"\s+", "");
-      Type = type;
       this.animationBuilder = animationBuilder;
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
@@ -62,27 +42,11 @@ namespace SimSharp.Visualization.Push {
     #endregion
 
     #region Update
-    public void Update(Rect rect0, Rect rect1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
-      CheckType(Shape.rect);
+    public void Update(Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
+      CheckType(shape0, shape1);
       CheckTime(time0, time1);
 
-      AnimationProps props = new AnimationProps(rect0, rect1, time0, time1, fill, stroke, strokeWidth, keep);
-      Update(props);
-    }
-
-    public void Update(Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
-      CheckType(Shape.ellipse);
-      CheckTime(time0, time1);
-
-      AnimationProps props = new AnimationProps(ellipse0, ellipse1, time0, time1, fill, stroke, strokeWidth, keep);
-      Update(props);
-    }
-
-    public void Update(Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
-      CheckType(Shape.polygon);
-      CheckTime(time0, time1);
-
-      AnimationProps props = new AnimationProps(polygon0, polygon1, time0, time1, fill, stroke, strokeWidth, keep);
+      AnimationProps props = new AnimationProps(shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep);
       Update(props);
     }
 
@@ -120,34 +84,12 @@ namespace SimSharp.Visualization.Push {
     #endregion
 
     #region Get animation props
-    public Rect GetRect0() {
-      CheckType(Shape.rect);
-      return GetCurrentProps().Rect0;
+    public Shape GetShape0() {
+      return GetCurrentProps().Shape0;
     }
 
-    public Rect GetRect1() {
-      CheckType(Shape.rect);
-      return GetCurrentProps().Rect1;
-    }
-
-    public Ellipse GetEllipse0() {
-      CheckType(Shape.ellipse);
-      return GetCurrentProps().Ellipse0;
-    }
-
-    public Ellipse GetEllipse1() {
-      CheckType(Shape.ellipse);
-      return GetCurrentProps().Ellipse1;
-    }
-
-    public Polygon GetPolygon0() {
-      CheckType(Shape.polygon);
-      return GetCurrentProps().Polygon0;
-    }
-
-    public Polygon GetPolygon1() {
-      CheckType(Shape.polygon);
-      return GetCurrentProps().Polygon1;
+    public Shape GetShape1() {
+      return GetCurrentProps().Shape1;
     }
 
     public string GetFillColor() {
@@ -178,7 +120,7 @@ namespace SimSharp.Visualization.Push {
     private void FillUnits(AnimationProps props, bool currVisible) {
       int startFrameNumber = Convert.ToInt32((props.Time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
       int stopFrameNumber = Convert.ToInt32((props.Time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
-      int frameNumber = stopFrameNumber - startFrameNumber + 1;
+      int totalFrameNumber = stopFrameNumber - startFrameNumber + 1;
 
       // Console.WriteLine(props.Time0 + " - " + props.Time1);
       // Console.WriteLine(startFrameNumber + " - " + stopFrameNumber + ": " + frameNumber);
@@ -205,20 +147,20 @@ namespace SimSharp.Visualization.Push {
         secondUnit.AddFrame(GetRemoveFrame());
         units.Add(secondUnit);
       } else if (!ShapesEqual(props) && startFrameNumber < stopFrameNumber) {
-        AnimationUnit animationUnit = props.Keep ? new AnimationUnit(startFrameNumber, stopFrameNumber, frameNumber) : new AnimationUnit(startFrameNumber, stopFrameNumber + 1, frameNumber + 1);
+        AnimationUnit animationUnit = props.Keep ? new AnimationUnit(startFrameNumber, stopFrameNumber, totalFrameNumber) : new AnimationUnit(startFrameNumber, stopFrameNumber + 1, totalFrameNumber + 1);
         animationUnit.AddFrame(GetInitFrame(props, 0, currVisible));
 
-        Dictionary<string, int[]> startTransformation = GetTransformation(props, 0);
-        Dictionary<string, int[]> stopTransformation = GetTransformation(props, 1);
+        Dictionary<string, int[]> startTransformation = GetAttributes(props, 0);
+        Dictionary<string, int[]> stopTransformation = GetAttributes(props, 1);
         Dictionary<string, List<int>[]> interpolation = new Dictionary<string, List<int>[]>(startTransformation.Count);
 
         foreach (KeyValuePair<string, int[]> attr in startTransformation) {
           stopTransformation.TryGetValue(attr.Key, out int[] value);
           if (!attr.Value.SequenceEqual(value))
-            interpolation.Add(attr.Key, GetInterpolation(attr.Value, value, frameNumber - 1));
+            interpolation.Add(attr.Key, GetInterpolation(attr.Value, value, totalFrameNumber - 1));
         }
 
-        for (int i = 0; i < frameNumber - 1; i++) {
+        for (int i = 0; i < totalFrameNumber - 1; i++) {
           writer.WritePropertyName(Name);
           writer.WriteStartObject();
 
@@ -272,19 +214,16 @@ namespace SimSharp.Visualization.Push {
         throw new ArgumentException("time0 can not be in the past");
     }
     
-    private void CheckType(Shape shape) {
-      if (Type != shape) {
-        throw new ArgumentException("This animation is not of type " + shape.ToString().ToUpper());
+    private void CheckType(Shape shape0, Shape shape1) {
+      if (shape0.GetType() != shape1.GetType())
+        throw new ArgumentException("Both shapes need to have the same type.");
+      if (shape0.GetType() != GetShape0().GetType()) {
+        throw new ArgumentException("This animation is not of type " + shape0.GetType());
       }
     }
 
     private bool ShapesEqual(AnimationProps props) {
-      switch (Type) {
-        case Shape.rect: return props.Rect0.Equals(props.Rect1);
-        case Shape.ellipse: return props.Ellipse0.Equals(props.Ellipse1);
-        case Shape.polygon: return props.Polygon0.Equals(props.Polygon1);
-        default: return false;
-      }
+      return props.Shape0.Equals(props.Shape1);
     }
 
     private string GetInitFrame(AnimationProps props, int z, bool currVisible) {
@@ -294,7 +233,7 @@ namespace SimSharp.Visualization.Push {
       AnimationProps prevWritten = GetLastWrittenProps();
       if (prevWritten == null) {
         writer.WritePropertyName("type");
-        writer.WriteValue(Type.ToString());
+        writer.WriteValue(props.Shape0.GetType().Name.ToLower());
 
         writer.WritePropertyName("fill");
         writer.WriteValue(props.Fill);
@@ -327,7 +266,7 @@ namespace SimSharp.Visualization.Push {
         writer.WriteValue(true);
       }
 
-      foreach (KeyValuePair<string, int[]> attr in GetTransformation(props, z)) {
+      foreach (KeyValuePair<string, int[]> attr in GetAttributes(props, z)) {
         writer.WritePropertyName(attr.Key);
         if (attr.Value.Length < 2) {
           writer.WriteValue(attr.Value[0]);
@@ -363,13 +302,8 @@ namespace SimSharp.Visualization.Push {
       return frame;
     }
 
-    private Dictionary<string, int[]> GetTransformation(AnimationProps props, int z) {
-      switch (Type) {
-        case Shape.rect: return z==0 ? props.Rect0.GetTransformation() : props.Rect1.GetTransformation();
-        case Shape.ellipse: return z == 0 ? props.Ellipse0.GetTransformation() : props.Ellipse1.GetTransformation();
-        case Shape.polygon: return z == 0 ? props.Polygon0.GetTransformation() : props.Polygon1.GetTransformation();
-        default: return null;
-      }
+    private Dictionary<string, int[]> GetAttributes(AnimationProps props, int z) {
+      return z == 0 ? props.Shape0.GetAttributes() : props.Shape1.GetAttributes();
     }
 
     // excl. start, incl. stop

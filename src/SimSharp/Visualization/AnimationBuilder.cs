@@ -74,20 +74,9 @@ namespace SimSharp.Visualization {
     #endregion
 
     #region CreateAnimation
-    public Animation Animate(string name, Rect rect0, Rect rect1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
-      Animation animation = new Animation(name, rect0, rect1, time0, time1, fill, stroke, strokeWidth, keep, this);
-      AddProvider(animation);
-      return animation;
-    }
-
-    public Animation Animate(string name, Ellipse ellipse0, Ellipse ellipse1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
-      Animation animation = new Animation(name, ellipse0, ellipse1, time0, time1, fill, stroke, strokeWidth, keep, this);
-      AddProvider(animation);
-      return animation;
-    }
-
-    public Animation Animate(string name, Polygon polygon0, Polygon polygon1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
-      Animation animation = new Animation(name, polygon0, polygon1, time0, time1, fill, stroke, strokeWidth, keep, this);
+    public Animation Animate(string name, Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
+      CheckType(shape0, shape1);
+      Animation animation = new Animation(name, shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep, this);
       AddProvider(animation);
       return animation;
     }
@@ -98,6 +87,11 @@ namespace SimSharp.Visualization {
       return rectAnimation;
     }
     #endregion
+
+    private void CheckType(Shape shape0, Shape shape1) {
+      if (shape0.GetType() != shape1.GetType())
+        throw new ArgumentException("Both shapes need to have the same type.");
+    }
 
     public void StartBuilding() {
       if (EnableAnimation) {
@@ -140,6 +134,7 @@ namespace SimSharp.Visualization {
         int startFrameNumber = Convert.ToInt32((prior - env.StartDate).TotalSeconds * FPS) + 1;
         int stopFrameNumber = Convert.ToInt32((now - env.StartDate).TotalSeconds * FPS);
         int totalFrameNumber = stopFrameNumber - startFrameNumber + 1;
+
         // Console.WriteLine(prior + " - " + now);
         // Console.WriteLine(startFrameNumber + " - " + stopFrameNumber + ": " + totalFrameNumber);
 

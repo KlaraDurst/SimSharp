@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace SimSharp.Visualization.Push.Shapes {
-  public class Ellipse {
+  public class Ellipse : Shape {
     public int Cx { get; }
     public int Cy { get; }
 
@@ -17,7 +17,7 @@ namespace SimSharp.Visualization.Push.Shapes {
       Ry = ry;
     }
 
-    public Dictionary<string, int[]> GetTransformation() {
+    public override Dictionary<string, int[]> GetAttributes() {
       return new Dictionary<string, int[]> {
         { "cx", new int[] { Cx } },
         { "cy", new int[] { Cy } },

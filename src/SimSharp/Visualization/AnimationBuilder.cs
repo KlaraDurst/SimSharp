@@ -11,7 +11,7 @@ using SimSharp.Visualization.Push.Shapes;
 namespace SimSharp.Visualization {
   public class AnimationBuilder {
     public string Name { get; }
-    public double TimeStep { get; }
+    public int FPS { get; }
     public string Target { get; }
 
     public int Width { get; }
@@ -41,27 +41,25 @@ namespace SimSharp.Visualization {
     private int frameCount;
 
     #region Constructors
-    public AnimationBuilder() : this(0, 0, 0, 0, "Visualization", 0.25, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName + @"\" + Regex.Replace("Visualization", @"\s+", "") + ".json", false) { }
+    public AnimationBuilder() : this(0, 0, 0, 0, "Visualization", 1, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName + @"\" + Regex.Replace("Visualization", @"\s+", "") + ".json", false) { }
     public AnimationBuilder(int width, int height) : this(width, height, "Visualization") { }
-    public AnimationBuilder(int width, int height, string name) : this(width, height, name, 0.25) { }
-    public AnimationBuilder(int width, int height, double timeStep) : this(width, height, "Visualization", timeStep) { }
+    public AnimationBuilder(int width, int height, string name) : this(width, height, name, 1) { }
+    public AnimationBuilder(int width, int height, int fps) : this(width, height, "Visualization", fps) { }
     public AnimationBuilder(int width, int height, string name, string target) : this(width, height, 0, 0, name, target) { }
-    public AnimationBuilder(int width, int height, string name, double timeStep) : this(width, height, 0, 0, name, timeStep) { }
+    public AnimationBuilder(int width, int height, string name, int fps) : this(width, height, 0, 0, name, fps) { }
     public AnimationBuilder(int width, int height, int startX, int startY) : this(width, height, startX, startY, "Visualization") { }
-    public AnimationBuilder(int width, int height, int startX, int startY, double timeStep) : this(width, height, startX, startY, "Visualization", timeStep) { }
-    public AnimationBuilder(int width, int height, int startX, int startY, string name) : this(width, height, startX, startY, name, 0.25) { }
-    public AnimationBuilder(int width, int height, int startX, int startY, string name, string target) : this(width, height, startX, startY, name, 0.25, target, true) { }
-    public AnimationBuilder(int width, int height, int startX, int startY, string name, double timeStep) : this(width, height, startX, startY, name, timeStep, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName + @"\" + Regex.Replace(name, @"\s+", "") + ".json", true) { }
-    public AnimationBuilder(int width, int height, int startX, int startY, string name, double timeStep, string target) : this(width, height, startX, startY, name, timeStep, target, true) { }
+    public AnimationBuilder(int width, int height, int startX, int startY, int fps) : this(width, height, startX, startY, "Visualization", fps) { }
+    public AnimationBuilder(int width, int height, int startX, int startY, string name) : this(width, height, startX, startY, name, 1) { }
+    public AnimationBuilder(int width, int height, int startX, int startY, string name, string target) : this(width, height, startX, startY, name, 1, target, true) { }
+    public AnimationBuilder(int width, int height, int startX, int startY, string name, int fps) : this(width, height, startX, startY, name, fps, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName + @"\" + Regex.Replace(name, @"\s+", "") + ".json", true) { }
+    public AnimationBuilder(int width, int height, int startX, int startY, string name, int fps, string target) : this(width, height, startX, startY, name, fps, target, true) { }
 
-    private AnimationBuilder(int width, int height, int startX, int startY, string name, double timeStep, string target, bool setCanvas) {
-      if (timeStep > 1)
-        throw new ArgumentException("The time lapsed between each pair of consecutive frames can not be more than 1 second.");
-      if (Math.Floor(1 / timeStep) != (1 / timeStep))
-        throw new ArgumentException("The time lapsed between each pair of consecutive frames has to devide 1 second without rest.");
+    private AnimationBuilder(int width, int height, int startX, int startY, string name, int fps, string target, bool setCanvas) {
+      if (fps > 60)
+        throw new ArgumentException("fps can not be higher than 60.");
 
       Name = name;
-      TimeStep = timeStep;
+      FPS = fps;
       Target = target;
       Width = width;
       Height = height;
@@ -111,8 +109,8 @@ namespace SimSharp.Visualization {
         writer.WritePropertyName("name");
         writer.WriteValue(Name);
 
-        writer.WritePropertyName("timeStep");
-        writer.WriteValue(TimeStep);
+        writer.WritePropertyName("fps");
+        writer.WriteValue(FPS);
 
         if (setCanvas) {
           writer.WritePropertyName("width");
@@ -139,8 +137,8 @@ namespace SimSharp.Visualization {
 
     public void Step(DateTime now) {
       if (EnableAnimation) {
-        int startFrameNumber = Convert.ToInt32((prior - env.StartDate).TotalSeconds / TimeStep) + 1;
-        int stopFrameNumber = Convert.ToInt32((now - env.StartDate).TotalSeconds / TimeStep);
+        int startFrameNumber = Convert.ToInt32((prior - env.StartDate).TotalSeconds * FPS) + 1;
+        int stopFrameNumber = Convert.ToInt32((now - env.StartDate).TotalSeconds * FPS);
         int totalFrameNumber = stopFrameNumber - startFrameNumber + 1;
         // Console.WriteLine(prior + " - " + now);
         // Console.WriteLine(startFrameNumber + " - " + stopFrameNumber + ": " + totalFrameNumber);

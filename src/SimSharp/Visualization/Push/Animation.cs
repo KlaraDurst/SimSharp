@@ -96,8 +96,8 @@ namespace SimSharp.Visualization.Push {
       propsList.Add(props.Time0, props);
 
       if (animationBuilder.EnableAnimation) {
-        int startFrameNumber = Convert.ToInt32((props.Time0 - animationBuilder.Env.StartDate).TotalSeconds / animationBuilder.TimeStep) + 1;
-        int stopFrameNumber = Convert.ToInt32((props.Time1 - animationBuilder.Env.StartDate).TotalSeconds / animationBuilder.TimeStep);
+        int startFrameNumber = Convert.ToInt32((props.Time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
+        int stopFrameNumber = Convert.ToInt32((props.Time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
 
         units.RemoveAll(unit => unit.Start >= startFrameNumber);
         foreach (AnimationUnit unit in units) {
@@ -176,10 +176,15 @@ namespace SimSharp.Visualization.Push {
     #endregion
 
     private void FillUnits(AnimationProps props, bool currVisible) {
-      int startFrameNumber = Convert.ToInt32((props.Time0 - animationBuilder.Env.StartDate).TotalSeconds / animationBuilder.TimeStep) + 1;
-      int stopFrameNumber = Convert.ToInt32((props.Time1 - animationBuilder.Env.StartDate).TotalSeconds / animationBuilder.TimeStep);
+      int startFrameNumber = Convert.ToInt32((props.Time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
+      int stopFrameNumber = Convert.ToInt32((props.Time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
+      int frameNumber = stopFrameNumber - startFrameNumber + 1;
 
-      if (currVisible && props.Time0.Equals(props.Time1) && !props.Keep) {
+      Console.WriteLine(props.Time0 + " - " + props.Time1);
+      Console.WriteLine(startFrameNumber + " - " + stopFrameNumber + ": " + frameNumber);
+      Console.WriteLine();
+
+      if (currVisible && startFrameNumber >= stopFrameNumber && !props.Keep) {
         AnimationUnit unit = new AnimationUnit(startFrameNumber, startFrameNumber, 1);
         unit.AddFrame(GetRemoveFrame());
         units.Add(unit);
@@ -187,11 +192,11 @@ namespace SimSharp.Visualization.Push {
         AnimationUnit unit = new AnimationUnit(startFrameNumber, startFrameNumber, 1);
         unit.AddFrame(GetInitFrame(props, 0, currVisible));
         units.Add(unit);
-      } else if (!ShapesEqual(props) && props.Time0.Equals(props.Time1) && props.Keep) {
+      } else if (!ShapesEqual(props) && startFrameNumber >= stopFrameNumber && props.Keep) {
         AnimationUnit unit = new AnimationUnit(startFrameNumber, startFrameNumber, 1);
         unit.AddFrame(GetInitFrame(props, 1, currVisible));
         units.Add(unit);
-      } else if (ShapesEqual(props) && !props.Time0.Equals(props.Time1) && !props.Keep) {
+      } else if (ShapesEqual(props) && startFrameNumber < stopFrameNumber && !props.Keep) {
         AnimationUnit firstUnit = new AnimationUnit(startFrameNumber, startFrameNumber, 1);
         firstUnit.AddFrame(GetInitFrame(props, 0, currVisible));
         units.Add(firstUnit);
@@ -199,8 +204,7 @@ namespace SimSharp.Visualization.Push {
         AnimationUnit secondUnit = new AnimationUnit(stopFrameNumber + 1, stopFrameNumber + 1, 1);
         secondUnit.AddFrame(GetRemoveFrame());
         units.Add(secondUnit);
-      } else if (!ShapesEqual(props) && !props.Time0.Equals(props.Time1)) {
-        int frameNumber = stopFrameNumber - startFrameNumber + 1;
+      } else if (!ShapesEqual(props) && startFrameNumber < stopFrameNumber) {
         AnimationUnit animationUnit = props.Keep ? new AnimationUnit(startFrameNumber, stopFrameNumber, frameNumber) : new AnimationUnit(startFrameNumber, stopFrameNumber + 1, frameNumber + 1);
         animationUnit.AddFrame(GetInitFrame(props, 0, currVisible));
 
@@ -264,8 +268,6 @@ namespace SimSharp.Visualization.Push {
     private void CheckTime(DateTime time0, DateTime time1) {
       if (time0 > time1)
         throw new ArgumentException("time1 must be after time0.");
-      if (!time0.Equals(time1) && (time1 - time0).TotalMilliseconds < 1000)
-        throw new ArgumentException("the difference between time0 and time1 must be greater than or equal to 1 second.");
       if (time0 > animationBuilder.Env.Now)
         throw new ArgumentException("time0 can not be in the past");
     }

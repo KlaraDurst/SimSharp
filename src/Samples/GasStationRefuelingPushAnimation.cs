@@ -53,7 +53,7 @@ namespace SimSharp.Samples {
        * depleted, the car has to wait for the tank truck to arrive.
        */
       var fuelTankLevel = env.RandUniform(MinFuelTankLevel, MaxFuelTankLevel + 1);
-      // env.Log("{0} arriving at gas station at {1}", name, env.Now);
+      env.Log("{0} arriving at gas station at {1}", name, env.Now);
       using (var req = gasStation.Request()) {
         var start = env.Now;
         // Request one of the gas pumps
@@ -96,7 +96,7 @@ namespace SimSharp.Samples {
 
           yield return env.Timeout(refuelDuration);
         }
-        // env.Log("{0} finished refueling in {1} seconds.", name, (env.Now - start).TotalSeconds);
+        env.Log("{0} finished refueling in {1} seconds.", name, (env.Now - start).TotalSeconds);
       }
     }
 
@@ -187,8 +187,6 @@ namespace SimSharp.Samples {
       // Fuel pump visualization
       Rect fuelPumpRect = new Rect(275, 550, 250, GasStationSize);
       env.AnimationBuilder.Animate("fuelPump", fuelPumpRect, fuelPumpRect, env.StartDate, env.StartDate, "none", "black", 1, true);
-
-      env.AnimationBuilder.Animate("test", gasStationRectLeft, gasStationRectRight, env.StartDate, env.StartDate.AddMilliseconds(2500), "red", "red", 1, true);
 
       env.Process(GasStationControl(env, fuelPump));
       env.Process(GasStationVisualization(env, fuelPump));

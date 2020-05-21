@@ -180,9 +180,9 @@ namespace SimSharp.Visualization.Push {
       int stopFrameNumber = Convert.ToInt32((props.Time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
       int frameNumber = stopFrameNumber - startFrameNumber + 1;
 
-      Console.WriteLine(props.Time0 + " - " + props.Time1);
-      Console.WriteLine(startFrameNumber + " - " + stopFrameNumber + ": " + frameNumber);
-      Console.WriteLine();
+      // Console.WriteLine(props.Time0 + " - " + props.Time1);
+      // Console.WriteLine(startFrameNumber + " - " + stopFrameNumber + ": " + frameNumber);
+      // Console.WriteLine();
 
       if (currVisible && startFrameNumber >= stopFrameNumber && !props.Keep) {
         AnimationUnit unit = new AnimationUnit(startFrameNumber, startFrameNumber, 1);

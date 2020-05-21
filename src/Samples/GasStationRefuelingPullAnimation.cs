@@ -81,8 +81,10 @@ namespace SimSharp.Samples {
 
           // First car tank fill visualization
           DateTime refuelStartTime = env.Now;
+          DateTime refuelPauseTime = env.Now + firstRefuelDuration;
           int entryFrame = Convert.ToInt32((refuelStartTime - env.StartDate).TotalSeconds * env.AnimationBuilder.FPS) + 1;
-          int firstRefuelFrames = Convert.ToInt32(firstRefuelDuration.TotalSeconds * env.AnimationBuilder.FPS) - 1;
+          int pauseFrame = Convert.ToInt32((refuelPauseTime - env.StartDate).TotalSeconds * env.AnimationBuilder.FPS);
+          int firstRefuelFrames = pauseFrame - entryFrame + 1;
 
           RectAnimation tempCarAnimation = env.AnimationBuilder.AnimateRect(
             name + "Tank",
@@ -92,7 +94,7 @@ namespace SimSharp.Samples {
               int endValue = Convert.ToInt32(level);
               int currFrame = t - entryFrame;
               if (currFrame >= 0 && currFrame <= firstRefuelFrames) {
-                double i = 1 / Convert.ToDouble(firstRefuelFrames) * currFrame;
+                double i = 1 / Convert.ToDouble(firstRefuelFrames - 1) * currFrame;
                 return Convert.ToInt32((1 - i) * 0 + i * endValue);
               } else if (currFrame < 0)
                 return 0;
@@ -110,15 +112,17 @@ namespace SimSharp.Samples {
 
           // Second car tank fill visualization
           DateTime refuelContinueTime = env.Now;
-          int coninueFrame = Convert.ToInt32((refuelContinueTime - env.StartDate).TotalSeconds * env.AnimationBuilder.FPS) + 1;
-          int secondRefuelFrames = Convert.ToInt32(secondRefuelDuration.TotalSeconds * env.AnimationBuilder.FPS) - 1;
+          DateTime refuelEndTime = env.Now + secondRefuelDuration;
+          int continueFrame = Convert.ToInt32((refuelContinueTime - env.StartDate).TotalSeconds * env.AnimationBuilder.FPS) + 1;
+          int exitFrame = Convert.ToInt32((refuelEndTime - env.StartDate).TotalSeconds * env.AnimationBuilder.FPS);
+          int secondRefuelFrames = exitFrame - continueFrame + 1;
 
           tempCarAnimation.SetWidth((Func<int, int>) (t => {
             int startValue = Convert.ToInt32(level);
             int endValue = Convert.ToInt32(litersRequired);
-            int currFrame = t - coninueFrame;
+            int currFrame = t - continueFrame;
             if (currFrame >= 0 && currFrame <= secondRefuelFrames) {
-              double i = 1 / Convert.ToDouble(secondRefuelFrames) * currFrame;
+              double i = 1 / Convert.ToDouble(secondRefuelFrames - 1) * currFrame;
               return Convert.ToInt32((1 - i) * startValue + i * endValue);
             } else if (currFrame < 0)
               return startValue;
@@ -133,8 +137,10 @@ namespace SimSharp.Samples {
 
           // Car tank fill visualization
           DateTime refuelStartTime = env.Now;
+          DateTime refuelEndTime = env.Now + refuelDuration;
           int entryFrame = Convert.ToInt32((refuelStartTime - env.StartDate).TotalSeconds * env.AnimationBuilder.FPS) + 1;
-          int refuelDurationFrames = Convert.ToInt32(Math.Ceiling(refuelDuration.TotalSeconds * env.AnimationBuilder.FPS)) - 1;
+          int exitFrame = Convert.ToInt32((refuelEndTime - env.StartDate).TotalSeconds * env.AnimationBuilder.FPS);
+          int refuelDurationFrames = exitFrame - entryFrame + 1;
 
           env.AnimationBuilder.AnimateRect(
             name + "Tank",
@@ -144,7 +150,7 @@ namespace SimSharp.Samples {
               int endValue = Convert.ToInt32(litersRequired);
               int currFrame = t - entryFrame;
               if (currFrame >= 0 && currFrame <= refuelDurationFrames) {
-                double i = 1 / Convert.ToDouble(refuelDurationFrames) * currFrame;
+                double i = 1 / Convert.ToDouble(refuelDurationFrames - 1) * currFrame;
                 return Convert.ToInt32((1 - i) * 0 + i * endValue);
               } else if (currFrame < 0)
                 return 0;

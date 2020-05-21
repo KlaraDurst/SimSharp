@@ -63,7 +63,6 @@ namespace SimSharp.Samples {
         var litersRequired = FuelTankSize - fuelTankLevel;
 
         // Car visualization (at gas station)
-        // Console.WriteLine(name + ": " + litersRequired);
         Rect fullCarRect = new Rect(gasStation.InUse < 2 ? 275 : 475, 250, Convert.ToInt32(litersRequired), CarHeight);
         Rect emptyCarRect = new Rect(fullCarRect.X, fullCarRect.Y, 0, CarHeight);
         Animation carAnimation = env.AnimationBuilder.Animate(name, fullCarRect, fullCarRect, env.Now, env.Now, "none", "yellow", 1, true);

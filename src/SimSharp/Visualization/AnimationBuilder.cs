@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using SimSharp.Visualization.Pull;
+using SimSharp.Visualization.Pull.AdvancedShapes;
 using SimSharp.Visualization.Push;
 using SimSharp.Visualization.Push.Shapes;
 
@@ -81,8 +82,8 @@ namespace SimSharp.Visualization {
       return animation;
     }
 
-    public RectAnimation AnimateRect(string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible) {
-      RectAnimation rectAnimation = new RectAnimation(name, x, y, width, height, fill, stroke, strokeWidth, visible);
+    public AdvancedAnimation Animate(string name, AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible) {
+      AdvancedAnimation rectAnimation = new AdvancedAnimation(name, shape, fill, stroke, strokeWidth, visible);
       AddProvider(rectAnimation);
       return rectAnimation;
     }

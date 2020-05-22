@@ -4,42 +4,31 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using SimSharp.Visualization.Pull.AdvancedShapes;
 
 namespace SimSharp.Visualization.Pull {
-  public class RectAnimation : FramesProvider {
+  public class AdvancedAnimation : FramesProvider {
     public string Name { get; set; }
 
     private StringWriter stringWriter;
     private JsonTextWriter writer;
-    private List<RectAnimationProps> propsList;
+    private List<AdvancedAnimationProps> propsList;
     private bool currVisible;
 
-    public RectAnimation (string name, AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
+    public AdvancedAnimation (string name, AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
       Name = Regex.Replace(name, @"\s+", "");
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
-      this.propsList = new List<RectAnimationProps>();
+      this.propsList = new List<AdvancedAnimationProps>();
       this.currVisible = false;
 
-      RectAnimationProps props = new RectAnimationProps(x, y, width, height, fill, stroke, strokeWidth, visibility);
+      AdvancedAnimationProps props = new AdvancedAnimationProps(shape, fill, stroke, strokeWidth, visibility);
       propsList.Add(props);
     }
 
     #region Get animation props
-    public AnimationAttribute<int> GetX() {
-      return propsList[propsList.Count - 1].X;
-    }
-
-    public AnimationAttribute<int> GetY() {
-      return propsList[propsList.Count - 1].Y;
-    }
-
-    public AnimationAttribute<int> GetWidth() {
-      return propsList[propsList.Count - 1].Width;
-    }
-
-    public AnimationAttribute<int> GetHeight() {
-      return propsList[propsList.Count - 1].Height;
+    public AdvancedShape GetShape() {
+      return propsList[propsList.Count - 1].Shape;
     }
 
     public AnimationAttribute<string> GetFill() {
@@ -60,20 +49,9 @@ namespace SimSharp.Visualization.Pull {
     #endregion
 
     #region Set animation props
-    public void SetX(AnimationAttribute<int> x) {
-      propsList[propsList.Count - 1].X = x;
-    }
-
-    public void SetY(AnimationAttribute<int> y) {
-      propsList[propsList.Count - 1].Y = y;
-    }
-
-    public void SetWidth(AnimationAttribute<int> width) {
-      propsList[propsList.Count - 1].Width = width;
-    }
-
-    public void SetHeight(AnimationAttribute<int> height) {
-      propsList[propsList.Count - 1].Height = height;
+    public void SetShape(AdvancedShape shape) {
+      CheckType(shape);
+      propsList[propsList.Count - 1].Shape = shape;
     }
 
     public void SetFill(AnimationAttribute<string> fill) {
@@ -93,23 +71,29 @@ namespace SimSharp.Visualization.Pull {
     }
     #endregion
 
-    private RectAnimationProps GetLastWrittenProps() {
+    private void CheckType(AdvancedShape shape) {
+      if (shape.GetType() != propsList[propsList.Count - 1].Shape.GetType()) {
+        throw new ArgumentException("This animation is not of type " + shape.GetType());
+      }
+    }
+
+    private AdvancedAnimationProps GetLastWrittenProps() {
       for (int j = propsList.Count - 1; j >= 0; j--) {
-        RectAnimationProps props = propsList[j];
+        AdvancedAnimationProps props = propsList[j];
         if (props.Written)
           return props;
       }
       return null;
     }
 
-    private string GetValueInitFrame(RectAnimationProps props) {
+    private string GetValueInitFrame(AdvancedAnimationProps props) {
       writer.WritePropertyName(Name);
       writer.WriteStartObject();
 
-      RectAnimationProps prevWritten = GetLastWrittenProps();
+      AdvancedAnimationProps prevWritten = GetLastWrittenProps();
       if (prevWritten == null && props.Visibility.Value) {
         writer.WritePropertyName("type");
-        writer.WriteValue("rect");
+        writer.WriteValue(props.Shape.GetType().Name.ToLower());
 
         writer.WritePropertyName("fill");
         writer.WriteValue(props.Fill.Value);
@@ -124,17 +108,18 @@ namespace SimSharp.Visualization.Pull {
         writer.WriteValue(true);
         currVisible = true;
 
-        writer.WritePropertyName("x");
-        writer.WriteValue(props.X.Value);
-
-        writer.WritePropertyName("y");
-        writer.WriteValue(props.Y.Value);
-
-        writer.WritePropertyName("width");
-        writer.WriteValue(props.Width.Value);
-
-        writer.WritePropertyName("height");
-        writer.WriteValue(props.Height.Value);
+        foreach (KeyValuePair<string, int[]> attr in props.Shape.GetValueAttributes()) {
+          writer.WritePropertyName(attr.Key);
+          if (attr.Value.Length < 2) {
+            writer.WriteValue(attr.Value[0]);
+          } else {
+            writer.WriteStartArray();
+            foreach (int val in attr.Value) {
+              writer.WriteValue(val);
+            }
+            writer.WriteEndArray();
+          }
+        }
 
         props.Written = true;
       } else if (prevWritten != null && props.Visibility.Value) {
@@ -159,24 +144,23 @@ namespace SimSharp.Visualization.Pull {
           currVisible = true;
         }
 
-        if (prevWritten.X.CurrValue != props.X.Value) {
-          writer.WritePropertyName("x");
-          writer.WriteValue(props.X.Value);
-        }
+        Dictionary<string, int[]> valueAttributes = props.Shape.GetValueAttributes();
+        Dictionary<string, int[]> currValueAttributes = prevWritten.Shape.GetCurrValueAttributes();
 
-        if (prevWritten.Y.CurrValue != props.Y.Value) {
-          writer.WritePropertyName("y");
-          writer.WriteValue(props.Y.Value);
-        }
-
-        if (prevWritten.Width.CurrValue != props.Width.Value) {
-          writer.WritePropertyName("width");
-          writer.WriteValue(props.Width.Value);
-        }
-
-        if (prevWritten.Height.CurrValue != props.Height.Value) {
-          writer.WritePropertyName("height");
-          writer.WriteValue(props.Height.Value);
+        foreach (KeyValuePair<string, int[]> attr in valueAttributes) {
+          currValueAttributes.TryGetValue(attr.Key, out int[] currValue);
+          if (!props.Shape.CompareValues(currValue, attr.Value)) {
+            writer.WritePropertyName(attr.Key);
+            if (attr.Value.Length < 2) {
+              writer.WriteValue(attr.Value[0]);
+            } else {
+              writer.WriteStartArray();
+              foreach (int val in attr.Value) {
+                writer.WriteValue(val);
+              }
+              writer.WriteEndArray();
+            }
+          }
         }
 
         props.Written = true;
@@ -205,7 +189,7 @@ namespace SimSharp.Visualization.Pull {
     }
 
     public List<AnimationUnit> FramesFromTo(int start, int stop) {
-      RectAnimationProps props = propsList[propsList.Count - 1];
+      AdvancedAnimationProps props = propsList[propsList.Count - 1];
       List<AnimationUnit> affectedUnits = new List<AnimationUnit>();
 
       if (props.AllValues()) {
@@ -223,30 +207,21 @@ namespace SimSharp.Visualization.Pull {
         string prevFill;
         string prevStroke;
         int prevStrokeWidth;
-        int prevX;
-        int prevY;
-        int prevWidth;
-        int prevHeight;
+        Dictionary<string, int[]> prevAttributes;
 
-        RectAnimationProps prevWritten = GetLastWrittenProps();
+        AdvancedAnimationProps prevWritten = GetLastWrittenProps();
         if (prevWritten == null) {
           init = true;
           prevFill = null;
           prevStroke = null;
           prevStrokeWidth = default;
-          prevX = default;
-          prevY = default;
-          prevWidth = default;
-          prevHeight = default;
+          prevAttributes = new Dictionary<string, int[]>();
         } else {
           init = false;
           prevFill = prevWritten.Fill.CurrValue;
           prevStroke = prevWritten.Stroke.CurrValue;
           prevStrokeWidth = prevWritten.StrokeWidth.CurrValue;
-          prevX = prevWritten.X.CurrValue;
-          prevY = prevWritten.Y.CurrValue;
-          prevWidth = prevWritten.Width.CurrValue;
-          prevHeight = prevWritten.Height.CurrValue;
+          prevAttributes = prevWritten.Shape.GetCurrValueAttributes();
         }
 
         for (int i = start; i <= stop; i++) {
@@ -257,7 +232,7 @@ namespace SimSharp.Visualization.Pull {
           if (visibility) {
             if (init) {
               writer.WritePropertyName("type");
-              writer.WriteValue("rect");
+              writer.WriteValue(props.Shape.GetType().Name.ToLower());
 
               string fill = props.Fill.GetValueAt(i);
               writer.WritePropertyName("fill");
@@ -282,33 +257,29 @@ namespace SimSharp.Visualization.Pull {
               props.Visibility.CurrValue = true;
               currVisible = true;
 
-              int x = props.X.GetValueAt(i);
-              writer.WritePropertyName("x");
-              writer.WriteValue(x);
-              props.X.CurrValue = x;
-              prevX = x;
+              foreach (KeyValuePair<string, int[]> attr in props.Shape.GetValueAttributesAt(i)) {
+                int[] valArr = attr.Value;
 
-              int y = props.Y.GetValueAt(i);
-              writer.WritePropertyName("y");
-              writer.WriteValue(y);
-              props.Y.CurrValue = y;
-              prevY = y;
+                writer.WritePropertyName(attr.Key);
+                if (valArr.Length < 2) {
+                  writer.WriteValue(valArr[0]);
+                } else {
+                  writer.WriteStartArray();
+                  foreach (int val in valArr) {
+                    writer.WriteValue(val);
+                  }
+                  writer.WriteEndArray();
+                }
 
-              int width = props.Width.GetValueAt(i);
-              writer.WritePropertyName("width");
-              writer.WriteValue(width);
-              props.Width.CurrValue = width;
-              prevWidth = width;
-
-              int height = props.Height.GetValueAt(i);
-              writer.WritePropertyName("height");
-              writer.WriteValue(height);
-              props.Height.CurrValue = height;
-              prevHeight = height;
+                prevAttributes.Add(attr.Key, valArr);
+              }
+              props.Shape.SetCurrValueAttributes(prevAttributes);
 
               init = false;
               props.Written = true;
             } else {
+              Dictionary<string, int[]> currValues = new Dictionary<string, int[]>();
+
               string fill = props.Fill.GetValueAt(i);
               if (prevFill != fill) {
                 writer.WritePropertyName("fill");
@@ -340,37 +311,26 @@ namespace SimSharp.Visualization.Pull {
               }
               props.Visibility.CurrValue = visibility;
 
-              int x = props.X.GetValueAt(i);
-              if (prevX != x) {
-                writer.WritePropertyName("x");
-                writer.WriteValue(x);
-                prevX = x;
+              foreach (KeyValuePair<string, int[]> attr in props.Shape.GetValueAttributesAt(i)) {
+                int[] valArr = attr.Value;
+                prevAttributes.TryGetValue(attr.Key, out int[] prevValue);
+                
+                if (!props.Shape.CompareValues(prevValue, valArr)) {
+                  writer.WritePropertyName(attr.Key);
+                  if (valArr.Length < 2) {
+                    writer.WriteValue(valArr[0]);
+                  } else {
+                    writer.WriteStartArray();
+                    foreach (int val in valArr) {
+                      writer.WriteValue(val);
+                    }
+                    writer.WriteEndArray();
+                  }
+                  prevAttributes[attr.Key] = valArr;
+                }
+                currValues.Add(attr.Key, valArr);
               }
-              props.X.CurrValue = x;
-
-              int y = props.Y.GetValueAt(i);
-              if (prevY != y) {
-                writer.WritePropertyName("y");
-                writer.WriteValue(y);
-                prevY = y;
-              }
-              props.Y.CurrValue = y;
-
-              int width = props.Width.GetValueAt(i);
-              if (prevWidth != width) {
-                writer.WritePropertyName("width");
-                writer.WriteValue(width);
-                prevWidth = width;
-              }
-              props.Width.CurrValue = width;
-
-              int height = props.Height.GetValueAt(i);
-              if (prevHeight != height) {
-                writer.WritePropertyName("height");
-                writer.WriteValue(height);
-                prevHeight = height;
-              }
-              props.Height.CurrValue = height;
+              props.Shape.SetCurrValueAttributes(currValues);
 
               props.Written = true;
             }

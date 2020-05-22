@@ -150,12 +150,12 @@ namespace SimSharp.Visualization.Push {
         AnimationUnit animationUnit = props.Keep ? new AnimationUnit(startFrameNumber, stopFrameNumber, totalFrameNumber) : new AnimationUnit(startFrameNumber, stopFrameNumber + 1, totalFrameNumber + 1);
         animationUnit.AddFrame(GetInitFrame(props, 0, currVisible));
 
-        Dictionary<string, int[]> startTransformation = GetAttributes(props, 0);
-        Dictionary<string, int[]> stopTransformation = GetAttributes(props, 1);
-        Dictionary<string, List<int>[]> interpolation = new Dictionary<string, List<int>[]>(startTransformation.Count);
+        Dictionary<string, int[]> startAttributes = GetAttributes(props, 0);
+        Dictionary<string, int[]> stopAttributes = GetAttributes(props, 1);
+        Dictionary<string, List<int>[]> interpolation = new Dictionary<string, List<int>[]>(startAttributes.Count);
 
-        foreach (KeyValuePair<string, int[]> attr in startTransformation) {
-          stopTransformation.TryGetValue(attr.Key, out int[] value);
+        foreach (KeyValuePair<string, int[]> attr in startAttributes) {
+          stopAttributes.TryGetValue(attr.Key, out int[] value);
           if (!attr.Value.SequenceEqual(value))
             interpolation.Add(attr.Key, GetInterpolation(attr.Value, value, totalFrameNumber - 1));
         }

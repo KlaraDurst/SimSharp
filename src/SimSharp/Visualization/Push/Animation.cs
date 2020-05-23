@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
@@ -156,7 +155,7 @@ namespace SimSharp.Visualization.Push {
 
         foreach (KeyValuePair<string, int[]> attr in startAttributes) {
           stopAttributes.TryGetValue(attr.Key, out int[] value);
-          if (!attr.Value.SequenceEqual(value))
+          if (!props.Shape0.CompareAttributeValues(attr.Value, value))
             interpolation.Add(attr.Key, GetInterpolation(attr.Value, value, totalFrameNumber - 1));
         }
 

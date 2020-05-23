@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace SimSharp.Visualization.Pull.AdvancedShapes {
@@ -36,10 +35,14 @@ namespace SimSharp.Visualization.Pull.AdvancedShapes {
     }
 
     public override void SetCurrValueAttributes(Dictionary<string, int[]> currValues) {
-      X.CurrValue = currValues.Values.ElementAt(0)[0];
-      Y.CurrValue = currValues.Values.ElementAt(1)[0];
-      Width.CurrValue = currValues.Values.ElementAt(2)[0];
-      Height.CurrValue = currValues.Values.ElementAt(3)[0];
+      currValues.TryGetValue("x", out int[] x);
+      X.CurrValue = x[0];
+      currValues.TryGetValue("y", out int[] y);
+      Y.CurrValue = y[0];
+      currValues.TryGetValue("width", out int[] width);
+      Width.CurrValue = width[0];
+      currValues.TryGetValue("height", out int[] height);
+      Height.CurrValue = height[0];
     }
 
     public override Dictionary<string, int[]> GetValueAttributesAt(int i) {
@@ -51,7 +54,7 @@ namespace SimSharp.Visualization.Pull.AdvancedShapes {
       };
     }
 
-    public override bool CompareValues(int[] a, int[] b) {
+    public override bool CompareAttributeValues(int[] a, int[] b) {
       return a[0] == b[0];
     }
 

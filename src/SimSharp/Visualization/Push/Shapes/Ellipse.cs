@@ -26,6 +26,10 @@ namespace SimSharp.Visualization.Push.Shapes {
       };
     }
 
+    public override bool CompareAttributeValues(int[] a, int[] b) {
+      return a[0] == b[0];
+    }
+
     public override bool Equals(object obj) {
       if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
         return false;

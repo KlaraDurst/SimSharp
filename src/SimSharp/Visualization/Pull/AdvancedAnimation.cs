@@ -15,6 +15,9 @@ namespace SimSharp.Visualization.Pull {
     private List<AdvancedAnimationProps> propsList;
     private bool currVisible;
 
+    private string typeStr;
+    private string removeStr;
+
     public AdvancedAnimation (string name, AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
       Name = Regex.Replace(name, @"\s+", "");
       this.stringWriter = new StringWriter();
@@ -24,6 +27,9 @@ namespace SimSharp.Visualization.Pull {
 
       AdvancedAnimationProps props = new AdvancedAnimationProps(shape, fill, stroke, strokeWidth, visibility);
       propsList.Add(props);
+
+      this.typeStr = props.Shape.GetType().Name.ToLower();
+      this.removeStr = "advanced";
     }
 
     #region Get animation props
@@ -93,7 +99,7 @@ namespace SimSharp.Visualization.Pull {
       AdvancedAnimationProps prevWritten = GetLastWrittenProps();
       if (prevWritten == null && props.Visibility.Value) {
         writer.WritePropertyName("type");
-        writer.WriteValue(props.Shape.GetType().Name.ToLower());
+        writer.WriteValue(typeStr.Remove(typeStr.IndexOf(removeStr), removeStr.Length));
 
         writer.WritePropertyName("fill");
         writer.WriteValue(props.Fill.Value);
@@ -149,7 +155,7 @@ namespace SimSharp.Visualization.Pull {
 
         foreach (KeyValuePair<string, int[]> attr in valueAttributes) {
           currValueAttributes.TryGetValue(attr.Key, out int[] currValue);
-          if (!props.Shape.CompareValues(currValue, attr.Value)) {
+          if (!props.Shape.CompareAttributeValues(currValue, attr.Value)) {
             writer.WritePropertyName(attr.Key);
             if (attr.Value.Length < 2) {
               writer.WriteValue(attr.Value[0]);
@@ -232,7 +238,7 @@ namespace SimSharp.Visualization.Pull {
           if (visibility) {
             if (init) {
               writer.WritePropertyName("type");
-              writer.WriteValue(props.Shape.GetType().Name.ToLower());
+              writer.WriteValue(typeStr.Remove(typeStr.IndexOf(removeStr), removeStr.Length));
 
               string fill = props.Fill.GetValueAt(i);
               writer.WritePropertyName("fill");
@@ -315,7 +321,7 @@ namespace SimSharp.Visualization.Pull {
                 int[] valArr = attr.Value;
                 prevAttributes.TryGetValue(attr.Key, out int[] prevValue);
                 
-                if (!props.Shape.CompareValues(prevValue, valArr)) {
+                if (!props.Shape.CompareAttributeValues(prevValue, valArr)) {
                   writer.WritePropertyName(attr.Key);
                   if (valArr.Length < 2) {
                     writer.WriteValue(valArr[0]);

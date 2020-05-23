@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace SimSharp.Visualization.Push.Shapes {
@@ -22,12 +21,32 @@ namespace SimSharp.Visualization.Push.Shapes {
       };
     }
 
+    public override bool CompareAttributeValues(int[] a, int[] b) {
+      if (!a.Length.Equals(b.Length))
+        return false;
+
+      for (int i = 0; i < a.Length; i++) {
+        if (a[i] != b[i])
+          return false;
+      }
+
+      return true;
+    }
+
     public override bool Equals(object obj) {
       if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
         return false;
       } else {
         Polygon p = (Polygon)obj;
-        return Points.SequenceEqual(p.Points);
+        if (!Points.Length.Equals(p.Points))
+          return false;
+
+        for (int i = 0; i < Points.Length; i++) {
+          if (Points[i] != p.Points[i])
+            return false;
+        }
+
+        return true;
       }
     }
 

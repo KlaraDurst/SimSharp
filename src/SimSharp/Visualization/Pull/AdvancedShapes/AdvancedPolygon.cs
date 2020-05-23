@@ -24,7 +24,8 @@ namespace SimSharp.Visualization.Pull.AdvancedShapes {
     }
 
     public override void SetCurrValueAttributes(Dictionary<string, int[]> currValues) {
-      Points.CurrValue = currValues.Values.ElementAt(0);
+      currValues.TryGetValue("points", out int[] points);
+      Points.CurrValue = points;
     }
 
     public override Dictionary<string, int[]> GetValueAttributesAt(int i) {
@@ -33,7 +34,7 @@ namespace SimSharp.Visualization.Pull.AdvancedShapes {
       };
     }
 
-    public override bool CompareValues(int[] a, int[] b) {
+    public override bool CompareAttributeValues(int[] a, int[] b) {
       if (!a.Length.Equals(b.Length))
         return false;
 

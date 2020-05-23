@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SimSharp.Visualization.Push.Shapes {
   public class Polygon : Shape {
-    public int[] Points { get; }
+    public int[] Points { get; private set; }
 
     public Polygon(params int[] points) {
       if (points.Length % 2 != 0) {
@@ -31,6 +31,16 @@ namespace SimSharp.Visualization.Push.Shapes {
       }
 
       return true;
+    }
+
+    public override void MoveRight(int space) {
+      for (int i = 0; i < Points.Length; i += 2) {
+        Points[i] += space;
+      }
+    }
+
+    public override Shape Copy() {
+      return new Polygon(Points);
     }
 
     public override bool Equals(object obj) {

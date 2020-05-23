@@ -87,6 +87,10 @@ namespace SimSharp.Visualization {
       AddProvider(rectAnimation);
       return rectAnimation;
     }
+
+    public void Remove(FramesProvider animation) {
+      providers.Remove(animation);
+    }
     #endregion
 
     private void CheckType(Shape shape0, Shape shape1) {

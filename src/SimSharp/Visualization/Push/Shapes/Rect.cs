@@ -4,8 +4,8 @@ using System.Text;
 
 namespace SimSharp.Visualization.Push.Shapes {
   public class Rect : Shape {
-    public int X { get; }
-    public int Y { get; }
+    public int X { get; set; }
+    public int Y { get; set; }
 
     public int Width { get; }
     public int Height { get; }
@@ -28,6 +28,14 @@ namespace SimSharp.Visualization.Push.Shapes {
 
     public override bool CompareAttributeValues(int[] a, int[] b) {
       return a[0] == b[0];
+    }
+
+    public override void MoveRight(int space) {
+      X += space;
+    }
+
+    public override Shape Copy() {
+      return new Rect(X, Y, Width, Height);
     }
 
     public override bool Equals(object obj) {

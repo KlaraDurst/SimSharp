@@ -4,8 +4,8 @@ using System.Text;
 
 namespace SimSharp.Visualization.Push.Shapes {
   public class Ellipse : Shape {
-    public int Cx { get; }
-    public int Cy { get; }
+    public int Cx { get; private set; }
+    public int Cy { get; private set; }
 
     public int Rx { get; }
     public int Ry { get; }
@@ -28,6 +28,14 @@ namespace SimSharp.Visualization.Push.Shapes {
 
     public override bool CompareAttributeValues(int[] a, int[] b) {
       return a[0] == b[0];
+    }
+
+    public override void MoveRight(int space) {
+      Cx += space;
+    }
+
+    public override Shape Copy() {
+      return new Ellipse(Cx, Cy, Rx, Ry);
     }
 
     public override bool Equals(object obj) {

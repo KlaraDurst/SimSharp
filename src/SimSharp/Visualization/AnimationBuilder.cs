@@ -226,17 +226,16 @@ namespace SimSharp.Visualization {
       }
     }
 
-    private void WriteJson() {
-      File.WriteAllText(Path.Combine(Target, Regex.Replace(Name, @"\s+", "") + ".json"), stringWriter.ToString());
-    }
-
     public void Play() {
       if (Player != null) {
         Player.Play(Target, stringWriter.ToString());
-      }
-      else {
+      } else {
         WriteJson();
       }
+    }
+
+    private void WriteJson() {
+      File.WriteAllText(Path.Combine(Target, Regex.Replace(Name, @"\s+", "") + ".json"), stringWriter.ToString());
     }
 
     private void WriteFrameNumber() {

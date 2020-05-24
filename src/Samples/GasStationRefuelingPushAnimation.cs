@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using SimSharp.Visualization.Push.Shapes;
 using SimSharp.Visualization.Push;
 using SimSharp.Visualization;
+using SimSharp.Visualization.Push.Resources;
 
 namespace SimSharp.Samples {
   public class GasStationRefuelingPushAnimation {
@@ -36,11 +37,11 @@ namespace SimSharp.Samples {
     private const int FuelTankSize = 50; // liters
     private const int MinFuelTankLevel = 5; // Min levels of fuel tanks (in liters)
     private const int MaxFuelTankLevel = 25; // Max levels of fuel tanks (in liters)
-    private const int RefuelingSpeed = 2; // liters / second
-    private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(10); // Minutes it takes the tank truck to arrive
-    private static readonly TimeSpan MinTInter = TimeSpan.FromMinutes(5); // Create a car every min seconds
-    private static readonly TimeSpan MaxTInter = TimeSpan.FromMinutes(50); // Create a car every max seconds
-    private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(150); // Simulation time
+    private const int RefuelingSpeed = 1; // liters / second
+    private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(1); // Minutes it takes the tank truck to arrive
+    private static readonly TimeSpan MinTInter = TimeSpan.FromSeconds(10); // Create a car every min seconds
+    private static readonly TimeSpan MaxTInter = TimeSpan.FromSeconds(20); // Create a car every max seconds
+    private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(30); // Simulation time
 
     private static readonly int CarHeight = 50; // Height of car rectangles
 
@@ -67,7 +68,7 @@ namespace SimSharp.Samples {
         Rect emptyCarRect = new Rect(fullCarRect.X, fullCarRect.Y, 0, CarHeight);
         Animation carAnimation = env.AnimationBuilder.Animate(name, fullCarRect, fullCarRect, env.Now, env.Now, "none", "yellow", 1, true);
 
-        if (litersRequired > fuelPump.Level) {
+        if (litersRequired > fuelPump.Level && fuelPump.Level > 0) {
           var level = fuelPump.Level;
           var firstRefuelDuration = TimeSpan.FromSeconds(level / RefuelingSpeed);
           var secondRefuelDuration = TimeSpan.FromSeconds((litersRequired - level) / RefuelingSpeed);
@@ -163,16 +164,20 @@ namespace SimSharp.Samples {
       // Create environment and start processes
       var env = new Simulation(DateTime.Now.Date, rseed, new AnimationBuilder(1000, 1000, "Gas Station Refueling", 1));
       env.Log("== Gas Station refuelling push animation ==");
-      var gasStation = new Resource(env, 2) {
-        QueueLength = new TimeSeriesMonitor(env, name: "Waiting cars", collect: true),
-        WaitingTime = new SampleMonitor(name: "Waiting time", collect: true),
-        Utilization = new TimeSeriesMonitor(env, name: "Station utilization"),
-      };
 
       // BuildAnimation has to be turned on before first Animation is created
       env.AnimationBuilder.DebugAnimation = false;
       env.AnimationBuilder.EnableAnimation = true;
       env.AnimationBuilder.Player = new HtmlPlayer();
+
+      Rect queueRect = new Rect(10, 50, 50, 50);
+      QueueAnimation queue = env.AnimationBuilder.AnimateQueue("gasStationQueue", queueRect, "red", "red", 1, 70, 20);
+
+      var gasStation = new Resource(env, 2, queue) {
+        QueueLength = new TimeSeriesMonitor(env, name: "Waiting cars", collect: true),
+        WaitingTime = new SampleMonitor(name: "Waiting time", collect: true),
+        Utilization = new TimeSeriesMonitor(env, name: "Station utilization"),
+      };
 
       // Gas station visualization
       Rect gasStationRectLeft = new Rect(275, 350, 50, 100);

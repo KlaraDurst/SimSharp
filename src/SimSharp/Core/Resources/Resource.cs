@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using SimSharp.Visualization.Push.Resources;
 
 namespace SimSharp {
   /// <summary>
@@ -40,7 +41,9 @@ namespace SimSharp {
     public ISampleMonitor WaitingTime { get; set; }
     public ISampleMonitor BreakOffTime { get; set; }
 
-    public Resource(Simulation environment, int capacity = 1) {
+    public QueueAnimation QueueAnimation { get; }
+
+    public Resource(Simulation environment, int capacity = 1, QueueAnimation queue = null) {
       if (capacity <= 0) throw new ArgumentException("Capacity must > 0.", "capacity");
       Environment = environment;
       Capacity = capacity;
@@ -51,11 +54,14 @@ namespace SimSharp {
       WhenFullQueue = new List<Event>();
       WhenEmptyQueue = new List<Event>();
       WhenChangeQueue = new List<Event>();
+      QueueAnimation = queue;
     }
 
     public virtual Request Request() {
       var request = new Request(Environment, TriggerRelease, DisposeCallback);
       RequestQueue.AddLast(request);
+      if (QueueAnimation != null)
+        QueueAnimation.Enqueue();
       TriggerRequest();
       return request;
     }
@@ -112,6 +118,8 @@ namespace SimSharp {
     protected virtual void DoRequest(Request request) {
       if (Users.Count < Capacity) {
         WaitingTime?.Add(Environment.ToDouble(Environment.Now - request.Time));
+        if (QueueAnimation != null)
+          QueueAnimation.Dequeue();
         Users.Add(request);
         request.Succeed();
       }
@@ -146,6 +154,8 @@ namespace SimSharp {
           if (!RequestQueue.Remove(release.Request))
             throw new InvalidOperationException("Failed to cancel a request.");
           BreakOffTime?.Add(Environment.ToDouble(Environment.Now - release.Request.Time));
+          if (QueueAnimation != null)
+            QueueAnimation.Dequeue();
           release.Succeed();
           ReleaseQueue.Dequeue();
         } else {

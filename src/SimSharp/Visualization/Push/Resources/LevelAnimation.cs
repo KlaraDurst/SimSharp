@@ -4,7 +4,7 @@ using System.Text;
 using SimSharp.Visualization.Push.Shapes;
 
 namespace SimSharp.Visualization.Push.Resources {
-  public class Level {
+  public class LevelAnimation {
     public string Name { get; }
     public Rect Rect { get; }
     public string Fill { get; }
@@ -14,7 +14,7 @@ namespace SimSharp.Visualization.Push.Resources {
     private AnimationBuilder animationBuilder;
     private Animation animation;
 
-    public Level(string name, Rect rect, string fill, string stroke, int strokeWidth, AnimationBuilder animationBuilder) {
+    public LevelAnimation(string name, Rect rect, string fill, string stroke, int strokeWidth, AnimationBuilder animationBuilder) {
       Name = name;
       Rect = rect;
       Fill = fill;

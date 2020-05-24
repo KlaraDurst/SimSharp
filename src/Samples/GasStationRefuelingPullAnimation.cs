@@ -72,7 +72,7 @@ namespace SimSharp.Samples {
         // Request one of the gas pumps
         yield return req;
 
-        if (litersRequired > fuelPump.Level) {
+        if (litersRequired > fuelPump.Level && fuelPump.Level > 0) {
           var level = fuelPump.Level;
           var firstRefuelDuration = TimeSpan.FromSeconds(level / RefuelingSpeed);
           var secondRefuelDuration = TimeSpan.FromSeconds((litersRequired - level) / RefuelingSpeed);

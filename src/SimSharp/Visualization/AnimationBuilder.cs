@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using SimSharp.Visualization.Pull;
 using SimSharp.Visualization.Pull.AdvancedShapes;
 using SimSharp.Visualization.Push;
+using SimSharp.Visualization.Push.Resources;
 using SimSharp.Visualization.Push.Shapes;
 
 namespace SimSharp.Visualization {
@@ -88,6 +89,14 @@ namespace SimSharp.Visualization {
       AdvancedAnimation rectAnimation = new AdvancedAnimation(name, shape, fill, stroke, strokeWidth, visible);
       AddProvider(rectAnimation);
       return rectAnimation;
+    }
+
+    public QueueAnimation AnimateQueue(string name, Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength) {
+      return new QueueAnimation(name, shape, fill, stroke, strokeWidth, space, maxLength, this);
+    }
+
+    public LevelAnimation AnimateLevel(string name, Rect rect, string fill, string stroke, int strokeWidth) {
+      return new LevelAnimation(name, rect, fill, stroke, strokeWidth, this);
     }
 
     public void Remove(FramesProvider animation) {

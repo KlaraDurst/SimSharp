@@ -4,7 +4,7 @@ using System.Text;
 using SimSharp.Visualization.Push.Shapes;
 
 namespace SimSharp.Visualization.Push.Resources {
-  public class Queue {
+  public class QueueAnimation {
     public string Name { get; }
     public Shape Shape { get; }
     public string Fill { get; }
@@ -17,7 +17,7 @@ namespace SimSharp.Visualization.Push.Resources {
     private List<Animation> elementList;
     private int elementCount;
 
-    public Queue(string name, Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength, AnimationBuilder animationBuilder) {
+    public QueueAnimation(string name, Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength, AnimationBuilder animationBuilder) {
       Name = name;
       Shape = shape;
       Fill = fill;
@@ -45,12 +45,12 @@ namespace SimSharp.Visualization.Push.Resources {
 
     public void Dequeue() {
       if (elementCount > 0) {
-        elementCount--;
-        if (elementCount < MaxLength) {
+        if (elementCount <= MaxLength) {
           Animation removeElement = elementList[elementCount - 1];
           elementList.Remove(removeElement);
           removeElement.Update(Shape, Shape, animationBuilder.Env.Now, animationBuilder.Env.Now, Fill, Stroke, StrokeWidth, false);
         }
+        elementCount--;
       }
     }
   }

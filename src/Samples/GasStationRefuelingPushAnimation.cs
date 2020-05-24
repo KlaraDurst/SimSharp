@@ -172,6 +172,7 @@ namespace SimSharp.Samples {
       // BuildAnimation has to be turned on before first Animation is created
       env.AnimationBuilder.DebugAnimation = false;
       env.AnimationBuilder.EnableAnimation = true;
+      env.AnimationBuilder.Player = new HtmlPlayer();
 
       // Gas station visualization
       Rect gasStationRectLeft = new Rect(275, 350, 50, 100);

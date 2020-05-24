@@ -95,6 +95,7 @@ namespace SimSharp {
 
       RunFinished += (o, e) => {
         AnimationBuilder.StopBuilding();
+        AnimationBuilder.Play();
       };
     }
 

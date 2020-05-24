@@ -21,6 +21,8 @@ namespace SimSharp.Visualization {
     public int StartX { get; }
     public int StartY { get; }
 
+    public IPlayer Player { get; set; }
+
     public Simulation Env { 
       get { return env; } 
       set {
@@ -42,7 +44,7 @@ namespace SimSharp.Visualization {
     private int frameCount;
 
     #region Constructors
-    public AnimationBuilder() : this(0, 0, 0, 0, "Visualization", 1, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName + @"\" + Regex.Replace("Visualization", @"\s+", "") + ".json", false) { }
+    public AnimationBuilder() : this(0, 0, 0, 0, "Visualization", 1, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName, false) { }
     public AnimationBuilder(int width, int height) : this(width, height, "Visualization") { }
     public AnimationBuilder(int width, int height, string name) : this(width, height, name, 1) { }
     public AnimationBuilder(int width, int height, int fps) : this(width, height, "Visualization", fps) { }
@@ -52,7 +54,7 @@ namespace SimSharp.Visualization {
     public AnimationBuilder(int width, int height, int startX, int startY, int fps) : this(width, height, startX, startY, "Visualization", fps) { }
     public AnimationBuilder(int width, int height, int startX, int startY, string name) : this(width, height, startX, startY, name, 1) { }
     public AnimationBuilder(int width, int height, int startX, int startY, string name, string target) : this(width, height, startX, startY, name, 1, target, true) { }
-    public AnimationBuilder(int width, int height, int startX, int startY, string name, int fps) : this(width, height, startX, startY, name, fps, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName + @"\" + Regex.Replace(name, @"\s+", "") + ".json", true) { }
+    public AnimationBuilder(int width, int height, int startX, int startY, string name, int fps) : this(width, height, startX, startY, name, fps, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName, true) { }
     public AnimationBuilder(int width, int height, int startX, int startY, string name, int fps, string target) : this(width, height, startX, startY, name, fps, target, true) { }
 
     private AnimationBuilder(int width, int height, int startX, int startY, string name, int fps, string target, bool setCanvas) {
@@ -221,13 +223,20 @@ namespace SimSharp.Visualization {
       if (EnableAnimation) {
         writer.WriteEndArray();
         writer.WriteEndObject();
-
-        WriteJson();
       }
     }
 
     private void WriteJson() {
-      File.WriteAllText(Target, stringWriter.ToString());
+      File.WriteAllText(Path.Combine(Target, Regex.Replace(Name, @"\s+", "") + ".json"), stringWriter.ToString());
+    }
+
+    public void Play() {
+      if (Player != null) {
+        Player.Play(Target, stringWriter.ToString());
+      }
+      else {
+        WriteJson();
+      }
     }
 
     private void WriteFrameNumber() {

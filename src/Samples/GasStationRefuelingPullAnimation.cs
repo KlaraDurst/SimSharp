@@ -43,6 +43,21 @@ namespace SimSharp.Samples {
     private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(150); // Simulation time
 
     private static readonly int CarHeight = 50; // Height of car rectangles
+    private static bool[] gasStations = { true, true };
+
+    private int GetFreeGasStation() {
+      if (gasStations[0]) {
+        gasStations[0] = false;
+        return 1;
+      } else {
+        gasStations[1] = false;
+        return 2;
+      }
+    }
+
+    private void FreeGasStation(int i) {
+      gasStations[i - 1] = true;
+    }
 
     private IEnumerable<Event> Car(string name, Simulation env, Resource gasStation, Container fuelPump) {
       /*
@@ -58,12 +73,12 @@ namespace SimSharp.Samples {
 
       // Car visualization (at gas station)
       Process thisProcess = env.ActiveProcess;
-      AdvancedRect carRect = new AdvancedRect(gasStation.InUse < 1 ? 275 : 475, 250, Convert.ToInt32(litersRequired), CarHeight);
+      AdvancedRect carRect = new AdvancedRect(GetFreeGasStation() == 1 ? 275 : 475, 250, Convert.ToInt32(litersRequired), CarHeight);
       AdvancedAnimation fullCarAnimation = env.AnimationBuilder.Animate(
         name, 
         carRect,
         "none", 
-        "yellow", 
+        "green", 
         1,
         (Func<int, bool>) (t => gasStation.UsedBy(thisProcess)));
 
@@ -103,8 +118,8 @@ namespace SimSharp.Samples {
           AdvancedAnimation tempCarAnimation = env.AnimationBuilder.Animate(
             name + "Tank",
             carTankRect,
-            "yellow",
-            "yellow",
+            "green",
+            "green",
             1,
             (Func<int, bool>) (t => gasStation.UsedBy(thisProcess)));
 
@@ -162,13 +177,14 @@ namespace SimSharp.Samples {
           env.AnimationBuilder.Animate(
             name + "Tank",
             carTankRect,
-            "yellow", 
-            "yellow", 
+            "green", 
+            "green", 
             1,
             (Func<int, bool>) (t => gasStation.UsedBy(thisProcess)));
 
           yield return env.Timeout(refuelDuration);
         }
+        FreeGasStation(carRect.X.Value == 275 ? 1 : 2);
         env.Log("{0} finished refueling in {1} seconds.", name, (env.Now - start).TotalSeconds);
       }
     }

@@ -16,6 +16,7 @@ namespace SimSharp.Visualization.Push.Resources {
     private AnimationBuilder animationBuilder;
     private List<Animation> elementList;
     private int elementCount;
+    private int totalCount;
 
     public QueueAnimation(string name, Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength, AnimationBuilder animationBuilder) {
       Name = name;
@@ -27,20 +28,21 @@ namespace SimSharp.Visualization.Push.Resources {
       MaxLength = maxLength;
 
       this.animationBuilder = animationBuilder;
-      this.elementList = new List<Animation>();
+      this.elementList = new List<Animation>(MaxLength);
       this.elementCount = 0;
+      this.totalCount = 0;
     }
 
     public void Enqueue() {
-      elementCount++;
-      if (elementCount <= MaxLength) {
+      if (elementCount < MaxLength) {
         Shape newShape = Shape.Copy();
-        for (int i = 0; i < elementList.Count; i++) { 
+        for (int i = 0; i < elementCount; i++) { 
           newShape.MoveRight(Space);
         }
-
-      elementList.Add(animationBuilder.Animate(Name + elementCount, newShape, newShape, animationBuilder.Env.Now, animationBuilder.Env.Now, Fill, Stroke, StrokeWidth, true));
+        elementList.Add(animationBuilder.Animate(Name + totalCount, newShape, newShape, animationBuilder.Env.Now, animationBuilder.Env.Now, Fill, Stroke, StrokeWidth, true));
       }
+      elementCount++;
+      totalCount++;
     }
 
     public void Dequeue() {

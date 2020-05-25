@@ -50,8 +50,12 @@ namespace SimSharp.Visualization.Push {
     }
 
     private void Update(AnimationProps props) {
+      int startFrameNumber = Convert.ToInt32((props.Time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
+      int stopFrameNumber = Convert.ToInt32((props.Time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
+
       for (int j = propsList.Count - 1; j >= 0; j--) {
-        if (propsList.Keys[j] >= props.Time0)
+        int prevStartFrameNumber = Convert.ToInt32((propsList.Keys[j] - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
+        if (prevStartFrameNumber >= startFrameNumber)
           propsList.RemoveAt(j);
         else
           break;
@@ -59,9 +63,6 @@ namespace SimSharp.Visualization.Push {
       propsList.Add(props.Time0, props);
 
       if (animationBuilder.EnableAnimation) {
-        int startFrameNumber = Convert.ToInt32((props.Time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
-        int stopFrameNumber = Convert.ToInt32((props.Time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
-
         units.RemoveAll(unit => unit.Start >= startFrameNumber);
         foreach (AnimationUnit unit in units) {
           if (unit.Stop >= startFrameNumber) {
@@ -73,7 +74,8 @@ namespace SimSharp.Visualization.Push {
 
         if (propsList.Count >= 2) {
           AnimationProps prev = propsList.Values[propsList.Count - 2];
-          FillUnits(props, (!prev.Keep && prev.Time1 < props.Time0) ? false : true);
+          int prevStopFrameNumber = Convert.ToInt32((prev.Time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
+          FillUnits(props, (!prev.Keep && prevStopFrameNumber + 1 < startFrameNumber) ? false : true);
         }
         else {
           FillUnits(props, false);

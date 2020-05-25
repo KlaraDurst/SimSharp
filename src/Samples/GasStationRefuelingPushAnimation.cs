@@ -139,21 +139,21 @@ namespace SimSharp.Samples {
       }
     }
 
-    private IEnumerable<Event> GasStationVisualization(Simulation env, Container fuelPump) {
-      /*
-       * Update the visualization of the fuel pump if the level changes 
-       */
-      Rect fullFuelPumpRect = new Rect(275, 550, 250, GasStationSize);
-      Animation fuelPumpAnimation = env.AnimationBuilder.Animate("fuelPumpTank", fullFuelPumpRect, fullFuelPumpRect, env.Now, env.Now, "black", "black", 1, true);
+    //private IEnumerable<Event> GasStationVisualization(Simulation env, Container fuelPump) {
+    //  /*
+    //   * Update the visualization of the fuel pump if the level changes 
+    //   */
+    //  Rect fullFuelPumpRect = new Rect(275, 550, 250, GasStationSize);
+    //  Animation fuelPumpAnimation = env.AnimationBuilder.Animate("fuelPumpTank", fullFuelPumpRect, fullFuelPumpRect, env.Now, env.Now, "black", "black", 1, true);
 
-      while (true) {
-        yield return fuelPump.WhenChange();
-        // Visualization has to be updated
-        Rect currFuelPumpRect = (Rect) fuelPumpAnimation.GetShape0();
-        Rect levelFuelPumpRect = new Rect(currFuelPumpRect.X, Convert.ToInt32(currFuelPumpRect.Y + currFuelPumpRect.Height - fuelPump.Level), 250, Convert.ToInt32(fuelPump.Level));
-        fuelPumpAnimation.Update(currFuelPumpRect, levelFuelPumpRect, env.Now, env.Now, "black", "black", 1, true);
-      }
-    }
+    //  while (true) {
+    //    yield return fuelPump.WhenChange();
+    //    // Visualization has to be updated
+    //    Rect currFuelPumpRect = (Rect) fuelPumpAnimation.GetShape0();
+    //    Rect levelFuelPumpRect = new Rect(currFuelPumpRect.X, Convert.ToInt32(currFuelPumpRect.Y + currFuelPumpRect.Height - fuelPump.Level), 250, Convert.ToInt32(fuelPump.Level));
+    //    fuelPumpAnimation.Update(currFuelPumpRect, levelFuelPumpRect, env.Now, env.Now, "black", "black", 1, true);
+    //  }
+    //}
 
     private IEnumerable<Event> TankTruck(string name, Simulation env, Container fuelPump) {
       // Arrives at the gas station after a certain delay and refuels it.
@@ -208,7 +208,10 @@ namespace SimSharp.Samples {
       env.AnimationBuilder.Animate("gasStationLeft", gasStationRectLeft, gasStationRectLeft, env.StartDate, env.StartDate, "grey", "grey", 1, true);
       env.AnimationBuilder.Animate("gasStationRight", gasStationRectRight, gasStationRectRight, env.StartDate, env.StartDate, "grey", "grey", 1, true);
 
-      var fuelPump = new Container(env, GasStationSize, GasStationSize) {
+      Rect fullFuelPumpRect = new Rect(275, 550, 250, GasStationSize);
+      LevelAnimation level = env.AnimationBuilder.AnimateLevel("fuelPumpTank", fullFuelPumpRect, "black", "black", 1);
+
+      var fuelPump = new Container(env, GasStationSize, GasStationSize, level) {
         Fillrate = new TimeSeriesMonitor(env, name: "Tank fill rate")
       };
 
@@ -217,7 +220,7 @@ namespace SimSharp.Samples {
       env.AnimationBuilder.Animate("fuelPump", fuelPumpRect, fuelPumpRect, env.StartDate, env.StartDate, "none", "black", 1, true);
 
       env.Process(GasStationControl(env, fuelPump));
-      env.Process(GasStationVisualization(env, fuelPump));
+      // env.Process(GasStationVisualization(env, fuelPump));
       env.Process(CarGenerator(env, gasStation, fuelPump));
 
       // Execute!

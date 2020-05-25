@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using SimSharp.Visualization.Push.Resources;
 
 namespace SimSharp {
   /// <summary>
@@ -37,7 +38,9 @@ namespace SimSharp {
     public ITimeSeriesMonitor GetQueueLength { get; set; }
     public ISampleMonitor GetWaitingTime { get; set; }
 
-    public Container(Simulation environment, double capacity = double.MaxValue, double initial = 0) {
+    public LevelAnimation LevelAnimation { get; }
+
+    public Container(Simulation environment, double capacity = double.MaxValue, double initial = 0, LevelAnimation levelAnimation = null) {
       if (capacity <= 0) throw new ArgumentException("Capacity must be > 0", "capacity");
       if (initial < 0) throw new ArgumentException("Initial must be >= 0", "initial");
       if (initial > capacity) throw new ArgumentException("Initial must be <= capacity", "initial");
@@ -49,6 +52,7 @@ namespace SimSharp {
       WhenAtLeastQueue = new SimplePriorityQueue<Event, double>();
       WhenAtMostQueue = new SimplePriorityQueue<Event, double>(new ReverseComparer<double>());
       WhenChangeQueue = new List<Event>();
+      LevelAnimation = levelAnimation;
     }
 
     public virtual ContainerPut Put(double amount) {
@@ -137,6 +141,8 @@ namespace SimSharp {
           PutQueue.Dequeue();
           TriggerWhenAtLeast();
           TriggerWhenChange();
+          if (LevelAnimation != null)
+            LevelAnimation.Update(Level);
         } else break;
       }
       Fillrate?.UpdateTo(Level / Capacity);
@@ -151,6 +157,8 @@ namespace SimSharp {
           GetQueue.Dequeue();
           TriggerWhenAtMost();
           TriggerWhenChange();
+          if (LevelAnimation != null)
+            LevelAnimation.Update(Level);
         } else break;
       }
       Fillrate?.UpdateTo(Level / Capacity);

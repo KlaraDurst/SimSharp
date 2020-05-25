@@ -43,7 +43,7 @@ namespace SimSharp {
 
     public QueueAnimation QueueAnimation { get; }
 
-    public Resource(Simulation environment, int capacity = 1, QueueAnimation queue = null) {
+    public Resource(Simulation environment, int capacity = 1, QueueAnimation queueAnimation = null) {
       if (capacity <= 0) throw new ArgumentException("Capacity must > 0.", "capacity");
       Environment = environment;
       Capacity = capacity;
@@ -54,7 +54,7 @@ namespace SimSharp {
       WhenFullQueue = new List<Event>();
       WhenEmptyQueue = new List<Event>();
       WhenChangeQueue = new List<Event>();
-      QueueAnimation = queue;
+      QueueAnimation = queueAnimation;
     }
 
     public virtual Request Request() {

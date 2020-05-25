@@ -261,7 +261,7 @@ namespace SimSharp.Samples {
       // BuildAnimation has to be turned on before first Animation is created
       env.AnimationBuilder.DebugAnimation = false;
       env.AnimationBuilder.EnableAnimation = true;
-      // env.AnimationBuilder.Player = new HtmlPlayer();
+      env.AnimationBuilder.Player = new HtmlPlayer();
 
       Rect queueRect = new Rect(10, 50, 50, 50);
       QueueAnimation queue = env.AnimationBuilder.AnimateQueue("gasStationQueue", queueRect, "red", "red", 1, 100, 20);
@@ -272,7 +272,10 @@ namespace SimSharp.Samples {
         Utilization = new TimeSeriesMonitor(env, name: "Station utilization"),
       };
 
-      var fuelPump = new Container(env, GasStationSize, GasStationSize) {
+      Rect fullFuelPumpRect = new Rect(275, 550, 250, GasStationSize);
+      LevelAnimation level = env.AnimationBuilder.AnimateLevel("fuelPumpTank", fullFuelPumpRect, "black", "black", 1);
+
+      var fuelPump = new Container(env, GasStationSize, GasStationSize, level) {
         Fillrate = new TimeSeriesMonitor(env, name: "Tank fill rate")
       };
 
@@ -286,12 +289,12 @@ namespace SimSharp.Samples {
       AdvancedRect fuelPumpRect = new AdvancedRect(275, 550, 250, GasStationSize);
       env.AnimationBuilder.Animate("fuelPump", fuelPumpRect, "none", "black", 1, true);
 
-      AdvancedRect fuelPumpTankRect = new AdvancedRect(275,
-        (Func<int, int>)(t => Convert.ToInt32(550 + (GasStationSize - fuelPump.Level))),
-        250,
-        (Func<int, int>)(t => Convert.ToInt32(fuelPump.Level)));
+      //AdvancedRect fuelPumpTankRect = new AdvancedRect(275,
+      //  (Func<int, int>)(t => Convert.ToInt32(550 + (GasStationSize - fuelPump.Level))),
+      //  250,
+      //  (Func<int, int>)(t => Convert.ToInt32(fuelPump.Level)));
 
-      env.AnimationBuilder.Animate("fuelPumpTank", fuelPumpTankRect,"black", "black", 1, true);
+      //env.AnimationBuilder.Animate("fuelPumpTank", fuelPumpTankRect,"black", "black", 1, true);
 
       env.Process(GasStationControl(env, fuelPump));
       env.Process(CarGenerator(env, gasStation, fuelPump));

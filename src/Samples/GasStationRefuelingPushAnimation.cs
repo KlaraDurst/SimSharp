@@ -191,7 +191,7 @@ namespace SimSharp.Samples {
       // BuildAnimation has to be turned on before first Animation is created
       env.AnimationBuilder.DebugAnimation = false;
       env.AnimationBuilder.EnableAnimation = true;
-      // env.AnimationBuilder.Player = new HtmlPlayer();
+      env.AnimationBuilder.Player = new HtmlPlayer();
 
       Rect queueRect = new Rect(10, 50, 50, 50);
       QueueAnimation queue = env.AnimationBuilder.AnimateQueue("gasStationQueue", queueRect, "red", "red", 1, 100, 20);

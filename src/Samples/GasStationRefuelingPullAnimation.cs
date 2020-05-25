@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using SimSharp.Visualization;
 using SimSharp.Visualization.Pull;
 using SimSharp.Visualization.Pull.AdvancedShapes;
+using SimSharp.Visualization.Push.Resources;
+using SimSharp.Visualization.Push.Shapes;
 
 namespace SimSharp.Samples {
   public class GasStationRefuelingPullAnimation {
@@ -37,10 +39,16 @@ namespace SimSharp.Samples {
     private const int MinFuelTankLevel = 5; // Min levels of fuel tanks (in liters)
     private const int MaxFuelTankLevel = 25; // Max levels of fuel tanks (in liters)
     private const int RefuelingSpeed = 2; // liters / second
+
     private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(10); // Minutes it takes the tank truck to arrive
     private static readonly TimeSpan MinTInter = TimeSpan.FromMinutes(5); // Create a car every min seconds
     private static readonly TimeSpan MaxTInter = TimeSpan.FromMinutes(50); // Create a car every max seconds
     private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(150); // Simulation time
+
+    //private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(1); // Minutes it takes the tank truck to arrive
+    //private static readonly TimeSpan MinTInter = TimeSpan.FromSeconds(10); // Create a car every min seconds
+    //private static readonly TimeSpan MaxTInter = TimeSpan.FromSeconds(20); // Create a car every max seconds
+    //private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(3); // Simulation time
 
     private static readonly int CarHeight = 50; // Height of car rectangles
     private static bool[] gasStations = { true, true };
@@ -68,24 +76,25 @@ namespace SimSharp.Samples {
        * depleted, the car has to wait for the tank truck to arrive.
        */
       var fuelTankLevel = env.RandUniform(MinFuelTankLevel, MaxFuelTankLevel + 1);
-      var litersRequired = FuelTankSize - fuelTankLevel;
       env.Log("{0} arriving at gas station at {1}", name, env.Now);
-
-      // Car visualization (at gas station)
-      Process thisProcess = env.ActiveProcess;
-      AdvancedRect carRect = new AdvancedRect(GetFreeGasStation() == 1 ? 275 : 475, 250, Convert.ToInt32(litersRequired), CarHeight);
-      AdvancedAnimation fullCarAnimation = env.AnimationBuilder.Animate(
-        name, 
-        carRect,
-        "none", 
-        "green", 
-        1,
-        (Func<int, bool>) (t => gasStation.UsedBy(thisProcess)));
-
       using (var req = gasStation.Request()) {
         var start = env.Now;
         // Request one of the gas pumps
         yield return req;
+
+        // Get the required amount of fuel
+        var litersRequired = FuelTankSize - fuelTankLevel;
+
+        // Car visualization (at gas station)
+        Process thisProcess = env.ActiveProcess;
+        AdvancedRect carRect = new AdvancedRect(GetFreeGasStation() == 1 ? 275 : 475, 250, Convert.ToInt32(litersRequired), CarHeight);
+        AdvancedAnimation fullCarAnimation = env.AnimationBuilder.Animate(
+          name,
+          carRect,
+          "none",
+          "green",
+          1,
+          (Func<int, bool>)(t => gasStation.UsedBy(thisProcess)));
 
         if (litersRequired > fuelPump.Level && fuelPump.Level > 0) {
           var level = fuelPump.Level;
@@ -100,18 +109,26 @@ namespace SimSharp.Samples {
           int pauseFrame = Convert.ToInt32((refuelPauseTime - env.StartDate).TotalSeconds * env.AnimationBuilder.FPS);
           int firstRefuelFrames = pauseFrame - entryFrame + 1;
 
-          AdvancedRect carTankRect = new AdvancedRect(((AdvancedRect)fullCarAnimation.GetShape()).X.GetValueAt(entryFrame),
+          AdvancedRect carTankRect = new AdvancedRect(
+            ((AdvancedRect)fullCarAnimation.GetShape()).X.GetValueAt(entryFrame),
             250,
             (Func<int, int>)(t => {
               int endValue = Convert.ToInt32(level);
               int currFrame = t - entryFrame;
-              if (currFrame >= 0 && currFrame <= firstRefuelFrames) {
-                double i = 1 / Convert.ToDouble(firstRefuelFrames - 1) * currFrame;
-                return Convert.ToInt32((1 - i) * 0 + i * endValue);
-              } else if (currFrame < 0)
-                return 0;
-              else
-                return endValue;
+              if (firstRefuelFrames < 2) {
+                if (currFrame <= 0)
+                  return 0;
+                else
+                  return endValue;
+              } else {
+                if (currFrame >= 0 && currFrame <= firstRefuelFrames) {
+                  double i = 1 / Convert.ToDouble(firstRefuelFrames - 1) * currFrame;
+                  return Convert.ToInt32((1 - i) * 0 + i * endValue);
+                } else if (currFrame < 0)
+                  return 0;
+                else
+                  return endValue;
+              }
             }),
             CarHeight);
 
@@ -240,7 +257,16 @@ namespace SimSharp.Samples {
       // Create environment and start processes
       var env = new Simulation(DateTime.Now.Date, rseed, new AnimationBuilder(1000, 1000, "Gas Station Refueling", 1));
       env.Log("== Gas Station refuelling pull animation ==");
-      var gasStation = new Resource(env, 2) {
+
+      // BuildAnimation has to be turned on before first Animation is created
+      env.AnimationBuilder.DebugAnimation = false;
+      env.AnimationBuilder.EnableAnimation = true;
+      // env.AnimationBuilder.Player = new HtmlPlayer();
+
+      Rect queueRect = new Rect(10, 50, 50, 50);
+      QueueAnimation queue = env.AnimationBuilder.AnimateQueue("gasStationQueue", queueRect, "red", "red", 1, 100, 20);
+
+      var gasStation = new Resource(env, 2, queue) {
         QueueLength = new TimeSeriesMonitor(env, name: "Waiting cars", collect: true),
         WaitingTime = new SampleMonitor(name: "Waiting time", collect: true),
         Utilization = new TimeSeriesMonitor(env, name: "Station utilization"),
@@ -249,11 +275,6 @@ namespace SimSharp.Samples {
       var fuelPump = new Container(env, GasStationSize, GasStationSize) {
         Fillrate = new TimeSeriesMonitor(env, name: "Tank fill rate")
       };
-
-      // BuildAnimation has to be turned on before first Animation is created
-      env.AnimationBuilder.DebugAnimation = false;
-      env.AnimationBuilder.EnableAnimation = true;
-      env.AnimationBuilder.Player = new HtmlPlayer();
 
       // Gas station visualization
       AdvancedRect gasStationLeftRect = new AdvancedRect(275, 350, 50, 100);

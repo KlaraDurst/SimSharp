@@ -377,5 +377,9 @@ namespace SimSharp.Visualization.Pull {
         return affectedUnits;
       }
     }
+
+    public string GetName() {
+      return Name;
+    }
   }
 }

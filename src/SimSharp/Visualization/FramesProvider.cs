@@ -7,5 +7,6 @@ namespace SimSharp.Visualization {
 
     // incl. start and stop
     List<AnimationUnit> FramesFromTo(int start, int stop);
+    string GetName();
   }
 }

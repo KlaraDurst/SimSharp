@@ -41,6 +41,7 @@ namespace SimSharp.Visualization {
     private JsonTextWriter writer;
     private bool setCanvas;
     private List<FramesProvider> providers;
+    private List<string> names; 
     private DateTime prior;
     private int frameCount;
 
@@ -72,6 +73,7 @@ namespace SimSharp.Visualization {
 
       this.setCanvas = setCanvas;
       this.providers = new List<FramesProvider>();
+      this.names = new List<string>();
       this.prior = DateTime.MinValue;
       this.frameCount = 1;
     }
@@ -109,6 +111,11 @@ namespace SimSharp.Visualization {
         throw new ArgumentException("Both shapes need to have the same type.");
     }
 
+    private void CheckName(string name) {
+      if (names.Contains(name))
+        throw new ArgumentException("Animations need to habe a unique name.");
+    }
+
     public void StartBuilding() {
       if (EnableAnimation) {
         stringWriter = new StringWriter();
@@ -142,6 +149,9 @@ namespace SimSharp.Visualization {
     }
 
     public void AddProvider(FramesProvider provider) {
+      string name = provider.GetName();
+      CheckName(name);
+      names.Add(name);
       providers.Add(provider);
     }
 

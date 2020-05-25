@@ -349,5 +349,9 @@ namespace SimSharp.Visualization.Push {
       }
       return affectedUnits;
     }
+
+    public string GetName() {
+      return Name;
+    }
   }
 }

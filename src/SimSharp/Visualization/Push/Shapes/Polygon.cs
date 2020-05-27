@@ -33,6 +33,18 @@ namespace SimSharp.Visualization.Push.Shapes {
       return true;
     }
 
+    public override bool CompareAttributeValues(List<int> a, int[] b) {
+      if (!a.Count.Equals(b.Length))
+        return false;
+
+      for (int i = 0; i < a.Count; i++) {
+        if (a[i] != b[i])
+          return false;
+      }
+
+      return true;
+    }
+
     public override void MoveRight(int space) {
       for (int i = 0; i < Points.Length; i += 2) {
         Points[i] += space;

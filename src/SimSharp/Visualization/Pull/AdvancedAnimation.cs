@@ -355,14 +355,12 @@ namespace SimSharp.Visualization.Pull {
 
           if (frame.Length <= Name.Length + 5) { // json object is empty
             int unitStop = unitStart + frames.Count;
-
             if (frames.Count > 0) {
               AnimationUnit unit = new AnimationUnit(unitStart, unitStop, frames.Count);
               unit.AddFrameRange(frames);
               affectedUnits.Add(unit);
               frames = new List<string>();
             }
-
             unitStart = unitStop + 1;
           } else {
             frames.Add(frame);

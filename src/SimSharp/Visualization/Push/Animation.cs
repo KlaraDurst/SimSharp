@@ -136,8 +136,11 @@ namespace SimSharp.Visualization.Push {
         secondUnit.AddFrame(GetRemoveFrame());
         units.Add(secondUnit);
       } else if (!ShapesEqual(props) && props.Start < props.Stop) {
-        AnimationUnit animationUnit = props.Keep ? new AnimationUnit(props.Start, props.Stop, totalFrameNumber) : new AnimationUnit(props.Start, props.Stop + 1, totalFrameNumber + 1);
-        animationUnit.AddFrame(GetInitFrame(props, 0, currVisible));
+        List<AnimationUnit> unitList = new List<AnimationUnit>();
+        List<string> frames = new List<string>();
+        int unitStart = props.Start;
+
+        frames.Add(GetInitFrame(props, 0, currVisible));
 
         Dictionary<string, int[]> startAttributes = GetAttributes(props, 0);
         Dictionary<string, int[]> stopAttributes = GetAttributes(props, 1);
@@ -149,33 +152,55 @@ namespace SimSharp.Visualization.Push {
             interpolation.Add(attr.Key, GetInterpolation(attr.Value, value, totalFrameNumber - 1));
         }
 
+        Dictionary<string, int[]> prevAttributes = startAttributes;
         for (int i = 0; i < totalFrameNumber - 1; i++) {
           writer.WritePropertyName(Name);
           writer.WriteStartObject();
 
           foreach (KeyValuePair<string, List<int>[]> attr in interpolation) {
-            writer.WritePropertyName(attr.Key);
-            if (attr.Value[i].Count < 2) {
-              writer.WriteValue(attr.Value[i][0]);
-            } else {
-              writer.WriteStartArray();
-              foreach (int val in attr.Value[i]) {
-                writer.WriteValue(val);
+            prevAttributes.TryGetValue(attr.Key, out int[] prevValue);
+            if (!props.Shape0.CompareAttributeValues(attr.Value[i], prevValue)) {
+              writer.WritePropertyName(attr.Key);
+              if (attr.Value[i].Count < 2) {
+                writer.WriteValue(attr.Value[i][0]);
+              } else {
+                writer.WriteStartArray();
+                foreach (int val in attr.Value[i]) {
+                  writer.WriteValue(val);
+                }
+                writer.WriteEndArray();
               }
-              writer.WriteEndArray();
+              prevAttributes[attr.Key] = attr.Value[i].ToArray();
             }
           }
 
           writer.WriteEndObject();
-          animationUnit.AddFrame(stringWriter.ToString());
+          string frame = stringWriter.ToString();
           Flush();
-        }
 
+          if (frame.Length <= Name.Length + 5) { // json object is empty
+            int unitStop = unitStart + frames.Count;
+            if (frames.Count > 0) {
+              AnimationUnit unit = new AnimationUnit(unitStart, unitStop, frames.Count);
+              unit.AddFrameRange(frames);
+              unitList.Add(unit);
+              frames = new List<string>();
+            }
+            unitStart = unitStop + 1;
+          } else {
+            frames.Add(frame);
+          }
+        }
         if (!props.Keep) {
-          animationUnit.AddFrame(GetRemoveFrame());
+          frames.Add(GetRemoveFrame());
         }
-
-        units.Add(animationUnit);
+        if (frames.Count > 0) {
+          int unitStop = unitStart + frames.Count;
+          AnimationUnit unit = new AnimationUnit(unitStart, unitStop, frames.Count);
+          unit.AddFrameRange(frames);
+          unitList.Add(unit);
+        }
+        units.AddRange(unitList);
       }
     }
 
@@ -256,11 +281,11 @@ namespace SimSharp.Visualization.Push {
 
       if (prevWritten != null && prevWritten.Stop < props.Start) {
         Dictionary<string, int[]> valueAttributes = GetAttributes(props, z);
-        Dictionary<string, int[]> currValueAttributes = GetAttributes(prevWritten, 1);
+        Dictionary<string, int[]> prevValueAttributes = GetAttributes(prevWritten, 1);
 
         foreach (KeyValuePair<string, int[]> attr in valueAttributes) {
-          currValueAttributes.TryGetValue(attr.Key, out int[] currValue);
-          if (!props.Shape1.CompareAttributeValues(currValue, attr.Value)) {
+          prevValueAttributes.TryGetValue(attr.Key, out int[] prevValue);
+          if (!props.Shape1.CompareAttributeValues(prevValue, attr.Value)) {
             writer.WritePropertyName(attr.Key);
             if (attr.Value.Length < 2) {
               writer.WriteValue(attr.Value[0]);

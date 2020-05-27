@@ -30,6 +30,10 @@ namespace SimSharp.Visualization.Push.Shapes {
       return a[0] == b[0];
     }
 
+    public override bool CompareAttributeValues(List<int> a, int[] b) {
+      return a[0] == b[0];
+    }
+
     public override void MoveRight(int space) {
       Cx += space;
     }

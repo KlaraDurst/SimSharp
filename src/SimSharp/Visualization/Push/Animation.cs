@@ -233,7 +233,6 @@ namespace SimSharp.Visualization.Push {
         writer.WritePropertyName("strokeWidth");
         writer.WriteValue(props.StrokeWidth);
       } else {
-
         if (prevWritten.Fill != props.Fill) {
           writer.WritePropertyName("fill");
           writer.WriteValue(props.Fill);
@@ -255,17 +254,37 @@ namespace SimSharp.Visualization.Push {
         writer.WriteValue(true);
       }
 
-      foreach (KeyValuePair<string, int[]> attr in GetAttributes(props, z)) {
-        writer.WritePropertyName(attr.Key);
-        if (attr.Value.Length < 2) {
-          writer.WriteValue(attr.Value[0]);
-        }
-        else {
-          writer.WriteStartArray();
-          foreach (int val in attr.Value) {
-            writer.WriteValue(val);
+      if (prevWritten != null && prevWritten.Stop < props.Start) {
+        Dictionary<string, int[]> valueAttributes = GetAttributes(props, z);
+        Dictionary<string, int[]> currValueAttributes = GetAttributes(prevWritten, 1);
+
+        foreach (KeyValuePair<string, int[]> attr in valueAttributes) {
+          currValueAttributes.TryGetValue(attr.Key, out int[] currValue);
+          if (!props.Shape1.CompareAttributeValues(currValue, attr.Value)) {
+            writer.WritePropertyName(attr.Key);
+            if (attr.Value.Length < 2) {
+              writer.WriteValue(attr.Value[0]);
+            } else {
+              writer.WriteStartArray();
+              foreach (int val in attr.Value) {
+                writer.WriteValue(val);
+              }
+              writer.WriteEndArray();
+            }
           }
-          writer.WriteEndArray();
+        }
+      } else {
+        foreach (KeyValuePair<string, int[]> attr in GetAttributes(props, z)) {
+          writer.WritePropertyName(attr.Key);
+          if (attr.Value.Length < 2) {
+            writer.WriteValue(attr.Value[0]);
+          } else {
+            writer.WriteStartArray();
+            foreach (int val in attr.Value) {
+              writer.WriteValue(val);
+            }
+            writer.WriteEndArray();
+          }
         }
       }
 

@@ -80,11 +80,43 @@ namespace SimSharp.Visualization {
     #endregion
 
     #region CreateAnimation
-    public Animation Animate(string name, Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
+    public Animation Animate(Shape shape, string fill, string stroke, int strokeWidth, bool keep = true) {
+      return Animate(shape, Env.Now, fill, stroke, strokeWidth, keep);
+    }
+
+    public Animation Animate(string name, Shape shape, string fill, string stroke, int strokeWidth, bool keep = true) {
+      return Animate(name, shape, Env.Now, fill, stroke, strokeWidth, keep);
+    }
+
+    public Animation Animate(Shape shape, DateTime time, string fill, string stroke, int strokeWidth, bool keep = true) {
+      return Animate(shape, time, time, fill, stroke, strokeWidth, keep);
+    }
+
+    public Animation Animate(string name, Shape shape, DateTime time, string fill, string stroke, int strokeWidth, bool keep = true) {
+      return Animate(name, shape, time, time, fill, stroke, strokeWidth, keep);
+    }
+
+    public Animation Animate(Shape shape, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
+      return Animate(GetNextName(), shape, shape, time0, time1, fill, stroke, strokeWidth, keep);
+    }
+
+    public Animation Animate(string name, Shape shape, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
+      return Animate(name, shape, shape, time0, time1, fill, stroke, strokeWidth, keep);
+    }
+
+    public Animation Animate(Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
+      return Animate(GetNextName(), shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep);
+    }
+
+    public Animation Animate(string name, Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
       CheckType(shape0, shape1);
       Animation animation = new Animation(name, shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep, this);
       AddProvider(animation);
       return animation;
+    }
+
+    public AdvancedAnimation Animate(AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible) {
+      return Animate(GetNextName(), shape, fill, stroke, strokeWidth, visible);
     }
 
     public AdvancedAnimation Animate(string name, AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible) {
@@ -93,8 +125,16 @@ namespace SimSharp.Visualization {
       return rectAnimation;
     }
 
+    public QueueAnimation AnimateQueue(Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength) {
+      return AnimateQueue(GetNextName(), shape, fill, stroke, strokeWidth, space, maxLength);
+    }
+
     public QueueAnimation AnimateQueue(string name, Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength) {
       return new QueueAnimation(name, shape, fill, stroke, strokeWidth, space, maxLength, this);
+    }
+
+    public LevelAnimation AnimateLevel(Rect rect, string fill, string stroke, int strokeWidth) {
+      return AnimateLevel(rect, fill, stroke, strokeWidth);
     }
 
     public LevelAnimation AnimateLevel(string name, Rect rect, string fill, string stroke, int strokeWidth) {
@@ -105,6 +145,9 @@ namespace SimSharp.Visualization {
       providers.Remove(animation);
     }
     #endregion
+    private string GetNextName() {
+      return providers.Count.ToString();
+    }
 
     private void CheckType(Shape shape0, Shape shape1) {
       if (shape0.GetType() != shape1.GetType())

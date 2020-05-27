@@ -157,9 +157,9 @@ namespace SimSharp.Visualization {
 
     public void Step(DateTime now) {
       if (EnableAnimation) {
-        int startFrameNumber = Convert.ToInt32((prior - env.StartDate).TotalSeconds * FPS) + 1;
-        int stopFrameNumber = Convert.ToInt32((now - env.StartDate).TotalSeconds * FPS);
-        int totalFrameNumber = stopFrameNumber - startFrameNumber + 1;
+        int totalStart = Convert.ToInt32((prior - env.StartDate).TotalSeconds * FPS) + 1;
+        int totalStop = Convert.ToInt32((now - env.StartDate).TotalSeconds * FPS);
+        int totalFrameNumber = totalStop - totalStart + 1;
 
         // Console.WriteLine(prior + " - " + now);
         // Console.WriteLine(startFrameNumber + " - " + stopFrameNumber + ": " + totalFrameNumber);
@@ -169,7 +169,7 @@ namespace SimSharp.Visualization {
             SortedList<int, List<IEnumerator<string>>> frames = new SortedList<int, List<IEnumerator<string>>>();
 
             foreach (FramesProvider provider in providers) {
-              List<AnimationUnit> units = provider.FramesFromTo(startFrameNumber, stopFrameNumber);
+              List<AnimationUnit> units = provider.FramesFromTo(totalStart, totalStop);
 
               if (units.Count > 0) {
                 foreach (AnimationUnit unit in units) {
@@ -186,12 +186,12 @@ namespace SimSharp.Visualization {
             if (frames.Count > 0) {
               List<IEnumerator<string>> framesEnums = new List<IEnumerator<string>>(frames.Count);
               int start = frames.Keys[0];
-              int stop = frames.Count > 1 ? frames.Keys[1] : stopFrameNumber + 1;
+              int stop = frames.Count > 1 ? frames.Keys[1] : totalStop + 1;
 
-              int precedingFramesNumber = start - startFrameNumber;
+              int precedingFramesNumber = start - totalStart;
               WriteEmptyObjects(precedingFramesNumber);
 
-              while (start <= stopFrameNumber) {
+              while (start <= totalStop) {
                 framesEnums.AddRange(frames.Values[0]);
                 frames.RemoveAt(0);
 
@@ -217,7 +217,7 @@ namespace SimSharp.Visualization {
                   writer.WriteEndObject();
                 }
                 start = stop;
-                stop = frames.Count > 1 ? frames.Keys[1] : stopFrameNumber + 1;
+                stop = frames.Count > 1 ? frames.Keys[1] : totalStop + 1;
               }
             } else {
               WriteEmptyObjects(totalFrameNumber);

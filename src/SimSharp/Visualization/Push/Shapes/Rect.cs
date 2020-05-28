@@ -42,6 +42,14 @@ namespace SimSharp.Visualization.Push.Shapes {
       return new Rect(X, Y, Width, Height);
     }
 
+    public override Shape CopyAndSet(Dictionary<string, int[]> attributes) {
+      attributes.TryGetValue("x", out int[] x);
+      attributes.TryGetValue("y", out int[] y);
+      attributes.TryGetValue("width", out int[] width);
+      attributes.TryGetValue("height", out int[] height);
+      return new Rect(x[0], y[0], width[0], height[0]);
+    }
+
     public override bool Equals(object obj) {
       if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
         return false;

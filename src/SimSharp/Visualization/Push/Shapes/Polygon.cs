@@ -55,6 +55,11 @@ namespace SimSharp.Visualization.Push.Shapes {
       return new Polygon(Points);
     }
 
+    public override Shape CopyAndSet(Dictionary<string, int[]> attributes) {
+      attributes.TryGetValue("points", out int[] points);
+      return new Polygon(points);
+    }
+
     public override bool Equals(object obj) {
       if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
         return false;

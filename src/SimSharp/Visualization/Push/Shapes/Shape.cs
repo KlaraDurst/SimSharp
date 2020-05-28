@@ -9,5 +9,6 @@ namespace SimSharp.Visualization.Push.Shapes {
     abstract public bool CompareAttributeValues(List<int> a, int[] b);
     abstract public void MoveRight(int space);
     abstract public Shape Copy();
+    abstract public Shape CopyAndSet(Dictionary<string, int[]> attributes);
   }
 }

@@ -38,14 +38,52 @@ namespace SimSharp.Visualization.Push {
     }
 
     #region Update
-    public void Update(Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep) {
+    public void Update(Shape shape0, Shape shape1, string fill, string stroke, int strokeWidth, bool keep = true) {
+      Update(shape0, shape1, animationBuilder.Env.Now, fill, stroke, strokeWidth, keep);
+    }
+
+    public void Update(Shape shape0, Shape shape1, DateTime time, string fill, string stroke, int strokeWidth, bool keep = true) {
+      Update(shape0, shape1, time, time, fill, stroke, strokeWidth, keep);
+    }
+
+    public void Update(Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
       CheckType(shape0, shape1);
       CheckTime(time0, time1);
       int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
       int stop = Convert.ToInt32((time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
 
-      AnimationProps props = new AnimationProps(shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep, start, stop);
-      Update(props);
+      Update(new AnimationProps(shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep, start, stop));
+    }
+
+    public void Update(Shape shape1, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
+      Update(shape1, animationBuilder.Env.Now, time1, fill, stroke, strokeWidth, keep);
+    }
+
+    public void Update(Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
+      CheckType(shape1);
+      CheckTime(time0, time1);
+      int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
+      int stop = Convert.ToInt32((time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
+      Dictionary<string, int[]> attributesAt = null;
+      List<string> attributeNames = new List<string>();
+
+      foreach (KeyValuePair<string, int[]> attr in shape1.GetAttributes()) {
+        attributeNames.Add(attr.Key);
+      }
+
+      foreach (AnimationUnit unit in units) {
+        if (unit.Stop > start) {
+          attributesAt = unit.GetAttributesAt(start, attributeNames);
+          break;
+        }
+      }
+
+      if (attributesAt != null) {
+        Shape shape0 = shape1.CopyAndSet(attributesAt);
+        Update(new AnimationProps(shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep, start, stop));
+      } else {
+        Update(new AnimationProps(GetLastWrittenProps().Shape1, shape1, time0, time1, fill, stroke, strokeWidth, keep, start, stop));
+      }
     }
 
     private void Update(AnimationProps props) {
@@ -224,15 +262,19 @@ namespace SimSharp.Visualization.Push {
     private void CheckTime(DateTime time0, DateTime time1) {
       if (time0 > time1)
         throw new ArgumentException("time0 can not be after time1.");
-      if (time0 > animationBuilder.Env.Now)
+      if (time0 < animationBuilder.Env.Now)
         throw new ArgumentException("time0 can not be in the past");
     }
     
     private void CheckType(Shape shape0, Shape shape1) {
       if (shape0.GetType() != shape1.GetType())
         throw new ArgumentException("Both shapes need to have the same type.");
-      if (shape0.GetType() != GetShape0().GetType()) {
-        throw new ArgumentException("This animation is not of type " + shape0.GetType());
+      CheckType(shape0);
+    }
+
+    private void CheckType(Shape shape) {
+      if (shape.GetType() != GetShape0().GetType()) {
+        throw new ArgumentException("This animation is not of type " + shape.GetType());
       }
     }
 

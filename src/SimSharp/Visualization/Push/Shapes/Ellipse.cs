@@ -42,6 +42,14 @@ namespace SimSharp.Visualization.Push.Shapes {
       return new Ellipse(Cx, Cy, Rx, Ry);
     }
 
+    public override Shape CopyAndSet(Dictionary<string, int[]> attributes) {
+      attributes.TryGetValue("cx", out int[] cx);
+      attributes.TryGetValue("cy", out int[] cy);
+      attributes.TryGetValue("rx", out int[] rx);
+      attributes.TryGetValue("ry", out int[] ry);
+      return new Ellipse(cx[0], cy[0], rx[0], ry[0]);
+    }
+
     public override bool Equals(object obj) {
       if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
         return false;

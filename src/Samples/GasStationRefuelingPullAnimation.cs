@@ -52,6 +52,7 @@ namespace SimSharp.Samples {
 
     private static readonly int CarHeight = 50; // Height of car rectangles
     private static bool[] gasStations = { true, true };
+    private AnimationUtil util;
 
     private int GetFreeGasStation() {
       if (gasStations[0]) {
@@ -113,22 +114,7 @@ namespace SimSharp.Samples {
             ((AdvancedRect)fullCarAnimation.GetShape()).X.GetValueAt(entryFrame),
             250,
             (Func<int, int>)(t => {
-              int endValue = Convert.ToInt32(level);
-              int currFrame = t - entryFrame;
-              if (firstRefuelFrames < 2) {
-                if (currFrame <= 0)
-                  return 0;
-                else
-                  return endValue;
-              } else {
-                if (currFrame >= 0 && currFrame <= firstRefuelFrames) {
-                  double i = 1 / Convert.ToDouble(firstRefuelFrames - 1) * currFrame;
-                  return Convert.ToInt32((1 - i) * 0 + i * endValue);
-                } else if (currFrame < 0)
-                  return 0;
-                else
-                  return endValue;
-              }
+              return util.GetIntValueAt(t, refuelStartTime, refuelPauseTime, 0, Convert.ToInt32(level));
             }),
             CarHeight);
 
@@ -151,16 +137,7 @@ namespace SimSharp.Samples {
           int secondRefuelFrames = exitFrame - continueFrame + 1;
 
           ((AdvancedRect)tempCarAnimation.GetShape()).Width = (Func<int, int>) (t => {
-            int startValue = Convert.ToInt32(level);
-            int endValue = Convert.ToInt32(litersRequired);
-            int currFrame = t - continueFrame;
-            if (currFrame >= 0 && currFrame <= secondRefuelFrames) {
-              double i = 1 / Convert.ToDouble(secondRefuelFrames - 1) * currFrame;
-              return Convert.ToInt32((1 - i) * startValue + i * endValue);
-            } else if (currFrame < 0)
-              return startValue;
-            else
-              return endValue;
+            return util.GetIntValueAt(t, refuelContinueTime, refuelEndTime, Convert.ToInt32(level), Convert.ToInt32(litersRequired));
           });
 
           yield return env.Timeout(secondRefuelDuration);
@@ -179,15 +156,7 @@ namespace SimSharp.Samples {
             ((AdvancedRect)fullCarAnimation.GetShape()).X.GetValueAt(entryFrame),
             250,
             (Func<int, int>)(t => {
-              int endValue = Convert.ToInt32(litersRequired);
-              int currFrame = t - entryFrame;
-              if (currFrame >= 0 && currFrame <= refuelDurationFrames) {
-                double i = 1 / Convert.ToDouble(refuelDurationFrames - 1) * currFrame;
-                return Convert.ToInt32((1 - i) * 0 + i * endValue);
-              } else if (currFrame < 0)
-                return 0;
-              else
-                return endValue;
+              return util.GetIntValueAt(t, refuelStartTime, refuelEndTime, 0, Convert.ToInt32(litersRequired));
             }),
             CarHeight);
 
@@ -261,7 +230,9 @@ namespace SimSharp.Samples {
       // BuildAnimation has to be turned on before first Animation is created
       env.AnimationBuilder.DebugAnimation = false;
       env.AnimationBuilder.EnableAnimation = true;
-      env.AnimationBuilder.Player = new HtmlPlayer();
+      // env.AnimationBuilder.Player = new HtmlPlayer();
+
+      util = env.AnimationBuilder.GetAnimationUtil();
 
       Rect queueRect = new Rect(10, 50, 50, 50);
       QueueAnimation queue = env.AnimationBuilder.AnimateQueue("gasStationQueue", queueRect, "red", "red", 1, 100, 20);

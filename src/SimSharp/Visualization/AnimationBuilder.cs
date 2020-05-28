@@ -145,6 +145,11 @@ namespace SimSharp.Visualization {
       providers.Remove(animation);
     }
     #endregion
+
+    public AnimationUtil GetAnimationUtil() {
+      return new AnimationUtil(this);
+    }
+
     private string GetNextName() {
       return providers.Count.ToString();
     }

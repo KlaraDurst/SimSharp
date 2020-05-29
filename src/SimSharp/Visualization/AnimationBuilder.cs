@@ -125,12 +125,12 @@ namespace SimSharp.Visualization {
       return rectAnimation;
     }
 
-    public QueueAnimation AnimateQueue(Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength) {
-      return AnimateQueue(GetNextName(), shape, fill, stroke, strokeWidth, space, maxLength);
+    public QueueAnimation AnimateQueue(Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength, QueueAnimation.QueueOrientation orientation = QueueAnimation.QueueOrientation.East) {
+      return AnimateQueue(GetNextName(), shape, fill, stroke, strokeWidth, space, maxLength, orientation);
     }
 
-    public QueueAnimation AnimateQueue(string name, Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength) {
-      return new QueueAnimation(name, shape, fill, stroke, strokeWidth, space, maxLength, this);
+    public QueueAnimation AnimateQueue(string name, Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength, QueueAnimation.QueueOrientation orientation = QueueAnimation.QueueOrientation.East) {
+      return new QueueAnimation(name, shape, fill, stroke, strokeWidth, space, maxLength, this, orientation);
     }
 
     public LevelAnimation AnimateLevel(Rect rect, string fill, string stroke, int strokeWidth) {
@@ -141,8 +141,8 @@ namespace SimSharp.Visualization {
       return new LevelAnimation(name, rect, fill, stroke, strokeWidth, this);
     }
 
-    public void Remove(FramesProvider animation) {
-      providers.Remove(animation);
+    public void Remove(FramesProvider provider) {
+      providers.Remove(provider);
     }
     #endregion
 

@@ -5,6 +5,8 @@ using SimSharp.Visualization.Basic.Shapes;
 
 namespace SimSharp.Visualization.Basic.Resources {
   public class QueueAnimation {
+    public enum QueueOrientation { North, East, South, West }
+
     public string Name { get; }
     public Shape Shape { get; }
     public string Fill { get; }
@@ -12,13 +14,14 @@ namespace SimSharp.Visualization.Basic.Resources {
     public int StrokeWidth { get; }
     public int Space { get; }
     public int MaxLength { get; }
+    public QueueOrientation Orientation { get; }
 
     private AnimationBuilder animationBuilder;
     private List<Animation> elementList;
     private int elementCount;
     private int totalCount;
 
-    public QueueAnimation(string name, Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength, AnimationBuilder animationBuilder) {
+    public QueueAnimation(string name, Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength, AnimationBuilder animationBuilder, QueueOrientation orientation) {
       Name = name;
       Shape = shape;
       Fill = fill;
@@ -26,6 +29,7 @@ namespace SimSharp.Visualization.Basic.Resources {
       StrokeWidth = strokeWidth;
       Space = space;
       MaxLength = maxLength;
+      Orientation = orientation;
 
       this.animationBuilder = animationBuilder;
       this.elementList = new List<Animation>(MaxLength);
@@ -36,10 +40,28 @@ namespace SimSharp.Visualization.Basic.Resources {
     public void Enqueue() {
       if (elementCount < MaxLength) {
         Shape newShape = Shape.Copy();
-        for (int i = 0; i < elementCount; i++) { 
-          newShape.MoveRight(Space);
+
+        switch (Orientation) {
+          case QueueOrientation.North: {
+              newShape.MoveUp(Space * elementCount);
+              break;
+            }
+          case QueueOrientation.East: {
+              newShape.MoveRight(Space*elementCount);
+              break;
+            }
+          case QueueOrientation.South: {
+              newShape.MoveDown(Space * elementCount);
+              break;
+            }
+          case QueueOrientation.West: {
+              newShape.MoveLeft(Space * elementCount);
+              break;
+            }
+          default: break;
         }
-        elementList.Add(animationBuilder.Animate(Name + totalCount, newShape, newShape, animationBuilder.Env.Now, animationBuilder.Env.Now, Fill, Stroke, StrokeWidth, true));
+
+        elementList.Add(animationBuilder.Animate(Name + totalCount, newShape, Fill, Stroke, StrokeWidth, true));
       }
       elementCount++;
       totalCount++;
@@ -50,7 +72,7 @@ namespace SimSharp.Visualization.Basic.Resources {
         if (elementCount <= MaxLength) {
           Animation removeElement = elementList[elementCount - 1];
           elementList.Remove(removeElement);
-          removeElement.Update(Shape, Shape, animationBuilder.Env.Now, animationBuilder.Env.Now, Fill, Stroke, StrokeWidth, false);
+          removeElement.Update(Shape, Fill, Stroke, StrokeWidth, false);
         }
         elementCount--;
       }

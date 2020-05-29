@@ -45,9 +45,27 @@ namespace SimSharp.Visualization.Basic.Shapes {
       return true;
     }
 
+    public override void MoveUp(int space) {
+      for (int i = 1; i < Points.Length; i += 2) {
+        Points[i] -= space;
+      }
+    }
+
     public override void MoveRight(int space) {
       for (int i = 0; i < Points.Length; i += 2) {
         Points[i] += space;
+      }
+    }
+
+    public override void MoveDown(int space) {
+      for (int i = 1; i < Points.Length; i += 2) {
+        Points[i] += space;
+      }
+    }
+
+    public override void MoveLeft(int space) {
+      for (int i = 0; i < Points.Length; i += 2) {
+        Points[i] -= space;
       }
     }
 

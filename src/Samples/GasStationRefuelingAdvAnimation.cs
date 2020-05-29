@@ -111,7 +111,7 @@ namespace SimSharp.Samples {
           int firstRefuelFrames = pauseFrame - entryFrame + 1;
 
           AdvancedRect carTankRect = new AdvancedRect(
-            ((AdvancedRect)fullCarAnimation.GetShape()).X.GetValueAt(entryFrame),
+            carRect.X,
             250,
             util.GetIntValueAt(refuelStartTime, refuelPauseTime, 0, Convert.ToInt32(level)),
             CarHeight);
@@ -134,7 +134,7 @@ namespace SimSharp.Samples {
           int exitFrame = Convert.ToInt32((refuelEndTime - env.StartDate).TotalSeconds * env.AnimationBuilder.FPS);
           int secondRefuelFrames = exitFrame - continueFrame + 1;
 
-          ((AdvancedRect)tempCarAnimation.GetShape()).Width = util.GetIntValueAt(refuelContinueTime, refuelEndTime, Convert.ToInt32(level), Convert.ToInt32(litersRequired));
+          carTankRect.Width = util.GetIntValueAt(refuelContinueTime, refuelEndTime, Convert.ToInt32(level), Convert.ToInt32(litersRequired));
 
           yield return env.Timeout(secondRefuelDuration);
         } else {
@@ -149,7 +149,7 @@ namespace SimSharp.Samples {
           int refuelDurationFrames = exitFrame - entryFrame + 1;
 
           AdvancedRect carTankRect = new AdvancedRect(
-            ((AdvancedRect)fullCarAnimation.GetShape()).X.GetValueAt(entryFrame),
+            carRect.X,
             250,
             util.GetIntValueAt(refuelStartTime, refuelEndTime, 0, Convert.ToInt32(litersRequired)),
             CarHeight);

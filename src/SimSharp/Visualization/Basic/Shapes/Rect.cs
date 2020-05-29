@@ -34,8 +34,20 @@ namespace SimSharp.Visualization.Basic.Shapes {
       return a[0] == b[0];
     }
 
+    public override void MoveUp(int space) {
+      Y -= space;
+    }
+
     public override void MoveRight(int space) {
       X += space;
+    }
+
+    public override void MoveDown(int space) {
+      Y += space;
+    }
+
+    public override void MoveLeft(int space) {
+      X -= space;
     }
 
     public override Shape Copy() {

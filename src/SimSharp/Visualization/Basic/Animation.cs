@@ -55,6 +55,10 @@ namespace SimSharp.Visualization.Basic {
       Update(new AnimationProps(shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep, start, stop));
     }
 
+    public void Update(Shape shape1, string fill, string stroke, int strokeWidth, bool keep = true) {
+      Update(shape1, animationBuilder.Env.Now, fill, stroke, strokeWidth, keep);
+    }
+
     public void Update(Shape shape1, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
       Update(shape1, animationBuilder.Env.Now, time1, fill, stroke, strokeWidth, keep);
     }

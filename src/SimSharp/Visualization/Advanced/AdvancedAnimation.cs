@@ -4,9 +4,9 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using SimSharp.Visualization.Pull.AdvancedShapes;
+using SimSharp.Visualization.Advanced.AdvancedShapes;
 
-namespace SimSharp.Visualization.Pull {
+namespace SimSharp.Visualization.Advanced {
   public class AdvancedAnimation : FramesProvider {
     public string Name { get; set; }
 

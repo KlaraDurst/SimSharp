@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SimSharp.Visualization.Pull.AdvancedShapes {
+namespace SimSharp.Visualization.Advanced.AdvancedShapes {
   public class AdvancedEllipse : AdvancedShape {
     public AnimationAttribute<int> Cx { get; set; }
     public AnimationAttribute<int> Cy { get; set; }

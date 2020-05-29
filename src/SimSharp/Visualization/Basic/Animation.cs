@@ -4,9 +4,9 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using SimSharp.Visualization.Push.Shapes;
+using SimSharp.Visualization.Basic.Shapes;
 
-namespace SimSharp.Visualization.Push {
+namespace SimSharp.Visualization.Basic {
   public class Animation : FramesProvider {
 
     public string Name { get; }

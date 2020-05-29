@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimSharp.Visualization.Push.Shapes {
+namespace SimSharp.Visualization.Basic.Shapes {
   public class Polygon : Shape {
     public int[] Points { get; private set; }
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimSharp.Visualization.Pull.AdvancedShapes {
+namespace SimSharp.Visualization.Advanced.AdvancedShapes {
   public class AdvancedRect : AdvancedShape{
     public AnimationAttribute<int> X { get; set; }
     public AnimationAttribute<int> Y { get; set; }

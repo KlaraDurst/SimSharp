@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SimSharp.Visualization.Pull.AdvancedShapes {
+namespace SimSharp.Visualization.Advanced.AdvancedShapes {
   public class AdvancedPolygon : AdvancedShape {
     public AnimationAttribute<int[]> Points { get; set; }
 

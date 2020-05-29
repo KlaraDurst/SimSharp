@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimSharp.Visualization.Push.Shapes {
+namespace SimSharp.Visualization.Basic.Shapes {
   public class Rect : Shape {
     public int X { get; set; }
     public int Y { get; set; }

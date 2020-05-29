@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using SimSharp.Visualization.Push.Shapes;
+using SimSharp.Visualization.Basic.Shapes;
 
-namespace SimSharp.Visualization.Push.Resources {
+namespace SimSharp.Visualization.Basic.Resources {
   public class LevelAnimation {
     public string Name { get; }
     public Rect Rect { get; }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimSharp.Visualization.Pull.AdvancedShapes {
+namespace SimSharp.Visualization.Advanced.AdvancedShapes {
   abstract public class AdvancedShape {
     public abstract Dictionary<string, int[]> GetValueAttributes();
     public abstract Dictionary<string, int[]> GetCurrValueAttributes();

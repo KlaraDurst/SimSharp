@@ -4,11 +4,11 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using SimSharp.Visualization.Pull;
-using SimSharp.Visualization.Pull.AdvancedShapes;
-using SimSharp.Visualization.Push;
-using SimSharp.Visualization.Push.Resources;
-using SimSharp.Visualization.Push.Shapes;
+using SimSharp.Visualization.Advanced;
+using SimSharp.Visualization.Advanced.AdvancedShapes;
+using SimSharp.Visualization.Basic;
+using SimSharp.Visualization.Basic.Resources;
+using SimSharp.Visualization.Basic.Shapes;
 
 namespace SimSharp.Visualization {
   public class AnimationBuilder {

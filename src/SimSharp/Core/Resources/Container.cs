@@ -7,7 +7,7 @@
 
 using System;
 using System.Collections.Generic;
-using SimSharp.Visualization.Push.Resources;
+using SimSharp.Visualization.Basic.Resources;
 
 namespace SimSharp {
   /// <summary>

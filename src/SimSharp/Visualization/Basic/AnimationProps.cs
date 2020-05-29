@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using SimSharp.Visualization.Push.Shapes;
+using SimSharp.Visualization.Basic.Shapes;
 
-namespace SimSharp.Visualization.Push {
+namespace SimSharp.Visualization.Basic {
   class AnimationProps {
     public Shape Shape0 { get; }
     public Shape Shape1 { get; }

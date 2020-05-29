@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using SimSharp.Visualization.Pull.AdvancedShapes;
+using SimSharp.Visualization.Advanced.AdvancedShapes;
 
-namespace SimSharp.Visualization.Pull {
+namespace SimSharp.Visualization.Advanced {
   class AdvancedAnimationProps {
     public AdvancedShape Shape { get; set; }
     public AnimationAttribute<string> Fill { get; set; }

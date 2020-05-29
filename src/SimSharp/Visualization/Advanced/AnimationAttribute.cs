@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimSharp.Visualization.Pull {
+namespace SimSharp.Visualization.Advanced {
   public class AnimationAttribute<T> {
     public T Value { get; }
     public Func<int, T> Function { get; }

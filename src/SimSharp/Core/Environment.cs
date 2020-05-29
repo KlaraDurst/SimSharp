@@ -12,9 +12,9 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using SimSharp.Visualization;
-using SimSharp.Visualization.Pull;
-using SimSharp.Visualization.Push;
-using SimSharp.Visualization.Push.Shapes;
+using SimSharp.Visualization.Advanced;
+using SimSharp.Visualization.Basic;
+using SimSharp.Visualization.Basic.Shapes;
 
 namespace SimSharp {
   /// <summary>

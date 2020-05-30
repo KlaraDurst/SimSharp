@@ -107,7 +107,7 @@ namespace SimSharp.Visualization.Advanced {
         writer.WritePropertyName("stroke");
         writer.WriteValue(props.Stroke.Value);
 
-        writer.WritePropertyName("strokeWidth");
+        writer.WritePropertyName("stroke-width");
         writer.WriteValue(props.StrokeWidth.Value);
 
         writer.WritePropertyName("visibility");
@@ -140,7 +140,7 @@ namespace SimSharp.Visualization.Advanced {
         }
 
         if (prevWritten.StrokeWidth.CurrValue != props.StrokeWidth.Value) {
-          writer.WritePropertyName("strokeWidth");
+          writer.WritePropertyName("stroke-width");
           writer.WriteValue(props.StrokeWidth.Value);
         }
 
@@ -253,7 +253,7 @@ namespace SimSharp.Visualization.Advanced {
               prevStroke = stroke;
 
               int strokeWidth = props.StrokeWidth.GetValueAt(i);
-              writer.WritePropertyName("strokeWidth");
+              writer.WritePropertyName("stroke-width");
               writer.WriteValue(strokeWidth);
               props.StrokeWidth.CurrValue = strokeWidth;
               prevStrokeWidth = strokeWidth;
@@ -304,7 +304,7 @@ namespace SimSharp.Visualization.Advanced {
 
               int strokeWidth = props.StrokeWidth.GetValueAt(i);
               if (prevStrokeWidth != strokeWidth) {
-                writer.WritePropertyName("strokeWidth");
+                writer.WritePropertyName("stroke-width");
                 writer.WriteValue(strokeWidth);
                 prevStrokeWidth = strokeWidth;
               }

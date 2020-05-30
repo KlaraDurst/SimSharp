@@ -301,7 +301,7 @@ namespace SimSharp.Visualization.Basic {
         writer.WritePropertyName("stroke");
         writer.WriteValue(props.Stroke);
 
-        writer.WritePropertyName("strokeWidth");
+        writer.WritePropertyName("stroke-width");
         writer.WriteValue(props.StrokeWidth);
       } else {
         if (prevWritten.Fill != props.Fill) {
@@ -315,7 +315,7 @@ namespace SimSharp.Visualization.Basic {
         }
 
         if (prevWritten.StrokeWidth != props.StrokeWidth) {
-          writer.WritePropertyName("strokeWidth");
+          writer.WritePropertyName("stroke-width");
           writer.WriteValue(props.StrokeWidth);
         }
       }

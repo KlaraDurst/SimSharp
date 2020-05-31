@@ -9,9 +9,7 @@ namespace SimSharp.Visualization.Basic.Resources {
 
     public string Name { get; }
     public Shape Shape { get; }
-    public string Fill { get; }
-    public string Stroke { get; }
-    public int StrokeWidth { get; }
+    public Style Style { get; set; }
     public int Space { get; }
     public int MaxLength { get; }
     public QueueOrientation Orientation { get; }
@@ -21,12 +19,10 @@ namespace SimSharp.Visualization.Basic.Resources {
     private int elementCount;
     private int totalCount;
 
-    public QueueAnimation(string name, Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength, AnimationBuilder animationBuilder, QueueOrientation orientation) {
+    public QueueAnimation(string name, Shape shape, Style style, int space, int maxLength, AnimationBuilder animationBuilder, QueueOrientation orientation) {
       Name = name;
       Shape = shape;
-      Fill = fill;
-      Stroke = stroke;
-      StrokeWidth = strokeWidth;
+      Style = style;
       Space = space;
       MaxLength = maxLength;
       Orientation = orientation;
@@ -47,7 +43,7 @@ namespace SimSharp.Visualization.Basic.Resources {
               break;
             }
           case QueueOrientation.East: {
-              newShape.MoveRight(Space*elementCount);
+              newShape.MoveRight(Space * elementCount);
               break;
             }
           case QueueOrientation.South: {
@@ -61,7 +57,7 @@ namespace SimSharp.Visualization.Basic.Resources {
           default: break;
         }
 
-        elementList.Add(animationBuilder.Animate(Name + totalCount, newShape, Fill, Stroke, StrokeWidth, true));
+        elementList.Add(animationBuilder.Animate(Name + "Elem" + totalCount, newShape, Style, true));
       }
       elementCount++;
       totalCount++;
@@ -72,7 +68,8 @@ namespace SimSharp.Visualization.Basic.Resources {
         if (elementCount <= MaxLength) {
           Animation removeElement = elementList[elementCount - 1];
           elementList.Remove(removeElement);
-          removeElement.Update(Shape, Fill, Stroke, StrokeWidth, false);
+          removeElement.Update(Shape, Style, false);
+          animationBuilder.Remove(removeElement);
         }
         elementCount--;
       }

@@ -10,7 +10,6 @@ namespace SimSharp.Visualization.Basic {
   public class Animation : FramesProvider {
 
     public string Name { get; }
-    public Shape Type { get; }
 
     private AnimationBuilder animationBuilder;
     private StringWriter stringWriter;
@@ -18,7 +17,7 @@ namespace SimSharp.Visualization.Basic {
     private SortedList<DateTime, AnimationProps> propsList;
     private List<AnimationUnit> units;
 
-    public Animation(string name, Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, AnimationBuilder animationBuilder) {
+    public Animation(string name, Shape shape0, Shape shape1, DateTime time0, DateTime time1, Style style, bool keep, AnimationBuilder animationBuilder) {
       Name = Regex.Replace(name, @"\s+", "");
       this.animationBuilder = animationBuilder;
       this.stringWriter = new StringWriter();
@@ -30,7 +29,7 @@ namespace SimSharp.Visualization.Basic {
       int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
       int stop = Convert.ToInt32((time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
 
-      AnimationProps props = new AnimationProps(shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep, start, stop);
+      AnimationProps props = new AnimationProps(shape0, shape1, time0, time1, style, keep, start, stop);
       propsList.Add(time0, props);
 
       if (animationBuilder.EnableAnimation)
@@ -38,32 +37,32 @@ namespace SimSharp.Visualization.Basic {
     }
 
     #region Update
-    public void Update(Shape shape0, Shape shape1, string fill, string stroke, int strokeWidth, bool keep = true) {
-      Update(shape0, shape1, animationBuilder.Env.Now, fill, stroke, strokeWidth, keep);
+    public void Update(Shape shape0, Shape shape1, Style style, bool keep = true) {
+      Update(shape0, shape1, animationBuilder.Env.Now, style, keep);
     }
 
-    public void Update(Shape shape0, Shape shape1, DateTime time, string fill, string stroke, int strokeWidth, bool keep = true) {
-      Update(shape0, shape1, time, time, fill, stroke, strokeWidth, keep);
+    public void Update(Shape shape0, Shape shape1, DateTime time, Style style, bool keep = true) {
+      Update(shape0, shape1, time, time, style, keep);
     }
 
-    public void Update(Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
+    public void Update(Shape shape0, Shape shape1, DateTime time0, DateTime time1, Style style, bool keep = true) {
       CheckType(shape0, shape1);
       CheckTime(time0, time1);
       int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
       int stop = Convert.ToInt32((time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
 
-      Update(new AnimationProps(shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep, start, stop));
+      Update(new AnimationProps(shape0, shape1, time0, time1, style, keep, start, stop));
     }
 
-    public void Update(Shape shape1, string fill, string stroke, int strokeWidth, bool keep = true) {
-      Update(shape1, animationBuilder.Env.Now, fill, stroke, strokeWidth, keep);
+    public void Update(Shape shape1, Style style, bool keep = true) {
+      Update(shape1, animationBuilder.Env.Now, style, keep);
     }
 
-    public void Update(Shape shape1, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
-      Update(shape1, animationBuilder.Env.Now, time1, fill, stroke, strokeWidth, keep);
+    public void Update(Shape shape1, DateTime time1, Style style, bool keep = true) {
+      Update(shape1, animationBuilder.Env.Now, time1, style, keep);
     }
 
-    public void Update(Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
+    public void Update(Shape shape1, DateTime time0, DateTime time1, Style style, bool keep = true) {
       CheckType(shape1);
       CheckTime(time0, time1);
       int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
@@ -84,9 +83,9 @@ namespace SimSharp.Visualization.Basic {
 
       if (attributesAt != null) {
         Shape shape0 = shape1.CopyAndSet(attributesAt);
-        Update(new AnimationProps(shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep, start, stop));
+        Update(new AnimationProps(shape0, shape1, time0, time1, style, keep, start, stop));
       } else {
-        Update(new AnimationProps(GetLastWrittenProps().Shape1, shape1, time0, time1, fill, stroke, strokeWidth, keep, start, stop));
+        Update(new AnimationProps(GetLastWrittenProps().Shape1, shape1, time0, time1, style, keep, start, stop));
       }
     }
 
@@ -129,16 +128,8 @@ namespace SimSharp.Visualization.Basic {
       return GetCurrentProps().Shape1;
     }
 
-    public string GetFillColor() {
-      return GetCurrentProps().Fill;
-    }
-
-    public string GetLineColor() {
-      return GetCurrentProps().Stroke;
-    }
-    
-    public int GetLineWidth() {
-      return GetCurrentProps().StrokeWidth;
+    public Style GetStyle() {
+      return GetCurrentProps().Style;
     }
 
     public DateTime GetTime0() {
@@ -294,30 +285,10 @@ namespace SimSharp.Visualization.Basic {
       if (prevWritten == null) {
         writer.WritePropertyName("type");
         writer.WriteValue(props.Shape0.GetType().Name.ToLower());
-
-        writer.WritePropertyName("fill");
-        writer.WriteValue(props.Fill);
-
-        writer.WritePropertyName("stroke");
-        writer.WriteValue(props.Stroke);
-
-        writer.WritePropertyName("stroke-width");
-        writer.WriteValue(props.StrokeWidth);
+        
+        props.Style.WriteJson(animationBuilder, Name, writer, null);
       } else {
-        if (prevWritten.Fill != props.Fill) {
-          writer.WritePropertyName("fill");
-          writer.WriteValue(props.Fill);
-        }
-
-        if (prevWritten.Stroke != props.Stroke) {
-          writer.WritePropertyName("stroke");
-          writer.WriteValue(props.Stroke);
-        }
-
-        if (prevWritten.StrokeWidth != props.StrokeWidth) {
-          writer.WritePropertyName("stroke-width");
-          writer.WriteValue(props.StrokeWidth);
-        }
+        props.Style.WriteJson(animationBuilder, Name, writer, prevWritten.Style);
       }
 
       if (!currVisible) {

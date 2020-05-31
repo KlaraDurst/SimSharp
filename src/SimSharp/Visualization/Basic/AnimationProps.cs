@@ -9,9 +9,7 @@ namespace SimSharp.Visualization.Basic {
     public Shape Shape1 { get; }
     public DateTime Time0 { get; }
     public DateTime Time1 { get; }
-    public string Fill { get; }
-    public string Stroke { get; }
-    public int StrokeWidth { get; }
+    public Style Style { get; }
     public bool Keep { get; }
 
     public int Start { get; }
@@ -19,14 +17,12 @@ namespace SimSharp.Visualization.Basic {
 
     public bool Written { get; set; }
 
-    public AnimationProps(Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep, int start, int stop) { 
+    public AnimationProps(Shape shape0, Shape shape1, DateTime time0, DateTime time1, Style style, bool keep, int start, int stop) { 
       Shape0 = shape0;
       Shape1 = shape1;
       Time0 = time0;
       Time1 = time1;
-      Fill = fill;
-      Stroke = stroke;
-      StrokeWidth = strokeWidth;
+      Style = style;
       Keep = keep;
       Start = start;
       Stop = stop;

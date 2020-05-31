@@ -9,6 +9,7 @@ using SimSharp.Visualization.Advanced.AdvancedShapes;
 using SimSharp.Visualization.Basic;
 using SimSharp.Visualization.Basic.Resources;
 using SimSharp.Visualization.Basic.Shapes;
+using SimSharp.Visualization.Player;
 
 namespace SimSharp.Visualization {
   public class AnimationBuilder {
@@ -44,6 +45,9 @@ namespace SimSharp.Visualization {
     private List<string> names; 
     private DateTime prior;
     private int frameCount;
+    private int animationCount;
+    private int queueCount;
+    private int levelCount;
 
     #region Constructors
     public AnimationBuilder() : this(0, 0, 0, 0, "Visualization", 1, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName, false) { }
@@ -76,47 +80,50 @@ namespace SimSharp.Visualization {
       this.names = new List<string>();
       this.prior = DateTime.MinValue;
       this.frameCount = 1;
+      this.animationCount = 0;
+      this.queueCount = 0;
+      this.levelCount = 0;
     }
     #endregion
 
     #region CreateAnimation
-    public Animation Animate(Shape shape, string fill, string stroke, int strokeWidth, bool keep = true) {
-      return Animate(shape, Env.Now, fill, stroke, strokeWidth, keep);
+    public Animation Animate(Shape shape, Style style, bool keep = true) {
+      return Animate(shape, Env.Now, style, keep);
     }
 
-    public Animation Animate(string name, Shape shape, string fill, string stroke, int strokeWidth, bool keep = true) {
-      return Animate(name, shape, Env.Now, fill, stroke, strokeWidth, keep);
+    public Animation Animate(string name, Shape shape, Style style, bool keep = true) {
+      return Animate(name, shape, Env.Now, style, keep);
     }
 
-    public Animation Animate(Shape shape, DateTime time, string fill, string stroke, int strokeWidth, bool keep = true) {
-      return Animate(shape, time, time, fill, stroke, strokeWidth, keep);
+    public Animation Animate(Shape shape, DateTime time, Style style, bool keep = true) {
+      return Animate(shape, time, time, style, keep);
     }
 
-    public Animation Animate(string name, Shape shape, DateTime time, string fill, string stroke, int strokeWidth, bool keep = true) {
-      return Animate(name, shape, time, time, fill, stroke, strokeWidth, keep);
+    public Animation Animate(string name, Shape shape, DateTime time, Style style, bool keep = true) {
+      return Animate(name, shape, time, time, style, keep);
     }
 
-    public Animation Animate(Shape shape, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
-      return Animate(GetNextName(), shape, shape, time0, time1, fill, stroke, strokeWidth, keep);
+    public Animation Animate(Shape shape, DateTime time0, DateTime time1, Style style, bool keep = true) {
+      return Animate(GetNextAnimationName(), shape, shape, time0, time1, style, keep);
     }
 
-    public Animation Animate(string name, Shape shape, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
-      return Animate(name, shape, shape, time0, time1, fill, stroke, strokeWidth, keep);
+    public Animation Animate(string name, Shape shape, DateTime time0, DateTime time1, Style style, bool keep = true) {
+      return Animate(name, shape, shape, time0, time1, style, keep);
     }
 
-    public Animation Animate(Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
-      return Animate(GetNextName(), shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep);
+    public Animation Animate(Shape shape0, Shape shape1, DateTime time0, DateTime time1, Style style, bool keep = true) {
+      return Animate(GetNextAnimationName(), shape0, shape1, time0, time1, style, keep);
     }
 
-    public Animation Animate(string name, Shape shape0, Shape shape1, DateTime time0, DateTime time1, string fill, string stroke, int strokeWidth, bool keep = true) {
+    public Animation Animate(string name, Shape shape0, Shape shape1, DateTime time0, DateTime time1, Style style, bool keep = true) {
       CheckType(shape0, shape1);
-      Animation animation = new Animation(name, shape0, shape1, time0, time1, fill, stroke, strokeWidth, keep, this);
+      Animation animation = new Animation(name, shape0, shape1, time0, time1, style, keep, this);
       AddProvider(animation);
       return animation;
     }
 
     public AdvancedAnimation Animate(AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible) {
-      return Animate(GetNextName(), shape, fill, stroke, strokeWidth, visible);
+      return Animate(GetNextAnimationName(), shape, fill, stroke, strokeWidth, visible);
     }
 
     public AdvancedAnimation Animate(string name, AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible) {
@@ -125,20 +132,20 @@ namespace SimSharp.Visualization {
       return rectAnimation;
     }
 
-    public QueueAnimation AnimateQueue(Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength, QueueAnimation.QueueOrientation orientation = QueueAnimation.QueueOrientation.East) {
-      return AnimateQueue(GetNextName(), shape, fill, stroke, strokeWidth, space, maxLength, orientation);
+    public QueueAnimation AnimateQueue(Shape shape, Style style, int space, int maxLength, QueueAnimation.QueueOrientation orientation = QueueAnimation.QueueOrientation.East) {
+      return AnimateQueue(GetNextQueueName(), shape, style, space, maxLength, orientation);
     }
 
-    public QueueAnimation AnimateQueue(string name, Shape shape, string fill, string stroke, int strokeWidth, int space, int maxLength, QueueAnimation.QueueOrientation orientation = QueueAnimation.QueueOrientation.East) {
-      return new QueueAnimation(name, shape, fill, stroke, strokeWidth, space, maxLength, this, orientation);
+    public QueueAnimation AnimateQueue(string name, Shape shape, Style style, int space, int maxLength, QueueAnimation.QueueOrientation orientation = QueueAnimation.QueueOrientation.East) {
+      return new QueueAnimation(name, shape, style, space, maxLength, this, orientation);
     }
 
-    public LevelAnimation AnimateLevel(Rect rect, string fill, string stroke, int strokeWidth) {
-      return AnimateLevel(rect, fill, stroke, strokeWidth);
+    public LevelAnimation AnimateLevel(Rect rect, Style style) {
+      return AnimateLevel(GetNextLevelName(), rect, style);
     }
 
-    public LevelAnimation AnimateLevel(string name, Rect rect, string fill, string stroke, int strokeWidth) {
-      return new LevelAnimation(name, rect, fill, stroke, strokeWidth, this);
+    public LevelAnimation AnimateLevel(string name, Rect rect, Style style) {
+      return new LevelAnimation(name, rect, style, this);
     }
 
     public void Remove(FramesProvider provider) {
@@ -150,13 +157,34 @@ namespace SimSharp.Visualization {
       return new AnimationUtil(this);
     }
 
-    private string GetNextName() {
-      return providers.Count.ToString();
+    #region Get Names
+    private string GetNextAnimationName() {
+      string animationName = "anim" + animationCount.ToString();
+      animationCount++;
+      return animationName;
     }
+
+    private string GetNextQueueName() {
+      string queueName = "queue" + queueCount.ToString();
+      queueCount++;
+      return queueName;
+    }
+
+    private string GetNextLevelName() {
+      string levelName = "level" + levelCount.ToString();
+      levelCount++;
+      return levelName;
+    }
+    #endregion
 
     private void CheckType(Shape shape0, Shape shape1) {
       if (shape0.GetType() != shape1.GetType())
         throw new ArgumentException("Both shapes need to have the same type.");
+    }
+
+    public void AddName(string name) {
+      CheckName(name);
+      names.Add(name);
     }
 
     private void CheckName(string name) {
@@ -198,8 +226,7 @@ namespace SimSharp.Visualization {
 
     public void AddProvider(FramesProvider provider) {
       string name = provider.GetName();
-      CheckName(name);
-      names.Add(name);
+      AddName(name);
       providers.Add(provider);
     }
 

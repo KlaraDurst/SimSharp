@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using SimSharp.Visualization;
 using SimSharp.Visualization.Advanced;
 using SimSharp.Visualization.Advanced.AdvancedShapes;
+using SimSharp.Visualization.Basic;
 using SimSharp.Visualization.Basic.Resources;
 using SimSharp.Visualization.Basic.Shapes;
 
@@ -230,7 +231,8 @@ namespace SimSharp.Samples {
 
       // Gas station queue visualization
       Rect queueRect = new Rect(10, 50, 50, 50);
-      QueueAnimation queue = env.AnimationBuilder.AnimateQueue("gasStationQueue", queueRect, "red", "red", 1, 100, 20);
+      Style queueStyle = new Style("red", "red", 1);
+      QueueAnimation queue = env.AnimationBuilder.AnimateQueue("gasStationQueue", queueRect, queueStyle, 100, 20);
 
       var gasStation = new Resource(env, 2, queue) {
         QueueLength = new TimeSeriesMonitor(env, name: "Waiting cars", collect: true),
@@ -240,7 +242,8 @@ namespace SimSharp.Samples {
 
       // Fuel pump level visualization
       Rect fullFuelPumpRect = new Rect(275, 550, 250, GasStationSize);
-      LevelAnimation level = env.AnimationBuilder.AnimateLevel("fuelPumpTank", fullFuelPumpRect, "black", "black", 1);
+      Style fuelPumpTankStyle = new Style("black", "black", 1);
+      LevelAnimation level = env.AnimationBuilder.AnimateLevel("fuelPumpTank", fullFuelPumpRect, fuelPumpTankStyle);
 
       var fuelPump = new Container(env, GasStationSize, GasStationSize, level) {
         Fillrate = new TimeSeriesMonitor(env, name: "Tank fill rate")

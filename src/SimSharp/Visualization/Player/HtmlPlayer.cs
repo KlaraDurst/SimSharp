@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace SimSharp.Visualization {
+namespace SimSharp.Visualization.Player {
   public class HtmlPlayer : IPlayer {
     string playerPath = Path.Combine(Directory.GetParent(System.Environment.CurrentDirectory).Parent.Parent.Parent.ToString(), @"SimSharp\Visualization\Player");
     string jsFile = @"js\scripts.js";

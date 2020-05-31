@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace SimSharp.Visualization.Advanced.AdvancedShapes {
   public class AdvancedEllipse : AdvancedShape {
@@ -17,13 +18,99 @@ namespace SimSharp.Visualization.Advanced.AdvancedShapes {
       Ry = ry;
     }
 
-    public override Dictionary<string, int[]> GetValueAttributes() {
-      return new Dictionary<string, int[]> {
-        { "cx", new int[] { Cx.Value } },
-        { "cy", new int[] { Cy.Value } },
-        { "rx", new int[] { Rx.Value } },
-        { "ry", new int[] { Ry.Value } }
-      };
+    public override void WriteValueJson(JsonTextWriter writer, AdvancedShape compare) {
+      if (compare == null) {
+        writer.WritePropertyName("cx");
+        writer.WriteValue(Cx.Value);
+
+        writer.WritePropertyName("cy");
+        writer.WriteValue(Cy.Value);
+
+        writer.WritePropertyName("rx");
+        writer.WriteValue(Rx.Value);
+
+        writer.WritePropertyName("ry");
+        writer.WriteValue(Ry.Value);
+      } else {
+        AdvancedEllipse e = (AdvancedEllipse)compare;
+
+        if (e.Cx.CurrValue != Cx.Value) {
+          writer.WritePropertyName("cx");
+          writer.WriteValue(Cx.Value);
+        }
+
+        if (e.Cy.CurrValue != Cy.Value) {
+          writer.WritePropertyName("cy");
+          writer.WriteValue(Cy.Value);
+        }
+
+        if (e.Rx.CurrValue != Rx.Value) {
+          writer.WritePropertyName("rx");
+          writer.WriteValue(Rx);
+        }
+
+        if (e.Ry.CurrValue != Ry.Value) {
+          writer.WritePropertyName("ry");
+          writer.WriteValue(Ry);
+        }
+      }
+    }
+
+    public override void WriteValueAtJson(int i, JsonTextWriter writer, Dictionary<string, int[]> compare) {
+      if (compare == null) {
+        int cx = Cx.GetValueAt(i);
+        writer.WritePropertyName("cx");
+        writer.WriteValue(cx);
+        Cx.CurrValue = cx;
+
+        int cy = Cy.GetValueAt(i);
+        writer.WritePropertyName("cy");
+        writer.WriteValue(cy);
+        Cy.CurrValue = cy;
+
+        int rx = Rx.GetValueAt(i);
+        writer.WritePropertyName("rx");
+        writer.WriteValue(rx);
+        Rx.CurrValue = rx;
+
+        int ry = Ry.GetValueAt(i);
+        writer.WritePropertyName("ry");
+        writer.WriteValue(ry);
+        Ry.CurrValue = ry;
+      } else {
+        compare.TryGetValue("cx", out int[] prevCx);
+        compare.TryGetValue("cy", out int[] prevCy);
+        compare.TryGetValue("rx", out int[] prevRx);
+        compare.TryGetValue("ry", out int[] prevRy);
+
+        int cx = Cx.GetValueAt(i);
+        if (prevCx[0] != cx) {
+          writer.WritePropertyName("cx");
+          writer.WriteValue(cx);
+        }
+        Cx.CurrValue = cx;
+
+        int cy = Cy.GetValueAt(i);
+        if (prevCy[0] != cy) {
+          writer.WritePropertyName("cy");
+          writer.WriteValue(cy);
+        }
+        Cy.CurrValue = cy;
+
+        int rx = Rx.GetValueAt(i);
+        if (prevRx[0] != rx) {
+          writer.WritePropertyName("rx");
+          writer.WriteValue(rx);
+        }
+        Rx.CurrValue = rx;
+
+        int ry = Ry.GetValueAt(i);
+        if (prevRy[0] != ry) {
+          writer.WritePropertyName("ry");
+          writer.WriteValue(ry);
+        }
+        Ry.CurrValue = ry;
+      }
     }
 
     public override Dictionary<string, int[]> GetCurrValueAttributes() {
@@ -33,30 +120,6 @@ namespace SimSharp.Visualization.Advanced.AdvancedShapes {
         { "rx", new int[] { Rx.CurrValue } },
         { "ry", new int[] { Ry.CurrValue } }
       };
-    }
-
-    public override void SetCurrValueAttributes(Dictionary<string, int[]> currValues) {
-      currValues.TryGetValue("cx", out int[] cx);
-      Cx.CurrValue = cx[0];
-      currValues.TryGetValue("cy", out int[] cy);
-      Cy.CurrValue = cy[0];
-      currValues.TryGetValue("rx", out int[] rx);
-      Rx.CurrValue = rx[0];
-      currValues.TryGetValue("ry", out int[] ry);
-      Ry.CurrValue = ry[0];
-    }
-
-    public override Dictionary<string, int[]> GetValueAttributesAt(int i) {
-      return new Dictionary<string, int[]> {
-        { "cx", new int[] { Cx.GetValueAt(i) } },
-        { "cy", new int[] { Cy.GetValueAt(i) } },
-        { "rx", new int[] { Rx.GetValueAt(i) } },
-        { "ry", new int[] { Ry.GetValueAt(i) } }
-      };
-    }
-
-    public override bool CompareAttributeValues(int[] a, int[] b) {
-      return a[0] == b[0];
     }
 
     public override bool AllValues() {

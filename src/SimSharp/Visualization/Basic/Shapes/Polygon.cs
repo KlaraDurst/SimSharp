@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace SimSharp.Visualization.Basic.Shapes {
   public class Polygon : Shape {
@@ -12,6 +13,28 @@ namespace SimSharp.Visualization.Basic.Shapes {
       }
       else {
         Points = points;
+      }
+    }
+
+    public override void WriteJson(JsonTextWriter writer, Shape compare) {
+      if (compare == null) {
+        writer.WritePropertyName("points");
+        writer.WriteStartArray();
+        foreach(int p in Points) {
+          writer.WriteValue(p);
+        }
+        writer.WriteEndArray();
+      } else {
+        Polygon p = (Polygon)compare;
+
+        if (!CompareAttributeValues(Points, p.Points)) {
+          writer.WritePropertyName("points");
+          writer.WriteStartArray();
+          foreach (int val in Points) {
+            writer.WriteValue(val);
+          }
+          writer.WriteEndArray();
+        }
       }
     }
 

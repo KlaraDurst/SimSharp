@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace SimSharp.Visualization.Basic.Shapes {
   public class Rect : Shape {
@@ -9,6 +10,44 @@ namespace SimSharp.Visualization.Basic.Shapes {
 
     public int Width { get; }
     public int Height { get; }
+
+    public override void WriteJson(JsonTextWriter writer, Shape compare) {
+      if (compare == null) {
+        writer.WritePropertyName("x");
+        writer.WriteValue(X);
+
+        writer.WritePropertyName("y");
+        writer.WriteValue(Y);
+
+        writer.WritePropertyName("width");
+        writer.WriteValue(Width);
+
+        writer.WritePropertyName("height");
+        writer.WriteValue(Height);
+      } else {
+        Rect r = (Rect)compare;
+
+        if (r.X != X) {
+          writer.WritePropertyName("x");
+          writer.WriteValue(X);
+        }
+
+        if (r.Y != Y) {
+          writer.WritePropertyName("y");
+          writer.WriteValue(Y);
+        }
+
+        if (r.Width != Width) {
+          writer.WritePropertyName("width");
+          writer.WriteValue(Width);
+        }
+
+        if (r.Height != Height) {
+          writer.WritePropertyName("height");
+          writer.WriteValue(Height);
+        }
+      }
+    }
 
     public Rect (int x, int y, int width, int height) {
       X = x;

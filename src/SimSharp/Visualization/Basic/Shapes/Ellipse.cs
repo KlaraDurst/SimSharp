@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace SimSharp.Visualization.Basic.Shapes {
   public class Ellipse : Shape {
@@ -15,6 +16,44 @@ namespace SimSharp.Visualization.Basic.Shapes {
       Cy = cy;
       Rx = rx;
       Ry = ry;
+    }
+
+    public override void WriteJson(JsonTextWriter writer, Shape compare) {
+      if (compare == null) {
+        writer.WritePropertyName("cx");
+        writer.WriteValue(Cx);
+
+        writer.WritePropertyName("cy");
+        writer.WriteValue(Cy);
+
+        writer.WritePropertyName("rx");
+        writer.WriteValue(Rx);
+
+        writer.WritePropertyName("ry");
+        writer.WriteValue(Ry);
+      } else {
+        Ellipse e = (Ellipse)compare;
+
+        if (e.Cx != Cx) {
+          writer.WritePropertyName("cx");
+          writer.WriteValue(Cx);
+        }
+
+        if (e.Cy != Cy) {
+          writer.WritePropertyName("cy");
+          writer.WriteValue(Cy);
+        }
+
+        if (e.Rx != Rx) {
+          writer.WritePropertyName("rx");
+          writer.WriteValue(Rx);
+        }
+
+        if (e.Ry != Ry) {
+          writer.WritePropertyName("ry");
+          writer.WriteValue(Ry);
+        }
+      }
     }
 
     public override Dictionary<string, int[]> GetAttributes() {

@@ -114,19 +114,7 @@ namespace SimSharp.Visualization.Advanced {
         writer.WriteValue(true);
         currVisible = true;
 
-        foreach (KeyValuePair<string, int[]> attr in props.Shape.GetValueAttributes()) {
-          writer.WritePropertyName(attr.Key);
-          if (attr.Value.Length < 2) {
-            writer.WriteValue(attr.Value[0]);
-          } else {
-            writer.WriteStartArray();
-            foreach (int val in attr.Value) {
-              writer.WriteValue(val);
-            }
-            writer.WriteEndArray();
-          }
-        }
-
+        props.Shape.WriteValueJson(writer, null);
         props.Written = true;
       } else if (prevWritten != null && props.Visibility.Value) {
         if (prevWritten.Fill.CurrValue != props.Fill.Value) {
@@ -150,25 +138,7 @@ namespace SimSharp.Visualization.Advanced {
           currVisible = true;
         }
 
-        Dictionary<string, int[]> valueAttributes = props.Shape.GetValueAttributes();
-        Dictionary<string, int[]> currValueAttributes = prevWritten.Shape.GetCurrValueAttributes();
-
-        foreach (KeyValuePair<string, int[]> attr in valueAttributes) {
-          currValueAttributes.TryGetValue(attr.Key, out int[] currValue);
-          if (!props.Shape.CompareAttributeValues(currValue, attr.Value)) {
-            writer.WritePropertyName(attr.Key);
-            if (attr.Value.Length < 2) {
-              writer.WriteValue(attr.Value[0]);
-            } else {
-              writer.WriteStartArray();
-              foreach (int val in attr.Value) {
-                writer.WriteValue(val);
-              }
-              writer.WriteEndArray();
-            }
-          }
-        }
-
+        props.Shape.WriteValueJson(writer, prevWritten.Shape);
         props.Written = true;
       } else if (prevWritten != null && !props.Visibility.Value) {
         if (currVisible) {
@@ -263,29 +233,12 @@ namespace SimSharp.Visualization.Advanced {
               props.Visibility.CurrValue = true;
               currVisible = true;
 
-              foreach (KeyValuePair<string, int[]> attr in props.Shape.GetValueAttributesAt(i)) {
-                int[] valArr = attr.Value;
-
-                writer.WritePropertyName(attr.Key);
-                if (valArr.Length < 2) {
-                  writer.WriteValue(valArr[0]);
-                } else {
-                  writer.WriteStartArray();
-                  foreach (int val in valArr) {
-                    writer.WriteValue(val);
-                  }
-                  writer.WriteEndArray();
-                }
-
-                prevAttributes.Add(attr.Key, valArr);
-              }
-              props.Shape.SetCurrValueAttributes(prevAttributes);
+              props.Shape.WriteValueAtJson(i, writer, null);
+              prevAttributes = props.Shape.GetCurrValueAttributes();
 
               init = false;
               props.Written = true;
             } else {
-              Dictionary<string, int[]> currValues = new Dictionary<string, int[]>();
-
               string fill = props.Fill.GetValueAt(i);
               if (prevFill != fill) {
                 writer.WritePropertyName("fill");
@@ -317,26 +270,8 @@ namespace SimSharp.Visualization.Advanced {
               }
               props.Visibility.CurrValue = visibility;
 
-              foreach (KeyValuePair<string, int[]> attr in props.Shape.GetValueAttributesAt(i)) {
-                int[] valArr = attr.Value;
-                prevAttributes.TryGetValue(attr.Key, out int[] prevValue);
-                
-                if (!props.Shape.CompareAttributeValues(prevValue, valArr)) {
-                  writer.WritePropertyName(attr.Key);
-                  if (valArr.Length < 2) {
-                    writer.WriteValue(valArr[0]);
-                  } else {
-                    writer.WriteStartArray();
-                    foreach (int val in valArr) {
-                      writer.WriteValue(val);
-                    }
-                    writer.WriteEndArray();
-                  }
-                  prevAttributes[attr.Key] = valArr;
-                }
-                currValues.Add(attr.Key, valArr);
-              }
-              props.Shape.SetCurrValueAttributes(currValues);
+              props.Shape.WriteValueAtJson(i, writer, prevAttributes);
+              prevAttributes = props.Shape.GetCurrValueAttributes();
 
               props.Written = true;
             }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace SimSharp.Visualization.Advanced.AdvancedShapes {
   public class AdvancedPolygon : AdvancedShape {
@@ -11,10 +12,48 @@ namespace SimSharp.Visualization.Advanced.AdvancedShapes {
       Points = points;
     }
 
-    public override Dictionary<string, int[]> GetValueAttributes() {
-      return new Dictionary<string, int[]> {
-        { "points", Points.Value },
-      };
+    public override void WriteValueJson(JsonTextWriter writer, AdvancedShape compare) {
+      if (compare == null) {
+        writer.WritePropertyName("points");
+        writer.WriteStartArray();
+        foreach (int p in Points.Value) {
+          writer.WriteValue(p);
+        }
+        writer.WriteEndArray();
+      } else {
+        AdvancedPolygon p = (AdvancedPolygon)compare;
+
+        if (!CompareAttributeValues(Points.Value, p.Points.CurrValue)) {
+          writer.WritePropertyName("points");
+          writer.WriteStartArray();
+          foreach (int val in Points.Value) {
+            writer.WriteValue(val);
+          }
+          writer.WriteEndArray();
+        }
+      }
+    }
+
+    public override void WriteValueAtJson(int i, JsonTextWriter writer, Dictionary<string, int[]> compare) {
+      if (compare == null) {
+        int[] points = Points.GetValueAt(i);
+        writer.WritePropertyName("points");
+        writer.WriteValue(points);
+        Points.CurrValue = points;
+      } else {
+        compare.TryGetValue("points", out int[] prevPoints);
+
+        int[] points = Points.GetValueAt(i);
+        if (prevPoints != points) {
+          writer.WritePropertyName("points");
+          writer.WriteStartArray();
+          foreach (int val in points) {
+            writer.WriteValue(val);
+          }
+          writer.WriteEndArray();
+        }
+        Points.CurrValue = points;
+      }
     }
 
     public override Dictionary<string, int[]> GetCurrValueAttributes() {
@@ -23,18 +62,7 @@ namespace SimSharp.Visualization.Advanced.AdvancedShapes {
       };
     }
 
-    public override void SetCurrValueAttributes(Dictionary<string, int[]> currValues) {
-      currValues.TryGetValue("points", out int[] points);
-      Points.CurrValue = points;
-    }
-
-    public override Dictionary<string, int[]> GetValueAttributesAt(int i) {
-      return new Dictionary<string, int[]> {
-        { "points", Points.GetValueAt(i) },
-      };
-    }
-
-    public override bool CompareAttributeValues(int[] a, int[] b) {
+    private bool CompareAttributeValues(int[] a, int[] b) {
       if (!a.Length.Equals(b.Length))
         return false;
 

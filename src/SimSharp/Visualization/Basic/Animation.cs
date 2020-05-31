@@ -296,39 +296,10 @@ namespace SimSharp.Visualization.Basic {
         writer.WriteValue(true);
       }
 
-      if (prevWritten != null && prevWritten.Stop < props.Start) {
-        Dictionary<string, int[]> valueAttributes = GetAttributes(props, z);
-        Dictionary<string, int[]> prevValueAttributes = GetAttributes(prevWritten, 1);
-
-        foreach (KeyValuePair<string, int[]> attr in valueAttributes) {
-          prevValueAttributes.TryGetValue(attr.Key, out int[] prevValue);
-          if (!props.Shape1.CompareAttributeValues(prevValue, attr.Value)) {
-            writer.WritePropertyName(attr.Key);
-            if (attr.Value.Length < 2) {
-              writer.WriteValue(attr.Value[0]);
-            } else {
-              writer.WriteStartArray();
-              foreach (int val in attr.Value) {
-                writer.WriteValue(val);
-              }
-              writer.WriteEndArray();
-            }
-          }
-        }
-      } else {
-        foreach (KeyValuePair<string, int[]> attr in GetAttributes(props, z)) {
-          writer.WritePropertyName(attr.Key);
-          if (attr.Value.Length < 2) {
-            writer.WriteValue(attr.Value[0]);
-          } else {
-            writer.WriteStartArray();
-            foreach (int val in attr.Value) {
-              writer.WriteValue(val);
-            }
-            writer.WriteEndArray();
-          }
-        }
-      }
+      if (prevWritten != null && prevWritten.Stop < props.Start)
+        WriteJson(props, z, writer, prevWritten.Shape1);
+      else 
+        WriteJson(props, z, writer, null);
 
       writer.WriteEndObject();
       string frame = stringWriter.ToString();
@@ -354,6 +325,13 @@ namespace SimSharp.Visualization.Basic {
 
     private Dictionary<string, int[]> GetAttributes(AnimationProps props, int z) {
       return z == 0 ? props.Shape0.GetAttributes() : props.Shape1.GetAttributes();
+    }
+
+    private void WriteJson(AnimationProps props, int z, JsonTextWriter writer, Shape compare) {
+      if (z == 0)
+        props.Shape0.WriteJson(writer, compare);
+      else
+        props.Shape1.WriteJson(writer, compare);
     }
 
     // excl. start, incl. stop

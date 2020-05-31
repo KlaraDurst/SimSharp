@@ -79,25 +79,8 @@ namespace SimSharp.Visualization.Basic {
         writer.WriteStartObject();
 
         child.Value.Item2.WriteJson(animationBuilder, child.Key, writer, other.Item2);
+        child.Value.Item1.WriteJson(writer, other.Item1);
 
-        Dictionary<string, int[]> valueAttributes = child.Value.Item1.GetAttributes();
-        Dictionary<string, int[]> prevValueAttributes = other.Item1.GetAttributes();
-
-        foreach (KeyValuePair<string, int[]> attr in valueAttributes) {
-          prevValueAttributes.TryGetValue(attr.Key, out int[] prevValue);
-          if (!child.Value.Item1.CompareAttributeValues(prevValue, attr.Value)) {
-            writer.WritePropertyName(attr.Key);
-            if (attr.Value.Length < 2) {
-              writer.WriteValue(attr.Value[0]);
-            } else {
-              writer.WriteStartArray();
-              foreach (int val in attr.Value) {
-                writer.WriteValue(val);
-              }
-              writer.WriteEndArray();
-            }
-          }
-        }
         writer.WriteEndObject();
       }
     }
@@ -108,19 +91,8 @@ namespace SimSharp.Visualization.Basic {
       writer.WriteStartObject();
 
       child.Value.Item2.WriteJson(animationBuilder, child.Key, writer, null);
+      child.Value.Item1.WriteJson(writer, null);
 
-      foreach (KeyValuePair<string, int[]> attr in child.Value.Item1.GetAttributes()) {
-        writer.WritePropertyName(attr.Key);
-        if (attr.Value.Length < 2) {
-          writer.WriteValue(attr.Value[0]);
-        } else {
-          writer.WriteStartArray();
-          foreach (int val in attr.Value) {
-            writer.WriteValue(val);
-          }
-          writer.WriteEndArray();
-        }
-      }
       writer.WriteEndObject();
     }
 

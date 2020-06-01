@@ -50,8 +50,11 @@ namespace SimSharp.Samples {
     //private static readonly TimeSpan MaxTInter = TimeSpan.FromSeconds(20); // Create a car every max seconds
     //private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(3); // Simulation time
 
+    // Used for Visualization
     private static readonly int CarHeight = 50; // Height of car rectangles
     private static bool[] gasStations = { true, true };
+    private static GroupStyle carGroupStyle;
+    private static GroupStyle modCarGroupStyle;
 
     private int GetFreeGasStation() {
       if (gasStations[0]) {
@@ -212,6 +215,37 @@ namespace SimSharp.Samples {
       Rect fuelPumpRect = new Rect(275, 550, 250, GasStationSize);
       Style fuelPumpStyle = new Style("none", "black", 1);
       env.AnimationBuilder.Animate("fuelPump", fuelPumpRect, env.StartDate, fuelPumpStyle);
+
+      // Test
+      Rect carTop = new Rect(10, 0, 20, 15);
+      Rect carBottom = new Rect(0, 15, 50, 15);
+      Ellipse wheelLeft = new Ellipse(7, 30, 5, 5);
+      Ellipse wheelRight = new Ellipse(43, 30, 5, 5);
+      Ellipse modWheelRight = new Ellipse(43, 30, 10, 10);
+
+      Style carStyle = new Style("green", "none", 0);
+      Style modCarStyle = new Style("red", "none", 0);
+      Style wheelStyle = new Style("black", "none", 0);
+
+      carGroupStyle = new GroupStyle("green", "none", 0);
+      carGroupStyle.AddChild("carTop", carTop, carStyle);
+      carGroupStyle.AddChild("carBottom", carBottom, carStyle);
+      carGroupStyle.AddChild("wheelLeft", wheelLeft, wheelStyle);
+      carGroupStyle.AddChild("wheelRight", wheelRight, wheelStyle);
+
+      modCarGroupStyle = new GroupStyle("green", "none", 0);
+      // modCarGroupStyle.AddChild("carTop", carTop, carStyle);
+      modCarGroupStyle.AddChild("carBottom", carBottom, modCarStyle);
+      modCarGroupStyle.AddChild("wheelLeft", wheelLeft, wheelStyle);
+      modCarGroupStyle.AddChild("wheelRight", modWheelRight, wheelStyle);
+
+      Group carGroup = new Group(0, 0, 50, 35);
+      Group modCarGroup = new Group(1000, 0, 50, 35);
+      Animation carAnimation = env.AnimationBuilder.Animate("testCar", carGroup, env.StartDate, carGroupStyle);
+      carAnimation.Update(carGroup, modCarGroup, env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), carGroupStyle, true);
+      carAnimation.Update(carGroup, carGroup, env.StartDate + TimeSpan.FromMinutes(60), modCarGroupStyle, true);
+      carAnimation.Update(carGroup, carGroup, env.StartDate + TimeSpan.FromMinutes(100), carGroupStyle, true);
+      carAnimation.Update(carGroup, carGroup, env.StartDate + TimeSpan.FromMinutes(149), carGroupStyle, false);
 
       env.Process(GasStationControl(env, fuelPump));
       // env.Process(GasStationVisualization(env, fuelPump));

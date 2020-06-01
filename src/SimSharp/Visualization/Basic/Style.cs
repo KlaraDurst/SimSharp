@@ -15,7 +15,7 @@ namespace SimSharp.Visualization.Basic {
       StrokeWidth = strokeWidth;
     }
 
-    public virtual void WriteJson(AnimationBuilder animationBuilder, string name, JsonTextWriter writer, Style compare) {
+    public virtual void WriteJson(string name, JsonTextWriter writer, Style compare) {
       if (compare == null) {
         writer.WritePropertyName("fill");
         writer.WriteValue(Fill);

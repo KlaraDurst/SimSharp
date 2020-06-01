@@ -5,11 +5,11 @@ using Newtonsoft.Json;
 
 namespace SimSharp.Visualization.Basic.Shapes {
   public class Group : Shape {
-    public int X { get; set; }
-    public int Y { get; set; }
+    public int X { get; private set; }
+    public int Y { get; private set; }
 
-    public int Width { get; set; }
-    public int Height { get; set; }
+    public int Width { get; }
+    public int Height { get; }
 
     public Group(int x, int y, int width, int height) {
       X = x;
@@ -32,7 +32,7 @@ namespace SimSharp.Visualization.Basic.Shapes {
         writer.WritePropertyName("height");
         writer.WriteValue(Height);
       } else {
-        Rect r = (Rect)compare;
+        Group r = (Group)compare;
 
         if (r.X != X) {
           writer.WritePropertyName("x");
@@ -90,7 +90,7 @@ namespace SimSharp.Visualization.Basic.Shapes {
     }
 
     public override Shape Copy() {
-      return new Rect(X, Y, Width, Height);
+      return new Group(X, Y, Width, Height);
     }
 
     public override Shape CopyAndSet(Dictionary<string, int[]> attributes) {
@@ -98,14 +98,14 @@ namespace SimSharp.Visualization.Basic.Shapes {
       attributes.TryGetValue("y", out int[] y);
       attributes.TryGetValue("width", out int[] width);
       attributes.TryGetValue("height", out int[] height);
-      return new Rect(x[0], y[0], width[0], height[0]);
+      return new Group(x[0], y[0], width[0], height[0]);
     }
 
     public override bool Equals(object obj) {
       if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
         return false;
       } else {
-        Rect r = (Rect)obj;
+        Group r = (Group)obj;
         return (X == r.X) && (Y == r.Y) && (Width == r.Width) && (Height == r.Height);
       }
     }

@@ -58,15 +58,13 @@ function init() {
     let sliderInt = parseInt(slider.value);
     let sliderDiff = sliderInt - prevSliderVal;
     textInput.value = msToTime(sliderInt * timePerStep);
-    for (let i = 0; i < sliderDiff; i++) {
+    for (let i = 0; i < sliderDiff; i++)
       animate();
-    }
 
     if (prevSliderVal > sliderInt) {
       reset();
-      for (let i = 0; i < sliderInt; i++) {
+      for (let i = 0; i < sliderInt; i++)
         animate();
-      }
     }
 
     prevSliderVal = sliderInt;
@@ -75,12 +73,10 @@ function init() {
   numberInput.max = timePerFrame / speedStep;
   numberInput.addEventListener('input', () => {
     let numberInputInt = parseInt(numberInput.value);
-    if (numberInputInt >= 0) {
+    if (numberInputInt >= 0)
       timePerFrame = timePerStep - speedStep * numberInputInt;
-    }
-    else if (0 > numberInputInt){
+    else if (0 > numberInputInt)
       timePerFrame = timePerStep + speedStep * numberInputInt * -1;
-    }
   }) 
 
   animate();
@@ -137,27 +133,49 @@ function increment(timestamp) {
 
 function animate() {
   let result = it.next();
-  if (!result.done) {
-    Object.keys(result.value).forEach(e => updateObj(e, result.value[e]));
+  if (!result.done)
+    Object.keys(result.value).forEach(e => updateObj(e, result.value[e], svgDocument));
+}
+
+function updateObj(key, value, parent) {
+  let obj = document.getElementById(key);
+  let type;
+
+  if (obj == null) {
+    type = value['type'];
+    if (type != 'group') 
+      obj = document.createElementNS(svgns, value['type']);
+    else 
+      obj = document.createElementNS(svgns, "svg");
+    obj.setAttribute("id", key);
+    parent.appendChild(obj);
+  } else {
+    type = obj.getAttribute('type');
+  }
+
+  if (type != 'group')
+    Object.keys(value).forEach(e => updateShapeAttr(obj, e, value[e]))
+  else 
+    Object.keys(value).forEach(e => updateGroupAttr(obj, e, value[e]));
+}
+
+function updateGroupAttr(group, key, value) {
+  if (key != "shapes")
+    updateShapeAttr(group, key, value);
+  else {
+    Object.keys(value).forEach(e => updateObj(e, value[e], group))
   }
 }
 
-function updateObj(key, value) {
-  let shape = document.getElementById(key);
-  if (shape == null) {
-    shape = document.createElementNS(svgns, value['type']);
-    shape.setAttribute("id", key);
-    svgDocument.appendChild(shape);
-  }
-  Object.keys(value).forEach(e => updateAttr(shape, e, value[e]));
-}
-
-function updateAttr(shape, key, value) {
+function updateShapeAttr(shape, key, value) {
   if (key == 'visibility') {
     if (value)
       value = 'visible';
     else
       value = 'hidden';
+  } else if (key == 'remove') {
+    if (value)
+      shape.remove();
   }
   shape.setAttribute(key, value);
 }
@@ -194,4 +212,3 @@ function msToTime(s) {
 
   return pad(hrs) + ':' + pad(mins) + ':' + pad(secs) + '.' + pad(ms, 3);
 }
-

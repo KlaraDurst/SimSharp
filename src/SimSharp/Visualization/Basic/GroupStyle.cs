@@ -8,89 +8,82 @@ namespace SimSharp.Visualization.Basic {
   public class GroupStyle : Style {
     public Dictionary<string, (Shape, Style)> Children { get; }
 
-    private int count;
-
     public GroupStyle(string fill, string stroke, int strokeWidth) : base (fill, stroke, strokeWidth) {
       Children = new Dictionary<string, (Shape, Style)>();
-      this.count = 0;
     }
 
-    public string AddChild(Shape shape, Style style) {
-      string name = "Elem" + count.ToString();
-      AddChild(name, shape, style);
-      count++;
-      return name;
+    public GroupStyle(GroupStyle other) : this (other.Fill, other.Stroke, other.StrokeWidth) {
+      foreach(KeyValuePair<string, (Shape, Style)> child in other.Children) {
+        Children.Add(child.Key, child.Value);
+      }
     }
 
     public void AddChild(string name, Shape shape, Style style) {
       Children.Add(name, (shape, style));
     }
 
-    public void RemoveChild(string name) {
-      Children.Remove(name);
-    }
-
-    public override void WriteJson(AnimationBuilder animationBuilder, string name, JsonTextWriter writer, Style compare) {
-      base.WriteJson(animationBuilder, name, writer, compare);
+    public override void WriteJson(string name, JsonTextWriter writer, Style compare) {
+      base.WriteJson(name, writer, compare);
 
       if (compare == null) {
         if (Children.Count > 0) {
           writer.WritePropertyName("shapes");
-          writer.WriteStartArray();
+          writer.WriteStartObject();
 
           foreach (KeyValuePair<string, (Shape, Style)> child in Children)
-            WriteJson(child, animationBuilder, writer);
+            WriteJson(child, name, writer);
           
-          writer.WriteEndArray();
+          writer.WriteEndObject();
         }
       } else {
         GroupStyle groupCompare = (GroupStyle)compare;
         if (!EqualChildren(groupCompare.Children)) {
           writer.WritePropertyName("shapes");
-          writer.WriteStartArray();
+          writer.WriteStartObject();
 
           foreach (KeyValuePair<string, (Shape, Style)> child in Children) {
             if (groupCompare.Children.ContainsKey(child.Key)) 
-              CompareAndWriteJson(child, groupCompare.Children[child.Key], animationBuilder, writer);
+              CompareAndWriteJson(child, groupCompare.Children[child.Key], name, writer);
             else 
-              WriteJson(child, animationBuilder, writer);
+              WriteJson(child, name, writer);
           }
 
           foreach (KeyValuePair<string, (Shape, Style)> child in groupCompare.Children) {
             if (!Children.ContainsKey(child.Key)) {
-              writer.WritePropertyName(child.Key);
+              writer.WritePropertyName(name + "/" + child.Key);
               writer.WriteStartObject();
 
-              writer.WritePropertyName("visibility");
-              writer.WriteValue(false);
+              writer.WritePropertyName("remove");
+              writer.WriteValue(true);
 
               writer.WriteEndObject();
             }
           }
-          writer.WriteEndArray();
+          writer.WriteEndObject();
         }
       }
     }
 
-    private void CompareAndWriteJson(KeyValuePair<string, (Shape, Style)> child, (Shape, Style) other, AnimationBuilder animationBuilder, JsonTextWriter writer) {
-      if (child.Value.Item2.Equals(other.Item2) || child.Value.Item1.Equals(other.Item1)) {
-        animationBuilder.AddName(child.Key);
-        writer.WritePropertyName(child.Key);
+    private void CompareAndWriteJson(KeyValuePair<string, (Shape, Style)> child, (Shape, Style) other, string name, JsonTextWriter writer) {
+      if (!child.Value.Item2.Equals(other.Item2) || !child.Value.Item1.Equals(other.Item1)) {
+        writer.WritePropertyName(name + "/" + child.Key);
         writer.WriteStartObject();
 
-        child.Value.Item2.WriteJson(animationBuilder, child.Key, writer, other.Item2);
+        child.Value.Item2.WriteJson(child.Key, writer, other.Item2);
         child.Value.Item1.WriteJson(writer, other.Item1);
 
         writer.WriteEndObject();
       }
     }
 
-    private void WriteJson(KeyValuePair<string, (Shape, Style)> child, AnimationBuilder animationBuilder, JsonTextWriter writer) {
-      animationBuilder.AddName(child.Key);
-      writer.WritePropertyName(child.Key);
+    private void WriteJson(KeyValuePair<string, (Shape, Style)> child, string name, JsonTextWriter writer) {
+      writer.WritePropertyName(name + "/" + child.Key);
       writer.WriteStartObject();
 
-      child.Value.Item2.WriteJson(animationBuilder, child.Key, writer, null);
+      writer.WritePropertyName("type");
+      writer.WriteValue(child.Value.Item1.GetType().Name.ToLower());
+
+      child.Value.Item2.WriteJson(child.Key, writer, null);
       child.Value.Item1.WriteJson(writer, null);
 
       writer.WriteEndObject();

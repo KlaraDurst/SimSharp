@@ -147,10 +147,6 @@ namespace SimSharp.Visualization {
     public LevelAnimation AnimateLevel(string name, Rect rect, Style style) {
       return new LevelAnimation(name, rect, style, this);
     }
-
-    public void Remove(FramesProvider provider) {
-      providers.Remove(provider);
-    }
     #endregion
 
     public AnimationUtil GetAnimationUtil() {
@@ -188,6 +184,8 @@ namespace SimSharp.Visualization {
     }
 
     private void CheckName(string name) {
+      if (name.Contains("/"))
+        throw new ArgumentException("name must not contain '/'");
       if (names.Contains(name))
         throw new ArgumentException("Animations need to habe a unique name.");
     }

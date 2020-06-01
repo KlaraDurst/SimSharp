@@ -69,7 +69,6 @@ namespace SimSharp.Visualization.Basic.Resources {
           Animation removeElement = elementList[elementCount - 1];
           elementList.Remove(removeElement);
           removeElement.Update(Shape, Style, false);
-          animationBuilder.Remove(removeElement);
         }
         elementCount--;
       }

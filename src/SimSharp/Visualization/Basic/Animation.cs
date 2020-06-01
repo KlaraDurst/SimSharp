@@ -286,9 +286,9 @@ namespace SimSharp.Visualization.Basic {
         writer.WritePropertyName("type");
         writer.WriteValue(props.Shape0.GetType().Name.ToLower());
         
-        props.Style.WriteJson(animationBuilder, Name, writer, null);
+        props.Style.WriteJson(Name, writer, null);
       } else {
-        props.Style.WriteJson(animationBuilder, Name, writer, prevWritten.Style);
+        props.Style.WriteJson(Name, writer, prevWritten.Style);
       }
 
       if (!currVisible) {

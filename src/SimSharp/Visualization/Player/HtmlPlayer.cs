@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SimSharp.Visualization.Player {
   public class HtmlPlayer : IPlayer {
-    string playerPath = Path.Combine(Directory.GetParent(System.Environment.CurrentDirectory).Parent.Parent.Parent.ToString(), @"SimSharp\Visualization\Player");
+    string playerPath = Path.Combine(Directory.GetParent(System.Environment.CurrentDirectory).Parent.Parent.Parent.ToString(), @"SimSharp\Visualization\Player\Templates");
     string jsFile = @"js\scripts.js";
     string htmlFile = "Player.html";
 

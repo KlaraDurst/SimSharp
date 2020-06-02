@@ -10,9 +10,9 @@ using System.Collections.Generic;
 using SimSharp.Visualization;
 using SimSharp.Visualization.Advanced;
 using SimSharp.Visualization.Advanced.AdvancedShapes;
-using SimSharp.Visualization.Basic;
 using SimSharp.Visualization.Basic.Resources;
 using SimSharp.Visualization.Basic.Shapes;
+using SimSharp.Visualization.Basic.Styles;
 
 namespace SimSharp.Samples {
   public class GasStationRefuelingAdvAnimation {

@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using SimSharp.Visualization.Basic.Shapes;
+using SimSharp.Visualization.Basic.Styles;
 
 namespace SimSharp.Visualization.Basic {
   public class Animation : FramesProvider {

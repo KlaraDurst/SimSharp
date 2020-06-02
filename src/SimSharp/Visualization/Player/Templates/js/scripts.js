@@ -134,50 +134,42 @@ function increment(timestamp) {
 function animate() {
   let result = it.next();
   if (!result.done)
-    Object.keys(result.value).forEach(e => updateObj(e, result.value[e], svgDocument));
+    Object.keys(result.value).forEach(e => updateShape(e, result.value[e], svgDocument));
 }
 
-function updateObj(key, value, parent) {
+function updateShape(key, value, parent) {
   let obj = document.getElementById(key);
-  let type;
 
   if (obj == null) {
-    type = value['type'];
-    if (type != 'group') 
-      obj = document.createElementNS(svgns, value['type']);
-    else 
+    let type = value['type'];
+    if (type == 'group') 
       obj = document.createElementNS(svgns, "svg");
+    else 
+      obj = document.createElementNS(svgns, type);
     obj.setAttribute("id", key);
     parent.appendChild(obj);
-  } else {
-    type = obj.getAttribute('type');
-  }
+  } 
 
-  if (type != 'group')
-    Object.keys(value).forEach(e => updateShapeAttr(obj, e, value[e]))
-  else 
-    Object.keys(value).forEach(e => updateGroupAttr(obj, e, value[e]));
+  Object.keys(value).forEach(e => updateAttr(obj, e, value[e]))
 }
 
-function updateGroupAttr(group, key, value) {
-  if (key != "shapes")
-    updateShapeAttr(group, key, value);
-  else {
-    Object.keys(value).forEach(e => updateObj(e, value[e], group))
-  }
-}
-
-function updateShapeAttr(shape, key, value) {
-  if (key == 'visibility') {
-    if (value)
-      value = 'visible';
-    else
-      value = 'hidden';
+function updateAttr(shape, key, value) {
+  if (key == 'shapes') {
+    Object.keys(value).forEach(e => updateShape(e, value[e], shape))
+  } else if (key == 'text') {
+    shape.innerHTML = value;
   } else if (key == 'remove') {
     if (value)
       shape.remove();
+  } else {
+    if (key == 'visibility') {
+      if (value)
+        value = 'visible';
+      else
+        value = 'hidden';
+    }
+    shape.setAttribute(key, value);
   }
-  shape.setAttribute(key, value);
 }
 
 function makeFrameIterator() {

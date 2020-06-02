@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace SimSharp.Visualization.Basic {
+namespace SimSharp.Visualization.Basic.Styles {
   public class Style {
     public string Fill { get; }
     public string Stroke { get; }

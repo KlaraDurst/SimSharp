@@ -4,18 +4,12 @@ using System.Text;
 using Newtonsoft.Json;
 using SimSharp.Visualization.Basic.Shapes;
 
-namespace SimSharp.Visualization.Basic {
+namespace SimSharp.Visualization.Basic.Styles {
   public class GroupStyle : Style {
     public Dictionary<string, (Shape, Style)> Children { get; }
 
     public GroupStyle(string fill, string stroke, int strokeWidth) : base (fill, stroke, strokeWidth) {
       Children = new Dictionary<string, (Shape, Style)>();
-    }
-
-    public GroupStyle(GroupStyle other) : this (other.Fill, other.Stroke, other.StrokeWidth) {
-      foreach(KeyValuePair<string, (Shape, Style)> child in other.Children) {
-        Children.Add(child.Key, child.Value);
-      }
     }
 
     public void AddChild(string name, Shape shape, Style style) {

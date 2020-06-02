@@ -12,6 +12,7 @@ using SimSharp.Visualization.Basic;
 using SimSharp.Visualization;
 using SimSharp.Visualization.Basic.Resources;
 using SimSharp.Visualization.Player;
+using SimSharp.Visualization.Basic.Styles;
 
 namespace SimSharp.Samples {
   public class GasStationRefuelingBasicAnimation {
@@ -53,8 +54,6 @@ namespace SimSharp.Samples {
     // Used for Visualization
     private static readonly int CarHeight = 50; // Height of car rectangles
     private static bool[] gasStations = { true, true };
-    private static GroupStyle carGroupStyle;
-    private static GroupStyle modCarGroupStyle;
 
     private int GetFreeGasStation() {
       if (gasStations[0]) {
@@ -216,7 +215,10 @@ namespace SimSharp.Samples {
       Style fuelPumpStyle = new Style("none", "black", 1);
       env.AnimationBuilder.Animate("fuelPump", fuelPumpRect, env.StartDate, fuelPumpStyle);
 
-      // Test
+      // Group Test
+      GroupStyle carGroupStyle;
+      GroupStyle modCarGroupStyle;
+
       Rect carTop = new Rect(10, 0, 20, 15);
       Rect carBottom = new Rect(0, 15, 50, 15);
       Ellipse wheelLeft = new Ellipse(7, 30, 5, 5);
@@ -246,6 +248,18 @@ namespace SimSharp.Samples {
       carAnimation.Update(carGroup, carGroup, env.StartDate + TimeSpan.FromMinutes(60), modCarGroupStyle, true);
       carAnimation.Update(carGroup, carGroup, env.StartDate + TimeSpan.FromMinutes(100), carGroupStyle, true);
       carAnimation.Update(carGroup, carGroup, env.StartDate + TimeSpan.FromMinutes(149), carGroupStyle, false);
+
+      // Text Test
+      TextStyle textStyle = new TextStyle("black", "none", 0, "hello world");
+      TextStyle modTextStyle = new TextStyle("black", "none", 0, "ok bye");
+
+      Text text = new Text(0, 100, 200, 20);
+      Text modText = new Text(1000, 100, 200,20);
+      Animation textAnimation = env.AnimationBuilder.Animate("testText", text, env.StartDate, textStyle);
+      textAnimation.Update(text, modText, env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), textStyle, true);
+      textAnimation.Update(text, text, env.StartDate + TimeSpan.FromMinutes(60), modTextStyle, true);
+      textAnimation.Update(text, text, env.StartDate + TimeSpan.FromMinutes(100), textStyle, true);
+      textAnimation.Update(text, text, env.StartDate + TimeSpan.FromMinutes(149), textStyle, false);
 
       env.Process(GasStationControl(env, fuelPump));
       // env.Process(GasStationVisualization(env, fuelPump));

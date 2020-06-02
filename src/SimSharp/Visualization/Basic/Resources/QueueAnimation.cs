@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using SimSharp.Visualization.Basic.Shapes;
+using SimSharp.Visualization.Basic.Styles;
 
 namespace SimSharp.Visualization.Basic.Resources {
   public class QueueAnimation {

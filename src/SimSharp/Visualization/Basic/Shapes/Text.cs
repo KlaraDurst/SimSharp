@@ -4,18 +4,18 @@ using System.Text;
 using Newtonsoft.Json;
 
 namespace SimSharp.Visualization.Basic.Shapes {
-  public class Group : Shape {
-    public int X { get; private set; }
-    public int Y { get; private set; }
+  public class Text : Shape {
+    public int X { get; set; }
+    public int Y { get; set; }
 
-    public int Width { get; }
-    public int Height { get; }
+    public int TextLength { get; set; }
+    public int FontSize { get; set; }
 
-    public Group(int x, int y, int width, int height) {
+    public Text(int x, int y, int textLength = default, int fontSize = default) {
       X = x;
       Y = y;
-      Width = width;
-      Height = height;
+      TextLength = textLength;
+      FontSize = fontSize;
     }
 
     public override void WriteJson(JsonTextWriter writer, Shape compare) {
@@ -26,32 +26,32 @@ namespace SimSharp.Visualization.Basic.Shapes {
         writer.WritePropertyName("y");
         writer.WriteValue(Y);
 
-        writer.WritePropertyName("width");
-        writer.WriteValue(Width);
+        writer.WritePropertyName("textLength");
+        writer.WriteValue(TextLength);
 
-        writer.WritePropertyName("height");
-        writer.WriteValue(Height);
+        writer.WritePropertyName("font-size");
+        writer.WriteValue(FontSize);
       } else {
-        Group g = (Group)compare;
+        Text t = (Text)compare;
 
-        if (g.X != X) {
+        if (t.X != X) {
           writer.WritePropertyName("x");
           writer.WriteValue(X);
         }
 
-        if (g.Y != Y) {
+        if (t.Y != Y) {
           writer.WritePropertyName("y");
           writer.WriteValue(Y);
         }
 
-        if (g.Width != Width) {
-          writer.WritePropertyName("width");
-          writer.WriteValue(Width);
+        if (t.TextLength != TextLength) {
+          writer.WritePropertyName("textLength");
+          writer.WriteValue(TextLength);
         }
 
-        if (g.Height != Height) {
-          writer.WritePropertyName("height");
-          writer.WriteValue(Height);
+        if (t.FontSize != FontSize) {
+          writer.WritePropertyName("font-size");
+          writer.WriteValue(FontSize);
         }
       }
     }
@@ -60,8 +60,8 @@ namespace SimSharp.Visualization.Basic.Shapes {
       return new Dictionary<string, int[]> {
         { "x", new int[] { X } },
         { "y", new int[] { Y } },
-        { "width", new int[] { Width } },
-        { "height", new int[] { Height } }
+        { "textLength", new int[] { TextLength } },
+        { "font-size", new int[] { FontSize } }
       };
     }
 
@@ -90,28 +90,28 @@ namespace SimSharp.Visualization.Basic.Shapes {
     }
 
     public override Shape Copy() {
-      return new Group(X, Y, Width, Height);
+      return new Text(X, Y, TextLength, FontSize);
     }
 
     public override Shape CopyAndSet(Dictionary<string, int[]> attributes) {
       attributes.TryGetValue("x", out int[] x);
       attributes.TryGetValue("y", out int[] y);
-      attributes.TryGetValue("width", out int[] width);
-      attributes.TryGetValue("height", out int[] height);
-      return new Group(x[0], y[0], width[0], height[0]);
+      attributes.TryGetValue("textLength", out int[] textLength);
+      attributes.TryGetValue("font-size", out int[] fontSize);
+      return new Text(x[0], y[0], textLength[0], fontSize[0]);
     }
 
     public override bool Equals(object obj) {
       if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
         return false;
       } else {
-        Group r = (Group)obj;
-        return (X == r.X) && (Y == r.Y) && (Width == r.Width) && (Height == r.Height);
+        Text r = (Text)obj;
+        return (X == r.X) && (Y == r.Y) && (TextLength == r.TextLength) && (FontSize == r.FontSize);
       }
     }
 
     public override int GetHashCode() {
-      return (X, Y, Width, Height).GetHashCode();
+      return (X, Y, TextLength, FontSize).GetHashCode();
     }
   }
 }

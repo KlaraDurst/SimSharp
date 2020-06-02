@@ -9,6 +9,7 @@ using SimSharp.Visualization.Advanced.AdvancedShapes;
 using SimSharp.Visualization.Basic;
 using SimSharp.Visualization.Basic.Resources;
 using SimSharp.Visualization.Basic.Shapes;
+using SimSharp.Visualization.Basic.Styles;
 using SimSharp.Visualization.Player;
 
 namespace SimSharp.Visualization {

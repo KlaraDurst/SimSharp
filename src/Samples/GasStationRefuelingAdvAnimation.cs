@@ -13,6 +13,7 @@ using SimSharp.Visualization.Advanced.AdvancedShapes;
 using SimSharp.Visualization.Basic.Resources;
 using SimSharp.Visualization.Basic.Shapes;
 using SimSharp.Visualization.Basic.Styles;
+using SimSharp.Visualization.Player;
 
 namespace SimSharp.Samples {
   public class GasStationRefuelingAdvAnimation {
@@ -53,7 +54,7 @@ namespace SimSharp.Samples {
 
     private static readonly int CarHeight = 50; // Height of car rectangles
     private static bool[] gasStations = { true, true };
-    private AnimationUtil util;
+    private static AnimationUtil util;
 
     private int GetFreeGasStation() {
       if (gasStations[0]) {
@@ -225,7 +226,7 @@ namespace SimSharp.Samples {
       // BuildAnimation has to be turned on before first Animation is created
       env.AnimationBuilder.DebugAnimation = false;
       env.AnimationBuilder.EnableAnimation = true;
-      // env.AnimationBuilder.Player = new HtmlPlayer();
+      env.AnimationBuilder.Player = new HtmlPlayer();
 
       util = env.AnimationBuilder.GetAnimationUtil();
 
@@ -258,6 +259,30 @@ namespace SimSharp.Samples {
       // Fuel pump visualization
       AdvancedRect fuelPumpRect = new AdvancedRect(275, 550, 250, GasStationSize);
       env.AnimationBuilder.Animate("fuelPump", fuelPumpRect, "none", "black", 1, true);
+
+      // Group Test
+      AdvancedGroup carGroup = new AdvancedGroup(
+        util.GetIntValueAt(env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), 0, 1000), 
+        0, 
+        50, 
+        35);
+      AdvancedRect carTop = new AdvancedRect(10, 0, 20, 15);
+      AdvancedRect carBottom = new AdvancedRect(0, 15, 50, 15);
+      AdvancedEllipse wheelLeft = new AdvancedEllipse(7, 30, 5, 5);
+      AdvancedEllipse wheelRight = new AdvancedEllipse(43, 30, 5, 5);
+
+      AdvancedGroupAnimation carAnimation = env.AnimationBuilder.Animate("testCar", carGroup, "green", "none", 0, true);
+      carAnimation.AddChild(
+        carTop, 
+        util.GetIfTimeBetween<string>(env.StartDate + TimeSpan.FromMinutes(60), env.StartDate + TimeSpan.FromMinutes(100), "red", "green"), 
+        "none", 
+        0, 
+        true);
+      carAnimation.AddChild(carBottom, "green", "none", 0, true);
+      carAnimation.AddChild(wheelLeft, "black", "none", 0, true);
+      carAnimation.AddChild(wheelRight, "black", "none", 0, true);
+
+      // Text Test
 
       env.Process(GasStationControl(env, fuelPump));
       env.Process(CarGenerator(env, gasStation, fuelPump));

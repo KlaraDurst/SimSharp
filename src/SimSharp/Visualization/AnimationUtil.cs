@@ -12,8 +12,8 @@ namespace SimSharp.Visualization {
 
     public Func<int, int> GetIntValueAt(DateTime start, DateTime stop, int startValue, int endValue) {
       int startFrame = Convert.ToInt32((start - AnimationBuilder.Env.StartDate).TotalSeconds * AnimationBuilder.FPS) + 1;
-      int pauseFrame = Convert.ToInt32((stop - AnimationBuilder.Env.StartDate).TotalSeconds * AnimationBuilder.FPS);
-      int totalFrames = pauseFrame - startFrame + 1;
+      int stopFrame = Convert.ToInt32((stop - AnimationBuilder.Env.StartDate).TotalSeconds * AnimationBuilder.FPS);
+      int totalFrames = stopFrame - startFrame + 1;
 
       return t => {
         int currFrame = t - startFrame;
@@ -31,6 +31,18 @@ namespace SimSharp.Visualization {
           else
             return endValue;
         }
+      };
+    }
+
+    public Func<int, T> GetIfTimeBetween<T>(DateTime from, DateTime to, T val, T elseVal) {
+      int startFrame = Convert.ToInt32((from - AnimationBuilder.Env.StartDate).TotalSeconds * AnimationBuilder.FPS) + 1;
+      int stopFrame = Convert.ToInt32((to - AnimationBuilder.Env.StartDate).TotalSeconds * AnimationBuilder.FPS);
+
+      return t => {
+        if (t >= startFrame && t <= stopFrame)
+          return val;
+        else
+          return elseVal;
       };
     }
   }

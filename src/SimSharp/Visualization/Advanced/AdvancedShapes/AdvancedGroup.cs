@@ -4,13 +4,13 @@ using System.Text;
 using Newtonsoft.Json;
 
 namespace SimSharp.Visualization.Advanced.AdvancedShapes {
-  public class AdvancedRect : AdvancedShape {
+  public class AdvancedGroup : AdvancedShape {
     public AnimationAttribute<int> X { get; set; }
     public AnimationAttribute<int> Y { get; set; }
     public AnimationAttribute<int> Width { get; set; }
     public AnimationAttribute<int> Height { get; set; }
 
-    public AdvancedRect(AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height) {
+    public AdvancedGroup(AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> width, AnimationAttribute<int> height) {
       X = x;
       Y = y;
       Width = width;
@@ -31,7 +31,7 @@ namespace SimSharp.Visualization.Advanced.AdvancedShapes {
         writer.WritePropertyName("height");
         writer.WriteValue(Height.Value);
       } else {
-        AdvancedRect r = (AdvancedRect)compare;
+        AdvancedGroup r = (AdvancedGroup)compare;
 
         if (r.X.CurrValue != X.Value) {
           writer.WritePropertyName("x");

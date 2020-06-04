@@ -123,14 +123,24 @@ namespace SimSharp.Visualization {
       return animation;
     }
 
-    public AdvancedAnimation Animate(AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible) {
-      return Animate(GetNextAnimationName(), shape, fill, stroke, strokeWidth, visible);
+    public AdvancedAnimation Animate(AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
+      return Animate(GetNextAnimationName(), shape, fill, stroke, strokeWidth, visibility);
     }
 
-    public AdvancedAnimation Animate(string name, AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visible) {
-      AdvancedAnimation rectAnimation = new AdvancedAnimation(name, shape, fill, stroke, strokeWidth, visible);
-      AddProvider(rectAnimation);
-      return rectAnimation;
+    public AdvancedAnimation Animate(string name, AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
+      AdvancedAnimation animation = new AdvancedAnimation(name, shape, fill, stroke, strokeWidth, visibility);
+      AddProvider(animation);
+      return animation;
+    }
+
+    public AdvancedGroupAnimation Animate(AdvancedGroup group, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
+      return Animate(GetNextAnimationName(), group, fill, stroke, strokeWidth, visibility);
+    }
+
+    public AdvancedGroupAnimation Animate(string name, AdvancedGroup group, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
+      AdvancedGroupAnimation groupAnimation = new AdvancedGroupAnimation(name, group, fill, stroke, strokeWidth, visibility);
+      AddProvider(groupAnimation);
+      return groupAnimation;
     }
 
     public QueueAnimation AnimateQueue(Shape shape, Style style, int space, int maxLength, QueueAnimation.QueueOrientation orientation = QueueAnimation.QueueOrientation.East) {
@@ -179,7 +189,7 @@ namespace SimSharp.Visualization {
         throw new ArgumentException("Both shapes need to have the same type.");
     }
 
-    public void AddName(string name) {
+    private void AddName(string name) {
       CheckName(name);
       names.Add(name);
     }
@@ -188,7 +198,7 @@ namespace SimSharp.Visualization {
       if (name.Contains("/"))
         throw new ArgumentException("name must not contain '/'");
       if (names.Contains(name))
-        throw new ArgumentException("Animations need to habe a unique name.");
+        throw new ArgumentException("Animations need to have a unique name.");
     }
 
     public void StartBuilding() {

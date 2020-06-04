@@ -13,7 +13,15 @@ namespace SimSharp.Visualization.Basic.Styles {
     }
 
     public void AddChild(string name, Shape shape, Style style) {
+      CheckName(name);
       Children.Add(name, (shape, style));
+    }
+
+    private void CheckName(string name) {
+      if (name.Contains("/"))
+        throw new ArgumentException("name must not contain '/'");
+      if (Children.ContainsKey(name))
+        throw new ArgumentException("Animation Children need to have a unique name.");
     }
 
     public override void WriteJson(string name, JsonTextWriter writer, Style compare) {

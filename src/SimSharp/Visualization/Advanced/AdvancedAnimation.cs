@@ -10,13 +10,13 @@ namespace SimSharp.Visualization.Advanced {
   public class AdvancedAnimation : FramesProvider {
     public string Name { get; set; }
 
-    private StringWriter stringWriter;
-    private JsonTextWriter writer;
-    private List<AdvancedAnimationProps> propsList;
-    private bool currVisible;
+    protected StringWriter stringWriter;
+    protected JsonTextWriter writer;
+    protected List<AdvancedAnimationProps> propsList;
+    protected bool currVisible;
 
-    private string typeStr;
-    private string removeStr;
+    protected string typeStr;
+    protected string removeStr;
 
     public AdvancedAnimation (string name, AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
       Name = Regex.Replace(name, @"\s+", "");
@@ -83,7 +83,7 @@ namespace SimSharp.Visualization.Advanced {
       }
     }
 
-    private AdvancedAnimationProps GetLastWrittenProps() {
+    protected AdvancedAnimationProps GetLastWrittenProps() {
       for (int j = propsList.Count - 1; j >= 0; j--) {
         AdvancedAnimationProps props = propsList[j];
         if (props.Written)
@@ -92,7 +92,13 @@ namespace SimSharp.Visualization.Advanced {
       return null;
     }
 
-    private string GetValueInitFrame(AdvancedAnimationProps props) {
+    protected virtual void WriteValueJson(AdvancedAnimationProps props, AdvancedAnimationProps prevWritten) {
+      props.WriteValueJson(writer, currVisible, prevWritten);
+    }
+
+    public virtual string GetValueInitFrame() {
+      AdvancedAnimationProps props = propsList[propsList.Count - 1];
+
       writer.WritePropertyName(Name);
       writer.WriteStartObject();
 
@@ -101,45 +107,11 @@ namespace SimSharp.Visualization.Advanced {
         writer.WritePropertyName("type");
         writer.WriteValue(typeStr.Remove(typeStr.IndexOf(removeStr), removeStr.Length));
 
-        writer.WritePropertyName("fill");
-        writer.WriteValue(props.Fill.Value);
-
-        writer.WritePropertyName("stroke");
-        writer.WriteValue(props.Stroke.Value);
-
-        writer.WritePropertyName("stroke-width");
-        writer.WriteValue(props.StrokeWidth.Value);
-
-        writer.WritePropertyName("visibility");
-        writer.WriteValue(true);
-        currVisible = true;
-
-        props.Shape.WriteValueJson(writer, null);
-        props.Written = true;
+        WriteValueJson(props, null);
+        currVisible = props.Visibility.Value;
       } else if (prevWritten != null && props.Visibility.Value) {
-        if (prevWritten.Fill.CurrValue != props.Fill.Value) {
-          writer.WritePropertyName("fill");
-          writer.WriteValue(props.Fill.Value);
-        }
-
-        if (prevWritten.Stroke.CurrValue != props.Stroke.Value) {
-          writer.WritePropertyName("stroke");
-          writer.WriteValue(props.Stroke.Value);
-        }
-
-        if (prevWritten.StrokeWidth.CurrValue != props.StrokeWidth.Value) {
-          writer.WritePropertyName("stroke-width");
-          writer.WriteValue(props.StrokeWidth.Value);
-        }
-
-        if (!currVisible) {
-          writer.WritePropertyName("visibility");
-          writer.WriteValue(true);
-          currVisible = true;
-        }
-
-        props.Shape.WriteValueJson(writer, prevWritten.Shape);
-        props.Written = true;
+        WriteValueJson(props, prevWritten);
+        currVisible = props.Visibility.Value;
       } else if (prevWritten != null && !props.Visibility.Value) {
         if (currVisible) {
           writer.WritePropertyName("visibility");
@@ -147,30 +119,36 @@ namespace SimSharp.Visualization.Advanced {
           currVisible = false;
         }
       }
-
       writer.WriteEndObject();
       string frame = stringWriter.ToString();
       Flush();
 
-      if (frame.Length <= Name.Length + 5) // json object is empty
-        return string.Empty;
-      else
-        return frame;
+      return frame;
     }
 
-    private void Flush() {
+    protected void Flush() {
       writer.Flush();
       StringBuilder sb = stringWriter.GetStringBuilder();
       sb.Remove(0, sb.Length);
     }
 
-    public List<AnimationUnit> FramesFromTo(int start, int stop) {
+    public virtual bool AllValues() {
+      AdvancedAnimationProps props = propsList[propsList.Count - 1];
+      return props.AllValues();
+    }
+
+    protected virtual void WriteValueAtJson(AdvancedAnimationProps props, int i, AdvancedAnimationProps.State propsState, Dictionary<string, int[]> prevAttributes) {
+      props.WriteValueAtJson(i, writer, currVisible, propsState);
+      props.Shape.WriteValueAtJson(i, writer, prevAttributes);
+    }
+
+    public virtual List<AnimationUnit> FramesFromTo(int start, int stop) {
       AdvancedAnimationProps props = propsList[propsList.Count - 1];
       List<AnimationUnit> affectedUnits = new List<AnimationUnit>();
 
-      if (props.AllValues()) {
-        string frame = GetValueInitFrame(props);
-        if (!frame.Equals(string.Empty)) {
+      if (AllValues()) {
+        string frame = GetValueInitFrame();
+        if (frame.Length > Name.Length + 5) { // json object is not empty
           AnimationUnit unit = new AnimationUnit(start, start, 1);
           unit.AddFrame(frame);
           affectedUnits.Add(unit);
@@ -180,23 +158,17 @@ namespace SimSharp.Visualization.Advanced {
         List<string> frames = new List<string>();
         int unitStart = start;
         bool init;
-        string prevFill;
-        string prevStroke;
-        int prevStrokeWidth;
+        AdvancedAnimationProps.State propsState;
         Dictionary<string, int[]> prevAttributes;
 
         AdvancedAnimationProps prevWritten = GetLastWrittenProps();
         if (prevWritten == null) {
           init = true;
-          prevFill = null;
-          prevStroke = null;
-          prevStrokeWidth = default;
+          propsState = new AdvancedAnimationProps.State(null, null, default);
           prevAttributes = new Dictionary<string, int[]>();
         } else {
           init = false;
-          prevFill = prevWritten.Fill.CurrValue;
-          prevStroke = prevWritten.Stroke.CurrValue;
-          prevStrokeWidth = prevWritten.StrokeWidth.CurrValue;
+          propsState = new AdvancedAnimationProps.State(prevWritten.Fill.CurrValue, prevWritten.Stroke.CurrValue, prevWritten.StrokeWidth.CurrValue);
           prevAttributes = prevWritten.Shape.GetCurrValueAttributes();
         }
 
@@ -210,70 +182,21 @@ namespace SimSharp.Visualization.Advanced {
               writer.WritePropertyName("type");
               writer.WriteValue(typeStr.Remove(typeStr.IndexOf(removeStr), removeStr.Length));
 
-              string fill = props.Fill.GetValueAt(i);
-              writer.WritePropertyName("fill");
-              writer.WriteValue(fill);
-              props.Fill.CurrValue = fill;
-              prevFill = fill;
-
-              string stroke = props.Stroke.GetValueAt(i);
-              writer.WritePropertyName("stroke");
-              writer.WriteValue(stroke);
-              props.Stroke.CurrValue = stroke;
-              prevStroke = stroke;
-
-              int strokeWidth = props.StrokeWidth.GetValueAt(i);
-              writer.WritePropertyName("stroke-width");
-              writer.WriteValue(strokeWidth);
-              props.StrokeWidth.CurrValue = strokeWidth;
-              prevStrokeWidth = strokeWidth;
-
-              writer.WritePropertyName("visibility");
-              writer.WriteValue(true);
-              props.Visibility.CurrValue = true;
-              currVisible = true;
-
-              props.Shape.WriteValueAtJson(i, writer, null);
+              WriteValueAtJson(props, i, null, null);
+              propsState.Fill  = props.Fill.CurrValue;
+              propsState.Stroke = props.Stroke.CurrValue;
+              propsState.StrokeWidth = props.StrokeWidth.CurrValue;
+              currVisible = props.Visibility.CurrValue;
               prevAttributes = props.Shape.GetCurrValueAttributes();
 
               init = false;
-              props.Written = true;
             } else {
-              string fill = props.Fill.GetValueAt(i);
-              if (prevFill != fill) {
-                writer.WritePropertyName("fill");
-                writer.WriteValue(fill);
-                prevFill = fill;
-              }
-              props.Fill.CurrValue = fill;
-
-              string stroke = props.Stroke.GetValueAt(i);
-              if (prevStroke != stroke) {
-                writer.WritePropertyName("stroke");
-                writer.WriteValue(stroke);
-                prevStroke = stroke;
-              }
-              props.Stroke.CurrValue = stroke;
-
-              int strokeWidth = props.StrokeWidth.GetValueAt(i);
-              if (prevStrokeWidth != strokeWidth) {
-                writer.WritePropertyName("stroke-width");
-                writer.WriteValue(strokeWidth);
-                prevStrokeWidth = strokeWidth;
-              }
-              props.StrokeWidth.CurrValue = strokeWidth;
-
-              if (!currVisible) {
-                writer.WritePropertyName("visibility");
-                writer.WriteValue(true);
-                currVisible = true;
-              }
-              props.Visibility.CurrValue = visibility;
-
-              props.Shape.WriteValueAtJson(i, writer, prevAttributes);
+              WriteValueAtJson(props, i, propsState, prevAttributes);
+              propsState.Fill = props.Fill.CurrValue;
+              propsState.Stroke = props.Stroke.CurrValue;
+              propsState.StrokeWidth = props.StrokeWidth.CurrValue;
+              currVisible = props.Visibility.CurrValue;
               prevAttributes = props.Shape.GetCurrValueAttributes();
-
-              props.Written = true;
             }
           } else {
             if (currVisible) {

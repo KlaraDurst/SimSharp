@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using SimSharp.Visualization.Advanced;
 using SimSharp.Visualization.Advanced.AdvancedShapes;
+using SimSharp.Visualization.Advanced.AdvancedStyles;
 using SimSharp.Visualization.Basic;
 using SimSharp.Visualization.Basic.Resources;
 using SimSharp.Visualization.Basic.Shapes;
@@ -123,22 +124,22 @@ namespace SimSharp.Visualization {
       return animation;
     }
 
-    public AdvancedAnimation Animate(AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
-      return Animate(GetNextAnimationName(), shape, fill, stroke, strokeWidth, visibility);
+    public AdvancedAnimation Animate(AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
+      return Animate(GetNextAnimationName(), shape, style, visibility);
     }
 
-    public AdvancedAnimation Animate(string name, AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
-      AdvancedAnimation animation = new AdvancedAnimation(name, shape, fill, stroke, strokeWidth, visibility);
+    public AdvancedAnimation Animate(string name, AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
+      AdvancedAnimation animation = new AdvancedAnimation(name, shape, style, visibility);
       AddProvider(animation);
       return animation;
     }
 
-    public AdvancedGroupAnimation Animate(AdvancedGroup group, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
-      return Animate(GetNextAnimationName(), group, fill, stroke, strokeWidth, visibility);
+    public AdvancedGroupAnimation Animate(AdvancedGroup group, AdvancedStyle style, AnimationAttribute<bool> visibility) {
+      return Animate(GetNextAnimationName(), group, style, visibility);
     }
 
-    public AdvancedGroupAnimation Animate(string name, AdvancedGroup group, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
-      AdvancedGroupAnimation groupAnimation = new AdvancedGroupAnimation(name, group, fill, stroke, strokeWidth, visibility);
+    public AdvancedGroupAnimation Animate(string name, AdvancedGroup group, AdvancedStyle style, AnimationAttribute<bool> visibility) {
+      AdvancedGroupAnimation groupAnimation = new AdvancedGroupAnimation(name, group, style, visibility);
       AddProvider(groupAnimation);
       return groupAnimation;
     }

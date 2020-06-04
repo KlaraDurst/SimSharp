@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using SimSharp.Visualization.Advanced.AdvancedShapes;
+using SimSharp.Visualization.Advanced.AdvancedStyles;
 
 namespace SimSharp.Visualization.Advanced {
   public class AdvancedGroupAnimation : AdvancedAnimation {
@@ -9,19 +10,19 @@ namespace SimSharp.Visualization.Advanced {
 
     private List<string> names;
 
-    public AdvancedGroupAnimation(string name, AdvancedGroup group, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) 
-      : base(name, group, fill, stroke, strokeWidth, visibility) {
+    public AdvancedGroupAnimation(string name, AdvancedGroup group, AdvancedStyle style, AnimationAttribute<bool> visibility) 
+      : base(name, group, style, visibility) {
       Children = new List<AdvancedAnimation>();
       this.names = new List<string>();
     }
 
-    public AdvancedAnimation AddChild(AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
-      return AddChild(GetNextAnimationName(), shape, fill, stroke, strokeWidth, visibility);
+    public AdvancedAnimation AddChild(AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
+      return AddChild(GetNextAnimationName(), shape, style, visibility);
     }
 
-    public AdvancedAnimation AddChild(string name, AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
+    public AdvancedAnimation AddChild(string name, AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
       AddName(name);
-      AdvancedAnimation animation = new AdvancedAnimation(Name + "/" + name, shape, fill, stroke, strokeWidth, visibility);
+      AdvancedAnimation animation = new AdvancedAnimation(Name + "/" + name, shape, style, visibility);
       Children.Add(animation);
       return animation;
     }
@@ -104,7 +105,7 @@ namespace SimSharp.Visualization.Advanced {
       return true;
     }
 
-    protected override void WriteValueAtJson(AdvancedAnimationProps props, int i, AdvancedAnimationProps.State propsState, Dictionary<string, int[]> prevAttributes) {
+    protected override void WriteValueAtJson(AdvancedAnimationProps props, int i, AdvancedStyle.State propsState, Dictionary<string, int[]> prevAttributes) {
       base.WriteValueAtJson(props, i, propsState, prevAttributes);
       WriteChildrenValueAtJson(i);
     }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using SimSharp.Visualization.Advanced.AdvancedShapes;
+using SimSharp.Visualization.Advanced.AdvancedStyles;
 
 namespace SimSharp.Visualization.Advanced {
   public class AdvancedAnimation : FramesProvider {
@@ -18,14 +19,14 @@ namespace SimSharp.Visualization.Advanced {
     protected string typeStr;
     protected string removeStr;
 
-    public AdvancedAnimation (string name, AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
+    public AdvancedAnimation (string name, AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
       Name = Regex.Replace(name, @"\s+", "");
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
       this.propsList = new List<AdvancedAnimationProps>();
       this.currVisible = false;
 
-      AdvancedAnimationProps props = new AdvancedAnimationProps(shape, fill, stroke, strokeWidth, visibility);
+      AdvancedAnimationProps props = new AdvancedAnimationProps(shape, style, visibility);
       propsList.Add(props);
 
       this.typeStr = props.Shape.GetType().Name.ToLower();
@@ -37,16 +38,8 @@ namespace SimSharp.Visualization.Advanced {
       return propsList[propsList.Count - 1].Shape;
     }
 
-    public AnimationAttribute<string> GetFill() {
-      return propsList[propsList.Count - 1].Fill;
-    }
-
-    public AnimationAttribute<string> GetStroke() {
-      return propsList[propsList.Count - 1].Stroke;
-    }
-
-    public AnimationAttribute<int> GetStrokeWidth() {
-      return propsList[propsList.Count - 1].StrokeWidth;
+    public AdvancedStyle GetStyle() {
+      return propsList[propsList.Count - 1].Style;
     }
 
     public AnimationAttribute<bool> GetVisible() {
@@ -60,16 +53,8 @@ namespace SimSharp.Visualization.Advanced {
       propsList[propsList.Count - 1].Shape = shape;
     }
 
-    public void SetFill(AnimationAttribute<string> fill) {
-      propsList[propsList.Count - 1].Fill = fill;
-    }
-
-    public void SetStroke(AnimationAttribute<string> stroke) {
-      propsList[propsList.Count - 1].Stroke = stroke;
-    }
-
-    public void SetStrokeWidth(AnimationAttribute<int> strokeWidth) {
-      propsList[propsList.Count - 1].StrokeWidth = strokeWidth;
+    public void SetStyle(AdvancedStyle style) {
+      propsList[propsList.Count - 1].Style = style;
     }
 
     public void SetVisible(AnimationAttribute<bool> visibility) {
@@ -137,7 +122,7 @@ namespace SimSharp.Visualization.Advanced {
       return props.AllValues();
     }
 
-    protected virtual void WriteValueAtJson(AdvancedAnimationProps props, int i, AdvancedAnimationProps.State propsState, Dictionary<string, int[]> prevAttributes) {
+    protected virtual void WriteValueAtJson(AdvancedAnimationProps props, int i, AdvancedStyle.State propsState, Dictionary<string, int[]> prevAttributes) {
       props.WriteValueAtJson(i, writer, currVisible, propsState);
       props.Shape.WriteValueAtJson(i, writer, prevAttributes);
     }
@@ -158,17 +143,17 @@ namespace SimSharp.Visualization.Advanced {
         List<string> frames = new List<string>();
         int unitStart = start;
         bool init;
-        AdvancedAnimationProps.State propsState;
+        AdvancedStyle.State propsState;
         Dictionary<string, int[]> prevAttributes;
 
         AdvancedAnimationProps prevWritten = GetLastWrittenProps();
         if (prevWritten == null) {
           init = true;
-          propsState = new AdvancedAnimationProps.State(null, null, default);
+          propsState = new AdvancedStyle.State();
           prevAttributes = new Dictionary<string, int[]>();
         } else {
           init = false;
-          propsState = new AdvancedAnimationProps.State(prevWritten.Fill.CurrValue, prevWritten.Stroke.CurrValue, prevWritten.StrokeWidth.CurrValue);
+          propsState = new AdvancedStyle.State(prevWritten.Style);
           prevAttributes = prevWritten.Shape.GetCurrValueAttributes();
         }
 
@@ -183,18 +168,14 @@ namespace SimSharp.Visualization.Advanced {
               writer.WriteValue(typeStr.Remove(typeStr.IndexOf(removeStr), removeStr.Length));
 
               WriteValueAtJson(props, i, null, null);
-              propsState.Fill  = props.Fill.CurrValue;
-              propsState.Stroke = props.Stroke.CurrValue;
-              propsState.StrokeWidth = props.StrokeWidth.CurrValue;
+              propsState.SetState(props.Style);
               currVisible = props.Visibility.CurrValue;
               prevAttributes = props.Shape.GetCurrValueAttributes();
 
               init = false;
             } else {
               WriteValueAtJson(props, i, propsState, prevAttributes);
-              propsState.Fill = props.Fill.CurrValue;
-              propsState.Stroke = props.Stroke.CurrValue;
-              propsState.StrokeWidth = props.StrokeWidth.CurrValue;
+              propsState.SetState(props.Style);
               currVisible = props.Visibility.CurrValue;
               prevAttributes = props.Shape.GetCurrValueAttributes();
             }

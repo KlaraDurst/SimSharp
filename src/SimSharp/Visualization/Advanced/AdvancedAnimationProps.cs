@@ -3,71 +3,33 @@ using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
 using SimSharp.Visualization.Advanced.AdvancedShapes;
+using SimSharp.Visualization.Advanced.AdvancedStyles;
 
 namespace SimSharp.Visualization.Advanced {
   public class AdvancedAnimationProps {
-    public class State {
-      public string Fill { get; set; }
-      public string Stroke { get; set; }
-      public int StrokeWidth { get; set; }
-
-      public State(string fill, string stroke, int strokeWidth) {
-        Fill = fill;
-        Stroke = stroke;
-        StrokeWidth = strokeWidth;
-      }
-    }
-
     public AdvancedShape Shape { get; set; }
-    public AnimationAttribute<string> Fill { get; set; }
-    public AnimationAttribute<string> Stroke { get; set; }
-    public AnimationAttribute<int> StrokeWidth { get; set; }
+    public AdvancedStyle Style { get; set; }
     public AnimationAttribute<bool> Visibility { get; set; }
 
     public bool Written { get; set; }
 
-    public AdvancedAnimationProps(AdvancedAnimationProps other) 
-      : this(other.Shape, other.Fill, other.Stroke, other.StrokeWidth, other.Visibility) { }
-
-    public AdvancedAnimationProps(AdvancedShape shape, AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<bool> visibility) {
+    public AdvancedAnimationProps(AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
       Shape = shape;
-      Fill = fill;
-      Stroke = stroke;
-      StrokeWidth = strokeWidth;
+      Style = style;
       Visibility = visibility;
       Written = false;
     }
     
     public void WriteValueJson(JsonTextWriter writer, bool currVisible, AdvancedAnimationProps compare) {
       if (compare == null) {
-        writer.WritePropertyName("fill");
-        writer.WriteValue(Fill.Value);
-
-        writer.WritePropertyName("stroke");
-        writer.WriteValue(Stroke.Value);
-
-        writer.WritePropertyName("stroke-width");
-        writer.WriteValue(StrokeWidth.Value);
+        Style.WriteValueJson(writer, null);
 
         writer.WritePropertyName("visibility");
         writer.WriteValue(Visibility.Value);
 
         Shape.WriteValueJson(writer, null);
       } else {
-        if (compare.Fill.CurrValue != Fill.Value) {
-          writer.WritePropertyName("fill");
-          writer.WriteValue(Fill.Value);
-        }
-
-        if (compare.Stroke.CurrValue != Stroke.Value) {
-          writer.WritePropertyName("stroke");
-          writer.WriteValue(Stroke.Value);
-        }
-
-        if (compare.StrokeWidth.CurrValue != StrokeWidth.Value) {
-          writer.WritePropertyName("stroke-width");
-          writer.WriteValue(StrokeWidth.Value);
-        }
+        Style.WriteValueJson(writer, compare.Style);
 
         if (!currVisible) {
           writer.WritePropertyName("visibility");
@@ -79,47 +41,15 @@ namespace SimSharp.Visualization.Advanced {
       Written = true;
     }
 
-    public void WriteValueAtJson(int i, JsonTextWriter writer, bool currVisible, State compare) {
+    public void WriteValueAtJson(int i, JsonTextWriter writer, bool currVisible, AdvancedStyle.State compare) {
       if (compare == null) {
-        string fill = Fill.GetValueAt(i);
-        writer.WritePropertyName("fill");
-        writer.WriteValue(fill);
-        Fill.CurrValue = fill;
-
-        string stroke = Stroke.GetValueAt(i);
-        writer.WritePropertyName("stroke");
-        writer.WriteValue(stroke);
-        Stroke.CurrValue = stroke;
-
-        int strokeWidth = StrokeWidth.GetValueAt(i);
-        writer.WritePropertyName("stroke-width");
-        writer.WriteValue(strokeWidth);
-        StrokeWidth.CurrValue = strokeWidth;
+        Style.WriteValueAtJson(i, writer, null);
 
         writer.WritePropertyName("visibility");
         writer.WriteValue(true);
         Visibility.CurrValue = true;
       } else {
-        string fill = Fill.GetValueAt(i);
-        if (compare.Fill != fill) {
-          writer.WritePropertyName("fill");
-          writer.WriteValue(fill);
-        }
-        Fill.CurrValue = fill;
-
-        string stroke = Stroke.GetValueAt(i);
-        if (compare.Stroke != stroke) {
-          writer.WritePropertyName("stroke");
-          writer.WriteValue(stroke);
-        }
-        Stroke.CurrValue = stroke;
-
-        int strokeWidth = StrokeWidth.GetValueAt(i);
-        if (compare.StrokeWidth != strokeWidth) {
-          writer.WritePropertyName("stroke-width");
-          writer.WriteValue(strokeWidth);
-        }
-        StrokeWidth.CurrValue = strokeWidth;
+        Style.WriteValueAtJson(i, writer, compare);
 
         if (!currVisible) {
           writer.WritePropertyName("visibility");
@@ -133,11 +63,7 @@ namespace SimSharp.Visualization.Advanced {
     public bool AllValues() {
       if (!Shape.AllValues())
         return false;
-      if (Fill.Function != null)
-        return false;
-      if (Stroke.Function != null)
-        return false;
-      if (StrokeWidth.Function != null)
+      if (!Style.AllValues())
         return false;
       if (Visibility.Function != null)
         return false;

@@ -286,6 +286,19 @@ namespace SimSharp.Samples {
       carAnimation.AddChild(wheelRight, wheelStyle, true);
 
       // Text Test
+      AdvancedText text = new AdvancedText(
+        util.GetIntValueAt(env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), 0, 1000),
+        100, 
+        200, 
+        20);
+
+      AdvancedTextStyle textStyle = new AdvancedTextStyle(
+        "black", 
+        "none", 
+        0,
+        util.GetIfTimeBetween<string>(env.StartDate + TimeSpan.FromMinutes(60), env.StartDate + TimeSpan.FromMinutes(100), "ok bye", "hello world"));
+
+      env.AnimationBuilder.Animate("testText", text, textStyle, true);
 
       env.Process(GasStationControl(env, fuelPump));
       env.Process(CarGenerator(env, gasStation, fuelPump));

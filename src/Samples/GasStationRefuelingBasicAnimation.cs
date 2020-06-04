@@ -230,7 +230,6 @@ namespace SimSharp.Samples {
       Style modCarStyle = new Style("red", "none", 0);
       Style wheelStyle = new Style("black", "none", 0);
 
-
       carGroupStyle.AddChild("carTop", carTop, carStyle);
       carGroupStyle.AddChild("carBottom", carBottom, carStyle);
       carGroupStyle.AddChild("wheelLeft", wheelLeft, wheelStyle);
@@ -248,11 +247,12 @@ namespace SimSharp.Samples {
       carAnimation.Update(carGroup, carGroup, env.StartDate + TimeSpan.FromMinutes(149), carGroupStyle, false);
 
       // Text Test
+      Text text = new Text(0, 100, 200, 20);
+      Text modText = new Text(1000, 100, 200, 20);
+
       TextStyle textStyle = new TextStyle("black", "none", 0, "hello world");
       TextStyle modTextStyle = new TextStyle("black", "none", 0, "ok bye");
 
-      Text text = new Text(0, 100, 200, 20);
-      Text modText = new Text(1000, 100, 200,20);
       Animation textAnimation = env.AnimationBuilder.Animate("testText", text, env.StartDate, textStyle);
       textAnimation.Update(text, modText, env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), textStyle, true);
       textAnimation.Update(text, text, env.StartDate + TimeSpan.FromMinutes(60), modTextStyle, true);

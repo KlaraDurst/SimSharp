@@ -149,11 +149,11 @@ namespace SimSharp.Visualization.Advanced {
         AdvancedAnimationProps prevWritten = GetLastWrittenProps();
         if (prevWritten == null) {
           init = true;
-          propsState = new AdvancedStyle.State();
+          propsState = null;
           prevAttributes = new Dictionary<string, int[]>();
         } else {
           init = false;
-          propsState = new AdvancedStyle.State(prevWritten.Style);
+          propsState = prevWritten.Style.GetState();
           prevAttributes = prevWritten.Shape.GetCurrValueAttributes();
         }
 
@@ -168,14 +168,14 @@ namespace SimSharp.Visualization.Advanced {
               writer.WriteValue(typeStr.Remove(typeStr.IndexOf(removeStr), removeStr.Length));
 
               WriteValueAtJson(props, i, null, null);
-              propsState.SetState(props.Style);
+              propsState = props.Style.GetState();
               currVisible = props.Visibility.CurrValue;
               prevAttributes = props.Shape.GetCurrValueAttributes();
 
               init = false;
             } else {
               WriteValueAtJson(props, i, propsState, prevAttributes);
-              propsState.SetState(props.Style);
+              propsState = props.Style.GetState();
               currVisible = props.Visibility.CurrValue;
               prevAttributes = props.Shape.GetCurrValueAttributes();
             }

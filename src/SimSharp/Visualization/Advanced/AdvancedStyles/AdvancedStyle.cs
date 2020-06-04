@@ -6,19 +6,11 @@ using Newtonsoft.Json;
 namespace SimSharp.Visualization.Advanced.AdvancedStyles {
   public class AdvancedStyle {
     public class State {
-      public string Fill { get; private set;}
-      public string Stroke { get; private set; }
-      public int StrokeWidth { get; private set; }
-
-      public State() {}
+      public string Fill { get; }
+      public string Stroke { get; }
+      public int StrokeWidth { get; }
 
       public State(AdvancedStyle style) {
-        Fill = style.Fill.CurrValue;
-        Stroke = style.Stroke.CurrValue;
-        StrokeWidth = style.StrokeWidth.CurrValue;
-      }
-
-      public void SetState(AdvancedStyle style) {
         Fill = style.Fill.CurrValue;
         Stroke = style.Stroke.CurrValue;
         StrokeWidth = style.StrokeWidth.CurrValue;
@@ -35,7 +27,11 @@ namespace SimSharp.Visualization.Advanced.AdvancedStyles {
       StrokeWidth = strokeWidth;
     }
 
-    public void WriteValueJson(JsonTextWriter writer, AdvancedStyle compare) {
+    public virtual State GetState() {
+      return new State(this);
+    }
+
+    public virtual void WriteValueJson(JsonTextWriter writer, AdvancedStyle compare) {
       if (compare == null) {
         writer.WritePropertyName("fill");
         writer.WriteValue(Fill.Value);
@@ -63,7 +59,7 @@ namespace SimSharp.Visualization.Advanced.AdvancedStyles {
       }
     }
 
-    public void WriteValueAtJson(int i, JsonTextWriter writer, State compare) {
+    public virtual void WriteValueAtJson(int i, JsonTextWriter writer, State compare) {
       if (compare == null) {
         string fill = Fill.GetValueAt(i);
         writer.WritePropertyName("fill");
@@ -103,7 +99,7 @@ namespace SimSharp.Visualization.Advanced.AdvancedStyles {
       }
     }
 
-    public bool AllValues() {
+    public virtual bool AllValues() {
       if (Fill.Function != null)
         return false;
       if (Stroke.Function != null)

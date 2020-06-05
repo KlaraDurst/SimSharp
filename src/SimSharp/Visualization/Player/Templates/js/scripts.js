@@ -31,7 +31,7 @@ function init() {
   speedStep = 100;
   it = makeFrameIterator();
   requestId = undefined;
-  totalFrameNumber = frames.length - 1;
+  totalFrameNumber = frames.length;
 
   if (json.hasOwnProperty('width')) {
     if (json.hasOwnProperty('height')) {
@@ -51,15 +51,21 @@ function init() {
     stop();
   });
   slider.addEventListener('mouseup', () => {
-    if (wasPlaying) 
+    if (wasPlaying && parseInt(slider.value) < totalFrameNumber)
       start();
   })
   slider.addEventListener('change', () => {
     let sliderInt = parseInt(slider.value);
     let sliderDiff = sliderInt - prevSliderVal;
     textInput.value = msToTime(sliderInt * timePerStep);
-    for (let i = 0; i < sliderDiff; i++)
+
+    if (prevSliderVal < sliderInt) {
       animate();
+      slider.stepUp();
+      prevSliderVal++;
+      for (let i = 0; i < sliderDiff; i++)
+        animate();
+    }
 
     if (prevSliderVal > sliderInt) {
       reset();
@@ -67,7 +73,7 @@ function init() {
         animate();
     }
 
-    prevSliderVal = sliderInt;
+    prevSliderVal = parseInt(slider.value);
   })
 
   numberInput.max = timePerFrame / speedStep;
@@ -80,13 +86,15 @@ function init() {
   }) 
 
   animate();
+  slider.stepUp();
+  prevSliderVal++;
 }
 
 function start() {
   if (parseInt(slider.value) >= totalFrameNumber) {
     reset();
-    slider.value = 0;
-    prevSliderVal = 0;
+    slider.value = 1;
+    prevSliderVal = 1;
   }
   playBtn.innerHTML = "&#10074;&#10074;";
   requestId = window.requestAnimationFrame(increment);
@@ -102,6 +110,8 @@ function reset() {
   svgDocument.textContent = '';
   it = makeFrameIterator();
   animate();
+  slider.stepUp();
+  prevSliderVal++;
 }
 
 function toggle() {
@@ -118,17 +128,19 @@ function increment(timestamp) {
     timeFromLastUpdate = timestamp - timeWhenLastUpdate;
 
   if (timeFromLastUpdate > timePerFrame) {
+    textInput.value = msToTime(parseInt(slider.value) * timePerStep);
+    animate();
+    if (parseInt(slider.value) >= totalFrameNumber) {
+      stop();
+      timeWhenLastUpdate = timestamp;
+      return;
+    }
     slider.stepUp();
     prevSliderVal++;
-    animate();
-    textInput.value = msToTime(prevSliderVal * timePerStep);
     timeWhenLastUpdate = timestamp;
   }
   
-  if (parseInt(slider.value) >= totalFrameNumber)
-    stop();
-  else 
-    requestId = window.requestAnimationFrame(increment);
+  requestId = window.requestAnimationFrame(increment);
 }
 
 function animate() {

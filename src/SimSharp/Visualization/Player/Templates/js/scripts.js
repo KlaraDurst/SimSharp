@@ -31,7 +31,7 @@ function init() {
   speedStep = 100;
   it = makeFrameIterator();
   requestId = undefined;
-  totalFrameNumber = frames.length - 1;
+  totalFrameNumber = frames.length;
 
   if (json.hasOwnProperty('width')) {
     if (json.hasOwnProperty('height')) {
@@ -51,19 +51,19 @@ function init() {
     stop();
   });
   slider.addEventListener('mouseup', () => {
-    if (wasPlaying) 
+    if (wasPlaying && parseInt(slider.value) < totalFrameNumber) 
       start();
   })
   slider.addEventListener('change', () => {
     let sliderInt = parseInt(slider.value);
     let sliderDiff = sliderInt - prevSliderVal;
     textInput.value = msToTime(sliderInt * timePerStep);
-    for (let i = 0; i < sliderDiff; i++)
+    for (let i = 1; i < sliderDiff; i++)
       animate();
 
     if (prevSliderVal > sliderInt) {
       reset();
-      for (let i = 0; i < sliderInt; i++)
+      for (let i = 1; i < sliderInt; i++)
         animate();
     }
 
@@ -79,7 +79,7 @@ function init() {
       timePerFrame = timePerStep + speedStep * numberInputInt * -1;
   }) 
 
-  animate();
+  Object.keys(frames[0]).forEach(e => updateShape(e, frames[0][e], svgDocument));
 }
 
 function start() {
@@ -101,7 +101,7 @@ function stop() {
 function reset() {
   svgDocument.textContent = '';
   it = makeFrameIterator();
-  animate();
+  Object.keys(frames[0]).forEach(e => updateShape(e, frames[0][e], svgDocument));
 }
 
 function toggle() {

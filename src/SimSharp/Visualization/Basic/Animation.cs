@@ -38,12 +38,8 @@ namespace SimSharp.Visualization.Basic {
     }
 
     #region Update
-    public void Update(Shape shape0, Shape shape1, Style style, bool keep = true) {
-      Update(shape0, shape1, animationBuilder.Env.Now, style, keep);
-    }
-
-    public void Update(Shape shape0, Shape shape1, DateTime time, Style style, bool keep = true) {
-      Update(shape0, shape1, time, time, style, keep);
+    public void Update(Shape shape0, Shape shape1, DateTime time0, DateTime time1, bool keep = true) {
+      Update(shape0, shape1, time0, time1, GetLastWrittenProps().Style, keep);
     }
 
     public void Update(Shape shape0, Shape shape1, DateTime time0, DateTime time1, Style style, bool keep = true) {
@@ -55,12 +51,20 @@ namespace SimSharp.Visualization.Basic {
       Update(new AnimationProps(shape0, shape1, time0, time1, style, keep, start, stop));
     }
 
-    public void Update(Shape shape1, Style style, bool keep = true) {
-      Update(shape1, animationBuilder.Env.Now, style, keep);
+    public void Update(Shape shape1, bool keep = true) {
+      Update(shape1, GetLastWrittenProps().Style, keep);
     }
 
-    public void Update(Shape shape1, DateTime time1, Style style, bool keep = true) {
-      Update(shape1, animationBuilder.Env.Now, time1, style, keep);
+    public void Update(Shape shape1, Style style, bool keep = true) {
+      Update(shape1, shape1, animationBuilder.Env.Now, animationBuilder.Env.Now, style, keep);
+    }
+
+    public void Update(Shape shape1, DateTime time1, bool keep = true) {
+      Update(shape1, animationBuilder.Env.Now, time1, GetLastWrittenProps().Style, keep);
+    }
+
+    public void Update(Shape shape1, DateTime time0, DateTime time1, bool keep = true) {
+      Update(shape1, time0, time1, GetLastWrittenProps().Style, keep);
     }
 
     public void Update(Shape shape1, DateTime time0, DateTime time1, Style style, bool keep = true) {

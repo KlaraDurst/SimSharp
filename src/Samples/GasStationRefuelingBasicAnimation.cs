@@ -109,8 +109,8 @@ namespace SimSharp.Samples {
           yield return fuelPump.Get(litersRequired - level); // wait for the rest
 
           // Second car tank fill visualization
-          fillCarAnimation.Update(tempCarRect, fullCarRect, env.Now, env.Now + secondRefuelDuration, carTankStyle, false);
-          carAnimation.Update(fullCarRect, env.Now, env.Now + secondRefuelDuration, carStyle, false); 
+          fillCarAnimation.Update(fullCarRect, env.Now, env.Now + secondRefuelDuration, false);
+          carAnimation.Update(fullCarRect, env.Now, env.Now + secondRefuelDuration, false); 
 
           yield return env.Timeout(secondRefuelDuration);
         } else {
@@ -119,7 +119,7 @@ namespace SimSharp.Samples {
 
           // Car tank fill visualization
           env.AnimationBuilder.Animate(name+"Tank", emptyCarRect, fullCarRect, env.Now, env.Now + refuelDuration, carTankStyle, false);
-          carAnimation.Update(fullCarRect, env.Now, env.Now + refuelDuration, carStyle, false);
+          carAnimation.Update(fullCarRect, env.Now, env.Now + refuelDuration, false);
 
           yield return env.Timeout(refuelDuration);
         }
@@ -159,7 +159,7 @@ namespace SimSharp.Samples {
       env.Log("Tank truck finished refuelling {0} liters at time {1}.", amount, env.Now);
 
       // Remove tank truck visualization
-      truckAnimation.Update(truckRect, env.Now, truckStyle, false);
+      truckAnimation.Update(truckRect, env.Now, false);
     }
 
     private IEnumerable<Event> CarGenerator(Simulation env, Resource gasStation, Container fuelPump) {
@@ -241,10 +241,10 @@ namespace SimSharp.Samples {
       modCarGroupStyle.AddChild("wheelRight", modWheelRight, wheelStyle);
 
       Animation carAnimation = env.AnimationBuilder.Animate("testCar", carGroup, env.StartDate, carGroupStyle);
-      carAnimation.Update(carGroup, modCarGroup, env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), carGroupStyle, true);
-      carAnimation.Update(carGroup, carGroup, env.StartDate + TimeSpan.FromMinutes(60), modCarGroupStyle, true);
-      carAnimation.Update(carGroup, carGroup, env.StartDate + TimeSpan.FromMinutes(100), carGroupStyle, true);
-      carAnimation.Update(carGroup, carGroup, env.StartDate + TimeSpan.FromMinutes(149), carGroupStyle, false);
+      carAnimation.Update(carGroup, modCarGroup, env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), true);
+      carAnimation.Update(carGroup, env.StartDate + TimeSpan.FromMinutes(60), env.StartDate + TimeSpan.FromMinutes(60), modCarGroupStyle, true);
+      carAnimation.Update(carGroup, env.StartDate + TimeSpan.FromMinutes(100), env.StartDate + TimeSpan.FromMinutes(100), carGroupStyle, true);
+      carAnimation.Update(carGroup, env.StartDate + TimeSpan.FromMinutes(149), env.StartDate + TimeSpan.FromMinutes(149), false);
 
       // Text Test
       Text text = new Text(0, 100, 200, 20);
@@ -254,10 +254,10 @@ namespace SimSharp.Samples {
       TextStyle modTextStyle = new TextStyle("black", "none", 0, "ok bye");
 
       Animation textAnimation = env.AnimationBuilder.Animate("testText", text, env.StartDate, textStyle);
-      textAnimation.Update(text, modText, env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), textStyle, true);
-      textAnimation.Update(text, text, env.StartDate + TimeSpan.FromMinutes(60), modTextStyle, true);
-      textAnimation.Update(text, text, env.StartDate + TimeSpan.FromMinutes(100), textStyle, true);
-      textAnimation.Update(text, text, env.StartDate + TimeSpan.FromMinutes(149), textStyle, false);
+      textAnimation.Update(text, modText, env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), true);
+      textAnimation.Update(text, env.StartDate + TimeSpan.FromMinutes(60), env.StartDate + TimeSpan.FromMinutes(60), modTextStyle, true);
+      textAnimation.Update(text, env.StartDate + TimeSpan.FromMinutes(100), env.StartDate + TimeSpan.FromMinutes(100), textStyle, true);
+      textAnimation.Update(text, env.StartDate + TimeSpan.FromMinutes(149), env.StartDate + TimeSpan.FromMinutes(149), false);
 
       env.Process(GasStationControl(env, fuelPump));
       // env.Process(GasStationVisualization(env, fuelPump));

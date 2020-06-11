@@ -42,7 +42,7 @@ namespace SimSharp.Visualization.Advanced {
       return propsList[propsList.Count - 1].Style;
     }
 
-    public AnimationAttribute<bool> GetVisible() {
+    public AnimationAttribute<bool> GetVisibility() {
       return propsList[propsList.Count - 1].Visibility;
     }
     #endregion
@@ -57,7 +57,7 @@ namespace SimSharp.Visualization.Advanced {
       propsList[propsList.Count - 1].Style = style;
     }
 
-    public void SetVisible(AnimationAttribute<bool> visibility) {
+    public void SetVisibility(AnimationAttribute<bool> visibility) {
       propsList[propsList.Count - 1].Visibility = visibility;
     }
     #endregion

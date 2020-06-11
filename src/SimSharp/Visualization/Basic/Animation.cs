@@ -273,7 +273,7 @@ namespace SimSharp.Visualization.Basic {
     }
 
     private void CheckType(Shape shape) {
-      if (shape.GetType() != GetShape0().GetType()) {
+      if (shape.GetType() != GetCurrentProps().Shape0.GetType()) {
         throw new ArgumentException("This animation is not of type " + shape.GetType());
       }
     }

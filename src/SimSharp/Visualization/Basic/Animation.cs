@@ -27,8 +27,8 @@ namespace SimSharp.Visualization.Basic {
       this.units = new List<AnimationUnit>();
 
       CheckTime(time0, time1);
-      int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
-      int stop = Convert.ToInt32((time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
+      int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.Config.FPS) + 1;
+      int stop = Convert.ToInt32((time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.Config.FPS);
 
       AnimationProps props = new AnimationProps(shape0, shape1, time0, time1, style, keep, start, stop);
       propsList.Add(time0, props);
@@ -45,8 +45,8 @@ namespace SimSharp.Visualization.Basic {
     public void Update(Shape shape0, Shape shape1, DateTime time0, DateTime time1, Style style, bool keep = true) {
       CheckType(shape0, shape1);
       CheckTime(time0, time1);
-      int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
-      int stop = Convert.ToInt32((time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
+      int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.Config.FPS) + 1;
+      int stop = Convert.ToInt32((time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.Config.FPS);
 
       Update(new AnimationProps(shape0, shape1, time0, time1, style, keep, start, stop));
     }
@@ -70,8 +70,8 @@ namespace SimSharp.Visualization.Basic {
     public void Update(Shape shape1, DateTime time0, DateTime time1, Style style, bool keep = true) {
       CheckType(shape1);
       CheckTime(time0, time1);
-      int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS) + 1;
-      int stop = Convert.ToInt32((time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.FPS);
+      int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.Config.FPS) + 1;
+      int stop = Convert.ToInt32((time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.Config.FPS);
       Dictionary<string, int[]> attributesAt = null;
       List<string> attributeNames = new List<string>();
 

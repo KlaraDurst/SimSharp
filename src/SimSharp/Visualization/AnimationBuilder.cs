@@ -11,21 +11,13 @@ using SimSharp.Visualization.Basic;
 using SimSharp.Visualization.Basic.Resources;
 using SimSharp.Visualization.Basic.Shapes;
 using SimSharp.Visualization.Basic.Styles;
-using SimSharp.Visualization.Player;
+using SimSharp.Visualization.Processor;
 
 namespace SimSharp.Visualization {
   public class AnimationBuilder {
-    public string Name { get; }
-    public int FPS { get; }
-    public string Target { get; }
+    public AnimationConfig Config { get; }
 
-    public int Width { get; }
-    public int Height { get; }
-
-    public int StartX { get; }
-    public int StartY { get; }
-
-    public IPlayer Player { get; set; }
+    public FramesProcessor Processor { get; set; }
 
     public Simulation Env { 
       get { return env; } 
@@ -42,7 +34,6 @@ namespace SimSharp.Visualization {
     private Simulation env;
     private StringWriter stringWriter;
     private JsonTextWriter writer;
-    private bool setCanvas;
     private List<FramesProvider> providers;
     private List<string> names; 
     private DateTime prior;
@@ -52,32 +43,24 @@ namespace SimSharp.Visualization {
     private int levelCount;
 
     #region Constructors
-    public AnimationBuilder() : this(0, 0, 0, 0, "Visualization", 1, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName, false) { }
+    public AnimationBuilder() : this(0, 0, 0, 0, "Visualization", 1, false) { }
     public AnimationBuilder(int width, int height) : this(width, height, "Visualization") { }
-    public AnimationBuilder(int width, int height, string name) : this(width, height, name, 1) { }
+    public AnimationBuilder(int width, int height, string name) : this(width, height, 0, 0, name, 1) { }
     public AnimationBuilder(int width, int height, int fps) : this(width, height, "Visualization", fps) { }
-    public AnimationBuilder(int width, int height, string name, string target) : this(width, height, 0, 0, name, target) { }
     public AnimationBuilder(int width, int height, string name, int fps) : this(width, height, 0, 0, name, fps) { }
     public AnimationBuilder(int width, int height, int startX, int startY) : this(width, height, startX, startY, "Visualization") { }
     public AnimationBuilder(int width, int height, int startX, int startY, int fps) : this(width, height, startX, startY, "Visualization", fps) { }
     public AnimationBuilder(int width, int height, int startX, int startY, string name) : this(width, height, startX, startY, name, 1) { }
-    public AnimationBuilder(int width, int height, int startX, int startY, string name, string target) : this(width, height, startX, startY, name, 1, target, true) { }
-    public AnimationBuilder(int width, int height, int startX, int startY, string name, int fps) : this(width, height, startX, startY, name, fps, Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName, true) { }
-    public AnimationBuilder(int width, int height, int startX, int startY, string name, int fps, string target) : this(width, height, startX, startY, name, fps, target, true) { }
+    public AnimationBuilder(int width, int height, int startX, int startY, string name, int fps) : this(width, height, startX, startY, name, fps, true) { }
 
-    private AnimationBuilder(int width, int height, int startX, int startY, string name, int fps, string target, bool setCanvas) {
+    private AnimationBuilder(int width, int height, int startX, int startY, string name, int fps, bool setCanvas) {
       if (fps > 60)
         throw new ArgumentException("fps can not be higher than 60.");
 
-      Name = name;
-      FPS = fps;
-      Target = target;
-      Width = width;
-      Height = height;
-      StartX = startX;
-      StartY = startY;
+      Config = new AnimationConfig(name, fps, width, height, startX, startY, setCanvas);
 
-      this.setCanvas = setCanvas;
+      this.stringWriter = new StringWriter();
+      this.writer = new JsonTextWriter(stringWriter);
       this.providers = new List<FramesProvider>();
       this.names = new List<string>();
       this.prior = DateTime.MinValue;
@@ -203,34 +186,8 @@ namespace SimSharp.Visualization {
     }
 
     public void StartBuilding() {
-      if (EnableAnimation) {
-        stringWriter = new StringWriter();
-        writer = new JsonTextWriter(stringWriter);
-
-        writer.WriteStartObject();
-
-        writer.WritePropertyName("name");
-        writer.WriteValue(Name);
-
-        writer.WritePropertyName("fps");
-        writer.WriteValue(FPS);
-
-        if (setCanvas) {
-          writer.WritePropertyName("width");
-          writer.WriteValue(Width);
-
-          writer.WritePropertyName("height");
-          writer.WriteValue(Height);
-
-          writer.WritePropertyName("startX");
-          writer.WriteValue(StartX);
-
-          writer.WritePropertyName("startY");
-          writer.WriteValue(StartY);
-        }
-
-        writer.WritePropertyName("frames");
-        writer.WriteStartArray();
+      if (EnableAnimation && Processor != null) {
+        Processor.SendStart(Config);
       }
     }
 
@@ -241,9 +198,9 @@ namespace SimSharp.Visualization {
     }
 
     public void Step(DateTime now) {
-      if (EnableAnimation) {
-        int totalStart = Convert.ToInt32((prior - env.StartDate).TotalSeconds * FPS) + 1;
-        int totalStop = Convert.ToInt32((now - env.StartDate).TotalSeconds * FPS);
+      if (EnableAnimation && Processor != null) {
+        int totalStart = Convert.ToInt32((prior - env.StartDate).TotalSeconds * Config.FPS) + 1;
+        int totalStop = Convert.ToInt32((now - env.StartDate).TotalSeconds * Config.FPS);
         int totalFrameNumber = totalStop - totalStart + 1;
 
         // Console.WriteLine(prior + " - " + now);
@@ -291,15 +248,19 @@ namespace SimSharp.Visualization {
                       framesEnums.RemoveAt(j);
                       continue;
                     }
-                    string frame = framesEnums[j].Current;
+                    string animFrame = framesEnums[j].Current;
 
                     if (DebugAnimation || !first)
                       writer.WriteRaw(",");
-                    writer.WriteRaw(frame);
+                    writer.WriteRaw(animFrame);
 
                     first = false;
                   }
                   writer.WriteEndObject();
+
+                  string frame = stringWriter.ToString();
+                  Processor.SendFrame(frame);
+                  Flush();
                 }
                 start = stop;
                 stop = frames.Count > 1 ? frames.Keys[1] : totalStop + 1;
@@ -320,26 +281,17 @@ namespace SimSharp.Visualization {
         writer.WriteStartObject();
         WriteFrameNumber();
         writer.WriteEndObject();
+
+        string frame = stringWriter.ToString();
+        Processor.SendFrame(frame);
+        Flush();
       }
     }
 
     public void StopBuilding() {
-      if (EnableAnimation) {
-        writer.WriteEndArray();
-        writer.WriteEndObject();
+      if (EnableAnimation && Processor != null) {
+        Processor.SendStop();
       }
-    }
-
-    public void Play() {
-      if (Player != null) {
-        Player.Play(Target, stringWriter.ToString());
-      } else {
-        WriteJson();
-      }
-    }
-
-    private void WriteJson() {
-      File.WriteAllText(Path.Combine(Target, Regex.Replace(Name, @"\s+", "") + ".json"), stringWriter.ToString());
     }
 
     private void WriteFrameNumber() {
@@ -348,6 +300,12 @@ namespace SimSharp.Visualization {
         writer.WriteValue(frameCount);
         frameCount++;
       }
+    }
+
+    private void Flush() {
+      writer.Flush();
+      StringBuilder sb = stringWriter.GetStringBuilder();
+      sb.Remove(0, sb.Length);
     }
   }
 }

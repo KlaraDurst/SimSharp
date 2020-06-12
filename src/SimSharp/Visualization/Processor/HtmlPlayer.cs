@@ -4,13 +4,20 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace SimSharp.Visualization.Player {
-  public class HtmlPlayer : IPlayer {
-    string playerPath = Path.Combine(Directory.GetParent(System.Environment.CurrentDirectory).Parent.Parent.Parent.ToString(), @"SimSharp\Visualization\Player\Templates");
-    string jsFile = @"js\scripts.js";
-    string htmlFile = "Player.html";
+namespace SimSharp.Visualization.Processor {
+  public class HtmlPlayer : JsonWriter{
+    private string playerPath = Path.Combine(Directory.GetParent(System.Environment.CurrentDirectory).Parent.Parent.Parent.ToString(), @"SimSharp\Visualization\Processor\Templates");
+    private string jsFile = @"js\scripts.js";
+    private string htmlFile = "Player.html";
 
-    public void Play(string target, string data) {
+    public override void SendStop() {
+      writer.WriteEndArray();
+      writer.WriteEndObject();
+
+      Play(stringWriter.ToString());
+    }
+
+    public void Play(string data) {
       string targetPlayerPath = Path.Combine(target, "Player");
 
       CopyDirectory(playerPath, targetPlayerPath);

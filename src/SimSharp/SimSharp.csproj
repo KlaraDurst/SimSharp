@@ -55,6 +55,7 @@ It also fixes a bug with respect to the calculation of the sigma parameter in Ra
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="RabbitMQ.Client" Version="3.6.9" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 

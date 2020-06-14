@@ -22,27 +22,7 @@ namespace SimSharp.Visualization.Processor {
       this.name = config.Name;
 
       writer.WriteStartObject();
-
-      writer.WritePropertyName("name");
-      writer.WriteValue(config.Name);
-
-      writer.WritePropertyName("fps");
-      writer.WriteValue(config.FPS);
-
-      if (config.SetCanvas) {
-        writer.WritePropertyName("width");
-        writer.WriteValue(config.Width);
-
-        writer.WritePropertyName("height");
-        writer.WriteValue(config.Height);
-
-        writer.WritePropertyName("startX");
-        writer.WriteValue(config.StartX);
-
-        writer.WritePropertyName("startY");
-        writer.WriteValue(config.StartY);
-      }
-
+      config.WriteJson(writer);
       writer.WritePropertyName("frames");
       writer.WriteStartArray();
     }

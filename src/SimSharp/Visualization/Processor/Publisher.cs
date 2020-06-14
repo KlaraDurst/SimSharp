@@ -26,10 +26,10 @@ namespace SimSharp.Visualization.Processor {
       model = connection.CreateModel();
 
       // Create Exchange
-      //model.ExchangeDeclare("simSharpExchange", ExchangeType.Direct);
+      model.ExchangeDeclare("simSharpExchange", ExchangeType.Direct);
 
       // Create Queue
-      //model.QueueDeclare("simSharpQueue", true, false, false, null);
+      model.QueueDeclare("simSharpQueue", true, false, false, null);
 
       // Bind Queue to Exchange
       model.QueueBind("simSharpQueue", "simSharpExchange", "directexchange_key");
@@ -38,25 +38,9 @@ namespace SimSharp.Visualization.Processor {
     public void SendStart(AnimationConfig config) {
       writer.WriteStartObject();
 
-      writer.WritePropertyName("name");
-      writer.WriteValue(config.Name);
-
-      writer.WritePropertyName("fps");
-      writer.WriteValue(config.FPS);
-
-      if (config.SetCanvas) {
-        writer.WritePropertyName("width");
-        writer.WriteValue(config.Width);
-
-        writer.WritePropertyName("height");
-        writer.WriteValue(config.Height);
-
-        writer.WritePropertyName("startX");
-        writer.WriteValue(config.StartX);
-
-        writer.WritePropertyName("startY");
-        writer.WriteValue(config.StartY);
-      }
+      writer.WritePropertyName("start");
+      writer.WriteValue(true);
+      config.WriteJson(writer);
 
       writer.WriteEndObject();
 

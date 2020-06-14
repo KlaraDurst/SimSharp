@@ -1,0 +1,15 @@
+{
+  "name": "consumer",
+  "version": "1.0.0",
+  "description": "SimSharp Visualization Player",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./index.js"
+  },
+  "author": "SimSharp",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.5.6",
+    "express": "^4.17.1"
+  }
+}

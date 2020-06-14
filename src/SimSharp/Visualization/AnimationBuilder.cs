@@ -179,6 +179,10 @@ namespace SimSharp.Visualization {
     }
 
     private void CheckName(string name) {
+      if (name.Equals("start"))
+        throw new ArgumentException("name must not be 'start'");
+      if (name.Equals("stop"))
+        throw new ArgumentException("name must not be 'stop'");
       if (name.Contains("/"))
         throw new ArgumentException("name must not contain '/'");
       if (names.Contains(name))

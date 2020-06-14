@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace SimSharp.Visualization {
   public class AnimationConfig {
@@ -23,6 +24,28 @@ namespace SimSharp.Visualization {
       StartX = startX;
       StartY = startY;
       SetCanvas = setCanvas;
+    }
+
+    public void WriteJson(JsonTextWriter writer) {
+      writer.WritePropertyName("name");
+      writer.WriteValue(Name);
+
+      writer.WritePropertyName("fps");
+      writer.WriteValue(FPS);
+
+      if (SetCanvas) {
+        writer.WritePropertyName("width");
+        writer.WriteValue(Width);
+
+        writer.WritePropertyName("height");
+        writer.WriteValue(Height);
+
+        writer.WritePropertyName("startX");
+        writer.WriteValue(StartX);
+
+        writer.WritePropertyName("startY");
+        writer.WriteValue(StartY);
+      }
     }
   }
 }

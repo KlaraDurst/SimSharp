@@ -6,14 +6,19 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 
 namespace SimSharp.Visualization.Processor {
-  public class Publisher : FramesProcessor{
-    private StringWriter stringWriter;
-    private JsonTextWriter writer;
-    private IModel model;
+  public class Publisher : FramesProcessor {
+    protected string target = Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName;
+    protected StringWriter stringWriter;
+    protected JsonTextWriter writer;
+    protected IModel model;
+    protected IConnection connection;
 
     public Publisher() {
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
+
+      int index = target.LastIndexOf(@"\SimSharp");
+      string targetPlayerPath = Path.Combine(target.Substring(0, index + 10), @"src\SimSharp\Visualization\Processor\Consumer");
 
       var connectionFactory = new ConnectionFactory() {
         UserName = "guest",
@@ -22,7 +27,7 @@ namespace SimSharp.Visualization.Processor {
       };
 
       //Main entry point to the RabbitMQ .NET AMQP client
-      var connection = connectionFactory.CreateConnection();
+      connection = connectionFactory.CreateConnection();
       model = connection.CreateModel();
 
       // Create Exchange
@@ -33,6 +38,11 @@ namespace SimSharp.Visualization.Processor {
 
       // Bind Queue to Exchange
       model.QueueBind("simSharpQueue", "simSharpExchange", "directexchange_key");
+
+      NpmStart(targetPlayerPath);
+      OpenUrl("http://localhost:3000");
+
+      // TODO: Batchvorgang abbrechen
     }
 
     public void SendStart(AnimationConfig config) {
@@ -64,6 +74,8 @@ namespace SimSharp.Visualization.Processor {
       string frame = stringWriter.ToString();
       PublishFrame(frame);
       Flush();
+
+      connection.Close();
     }
 
     private void PublishFrame(string frame) {
@@ -78,6 +90,50 @@ namespace SimSharp.Visualization.Processor {
       writer.Flush();
       StringBuilder sb = stringWriter.GetStringBuilder();
       sb.Remove(0, sb.Length);
+    }
+
+    private void NpmStart(string path) {
+      try {
+        // Windows
+        path = path.Replace("&", "^&");
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd", $"/c cd {path} && npm start") { CreateNoWindow = true });
+      } catch {
+        try {
+          // Linux
+          throw new NotImplementedException();
+        } catch {
+          try {
+            // OSX
+            throw new NotImplementedException();
+          } catch {
+            throw;
+          }
+        }
+      }
+    }
+
+    private void OpenUrl(string url) {
+      try {
+        System.Diagnostics.Process.Start(url);
+      } catch {
+        try {
+          // Windows
+          url = url.Replace("&", "^&");
+          System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+        } catch {
+          try {
+            // Linux
+            System.Diagnostics.Process.Start("xdg-open", url);
+          } catch {
+            try {
+              // OSX
+              System.Diagnostics.Process.Start("open", url);
+            } catch {
+              throw;
+            }
+          }
+        }
+      }
     }
   }
 }

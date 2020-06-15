@@ -10,12 +10,9 @@ var timeFromLastUpdate;
 var requestId;
 var textInput;
 
-// Create WebSocket connection.
 const socket = new WebSocket('ws://localhost:8080');
 
-// Listen for messages
 socket.addEventListener('message', function (event) {
-  console.log(event.data);
   var json = JSON.parse(event.data);
   if (json.hasOwnProperty("start"))
     init(json)
@@ -55,7 +52,6 @@ function increment(timestamp) {
   if (timeFromLastUpdate > timePerFrame) {
     textInput.value = msToTime(framesCount * timePerStep);
     animate();
-    framesCount++;
     timeWhenLastUpdate = timestamp;
   }
   
@@ -64,8 +60,10 @@ function increment(timestamp) {
 
 function animate() {
   let result = it.next();
-  if (!result.done)
+  if (!result.done) {
+    framesCount++;
     Object.keys(result.value).forEach(e => updateShape(e, result.value[e], svgDocument));
+  }
 }
 
 function updateShape(key, value, parent) {
@@ -104,16 +102,13 @@ function updateAttr(shape, key, value) {
 }
 
 function makeFrameIterator() {
-  let nextIndex = 0;
-
   const frameIterator = {
     next: function () {
       let result;
-      if (frames.length > nextIndex) {
-        var frame = frames[nextIndex];
+      if (frames.length > 0) {
+        var frame = frames.shift();
         if (!frame.hasOwnProperty("stop")) {
           result = { value: frame, done: false }
-          nextIndex += 1;
           return result;
         } else {
           window.cancelAnimationFrame(requestId);

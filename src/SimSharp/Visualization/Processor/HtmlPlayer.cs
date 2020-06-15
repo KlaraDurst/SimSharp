@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 namespace SimSharp.Visualization.Processor {
-  public class HtmlPlayer : JsonWriter{
+  public class HtmlPlayer : JsonWriter {
     private string playerPath = Path.Combine(Directory.GetParent(System.Environment.CurrentDirectory).Parent.Parent.Parent.ToString(), @"SimSharp\Visualization\Processor\Templates");
     private string jsFile = @"js\scripts.js";
     private string htmlFile = "Player.html";

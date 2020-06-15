@@ -1,19 +1,18 @@
 var svgDocument;
 var svgns;
-var frames;
+var frames = [];
+var framesCount;
 var timePerStep;
 var timePerFrame;
 var it;
 var timeWhenLastUpdate;
 var timeFromLastUpdate;
 var requestId;
-var slider;
 var textInput;
 
 function consume() {
   var q = 'simSharpQueue';
   var open = require('amqplib').connect('amqp://localhost');
-  frames = [];
   
   open.then(function(conn) {
       return conn.createChannel();
@@ -40,6 +39,7 @@ function consume() {
 }
 
 function init(config) {
+  framesCount = 0;
   svgDocument = document.getElementById('canvas');
   textInput = document.getElementById('textInput');
   svgns = "http://www.w3.org/2000/svg";
@@ -68,8 +68,9 @@ function increment(timestamp) {
     timeFromLastUpdate = timestamp - timeWhenLastUpdate;
 
   if (timeFromLastUpdate > timePerFrame) {
-    textInput.value = msToTime(parseInt(slider.value) * timePerStep);
+    textInput.value = msToTime(framesCount * timePerStep);
     animate();
+    framesCount++;
     timeWhenLastUpdate = timestamp;
   }
   

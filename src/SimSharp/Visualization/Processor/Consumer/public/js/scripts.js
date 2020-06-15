@@ -10,33 +10,18 @@ var timeFromLastUpdate;
 var requestId;
 var textInput;
 
-function consume() {
-  var q = 'simSharpQueue';
-  var open = require('amqplib').connect('amqp://localhost');
-  
-  open.then(function(conn) {
-      return conn.createChannel();
-    }).then(function(ch) {
-      return ch.assertQueue(q).then(function(ok) {
-        return ch.consume(q, function(msg) {
-          if (msg !== null) {
-            var json = msg.content.toJSON();
-            console.log(json);
-            if (json.hasOwnProperty("start")) {
-              init(json)
-            }
-            else if (json.hasOwnProperty("stop")) {
-              window.cancelAnimationFrame(requestId);
-            }
-            else {
-              frames.push(json);
-            }
-            ch.ack(msg);
-          }
-        });
-      });
-    }).catch(console.warn);
-}
+// Create WebSocket connection.
+const socket = new WebSocket('ws://localhost:8080');
+
+// Listen for messages
+socket.addEventListener('message', function (event) {
+  console.log(event.data);
+  var json = JSON.parse(event.data);
+  if (json.hasOwnProperty("start"))
+    init(json)
+  else 
+    frames.push(json);
+});
 
 function init(config) {
   framesCount = 0;
@@ -125,9 +110,14 @@ function makeFrameIterator() {
     next: function () {
       let result;
       if (frames.length > nextIndex) {
-        result = { value: frames[nextIndex], done: false }
-        nextIndex += 1;
-        return result;
+        var frame = frames[nextIndex];
+        if (!frame.hasOwnProperty("stop")) {
+          result = { value: frame, done: false }
+          nextIndex += 1;
+          return result;
+        } else {
+          window.cancelAnimationFrame(requestId);
+        }
       }
       return { value: frames.length, done: true }
     }

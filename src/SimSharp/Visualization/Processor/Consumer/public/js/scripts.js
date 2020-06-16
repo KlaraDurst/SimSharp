@@ -12,6 +12,10 @@ var textInput;
 
 const socket = new WebSocket('ws://localhost:8080');
 
+window.onunload = function (event) {
+  socket.send('terminate');
+}
+
 socket.addEventListener('message', function (event) {
   var json = JSON.parse(event.data);
   if (json.hasOwnProperty("start"))

@@ -7,6 +7,11 @@ const q = 'simSharpQueue';
 const open = require('amqplib').connect('amqp://localhost');
 
 wss.on('connection', function connection(ws) {
+    ws.on('message', function incoming(msg) {
+        if (msg == 'terminate')
+        process.kill(process.pid, 'SIGTERM');
+      });
+
     open.then(function (conn) {
         return conn.createChannel();
     }).then(function (ch) {
@@ -27,4 +32,10 @@ app.get('/', (req, res) => {
     res.sendFile('./Player.html', { root: __dirname });
 });
 
-app.listen(port, () => console.log(`listening on port ${port}!`))
+const server = app.listen(port, () => console.log(`listening on port ${port}!`))
+
+process.on('SIGTERM', () => {
+    server.close(() => {
+        console.log(`stop listening`);
+    })
+})

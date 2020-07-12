@@ -18,7 +18,7 @@ namespace SimSharp.Visualization.Basic.Shapes {
       FontSize = fontSize;
     }
 
-    public override void WriteJson(JsonTextWriter writer, Shape compare) {
+    public void WriteJson(JsonTextWriter writer, Shape compare) {
       if (compare == null) {
         writer.WritePropertyName("x");
         writer.WriteValue(X);
@@ -56,7 +56,7 @@ namespace SimSharp.Visualization.Basic.Shapes {
       }
     }
 
-    public override Dictionary<string, int[]> GetAttributes() {
+    public Dictionary<string, int[]> GetAttributes() {
       return new Dictionary<string, int[]> {
         { "x", new int[] { X } },
         { "y", new int[] { Y } },
@@ -65,35 +65,35 @@ namespace SimSharp.Visualization.Basic.Shapes {
       };
     }
 
-    public override bool CompareAttributeValues(int[] a, int[] b) {
+    public bool CompareAttributeValues(int[] a, int[] b) {
       return a[0] == b[0];
     }
 
-    public override bool CompareAttributeValues(List<int> a, int[] b) {
+    public bool CompareAttributeValues(List<int> a, int[] b) {
       return a[0] == b[0];
     }
 
-    public override void MoveUp(int space) {
+    public void MoveUp(int space) {
       Y -= space;
     }
 
-    public override void MoveRight(int space) {
+    public void MoveRight(int space) {
       X += space;
     }
 
-    public override void MoveDown(int space) {
+    public void MoveDown(int space) {
       Y += space;
     }
 
-    public override void MoveLeft(int space) {
+    public void MoveLeft(int space) {
       X -= space;
     }
 
-    public override Shape Copy() {
+    public Shape Copy() {
       return new Text(X, Y, TextLength, FontSize);
     }
 
-    public override Shape CopyAndSet(Dictionary<string, int[]> attributes) {
+    public Shape CopyAndSet(Dictionary<string, int[]> attributes) {
       attributes.TryGetValue("x", out int[] x);
       attributes.TryGetValue("y", out int[] y);
       attributes.TryGetValue("textLength", out int[] textLength);

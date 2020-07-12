@@ -17,7 +17,7 @@ namespace SimSharp.Visualization.Processor {
       Play(stringWriter.ToString());
     }
 
-    public void Play(string data) {
+    private void Play(string data) {
       string targetPlayerPath = Path.Combine(target, "Player");
 
       CopyDirectory(playerPath, targetPlayerPath);

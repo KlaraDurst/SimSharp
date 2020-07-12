@@ -39,10 +39,14 @@ namespace SimSharp.Visualization.Processor {
       // Bind Queue to Exchange
       model.QueueBind("simSharpQueue", "simSharpExchange", "directexchange_key");
 
-      NpmStart(targetPlayerPath);
-      OpenUrl("http://localhost:3000");
+      Play(targetPlayerPath);
 
       // TODO: Batchvorgang abbrechen
+    }
+
+    private void Play(string targetPlayerPath) {
+      NpmStart(targetPlayerPath);
+      OpenUrl("http://localhost:3000");
     }
 
     public void SendStart(AnimationConfig config) {

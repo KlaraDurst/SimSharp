@@ -16,7 +16,7 @@ namespace SimSharp.Visualization.Basic.Shapes {
       }
     }
 
-    public override void WriteJson(JsonTextWriter writer, Shape compare) {
+    public void WriteJson(JsonTextWriter writer, Shape compare) {
       if (compare == null) {
         writer.WritePropertyName("points");
         writer.WriteStartArray();
@@ -38,13 +38,13 @@ namespace SimSharp.Visualization.Basic.Shapes {
       }
     }
 
-    public override Dictionary<string, int[]> GetAttributes() {
+    public Dictionary<string, int[]> GetAttributes() {
       return new Dictionary<string, int[]> {
         { "points", Points },
       };
     }
 
-    public override bool CompareAttributeValues(int[] a, int[] b) {
+    public bool CompareAttributeValues(int[] a, int[] b) {
       if (!a.Length.Equals(b.Length))
         return false;
 
@@ -56,7 +56,7 @@ namespace SimSharp.Visualization.Basic.Shapes {
       return true;
     }
 
-    public override bool CompareAttributeValues(List<int> a, int[] b) {
+    public bool CompareAttributeValues(List<int> a, int[] b) {
       if (!a.Count.Equals(b.Length))
         return false;
 
@@ -68,35 +68,35 @@ namespace SimSharp.Visualization.Basic.Shapes {
       return true;
     }
 
-    public override void MoveUp(int space) {
+    public void MoveUp(int space) {
       for (int i = 1; i < Points.Length; i += 2) {
         Points[i] -= space;
       }
     }
 
-    public override void MoveRight(int space) {
+    public void MoveRight(int space) {
       for (int i = 0; i < Points.Length; i += 2) {
         Points[i] += space;
       }
     }
 
-    public override void MoveDown(int space) {
+    public void MoveDown(int space) {
       for (int i = 1; i < Points.Length; i += 2) {
         Points[i] += space;
       }
     }
 
-    public override void MoveLeft(int space) {
+    public void MoveLeft(int space) {
       for (int i = 0; i < Points.Length; i += 2) {
         Points[i] -= space;
       }
     }
 
-    public override Shape Copy() {
+    public Shape Copy() {
       return new Polygon(Points);
     }
 
-    public override Shape CopyAndSet(Dictionary<string, int[]> attributes) {
+    public Shape CopyAndSet(Dictionary<string, int[]> attributes) {
       attributes.TryGetValue("points", out int[] points);
       return new Polygon(points);
     }

@@ -4,16 +4,16 @@ using System.Text;
 using Newtonsoft.Json;
 
 namespace SimSharp.Visualization.Basic.Shapes {
-  abstract public class Shape {
-    abstract public void WriteJson(JsonTextWriter writer, Shape compare);
-    abstract public Dictionary<string, int[]> GetAttributes();
-    abstract public bool CompareAttributeValues(int[] a, int[] b);
-    abstract public bool CompareAttributeValues(List<int> a, int[] b);
-    abstract public void MoveUp(int space);
-    abstract public void MoveRight(int space);
-    abstract public void MoveDown(int space);
-    abstract public void MoveLeft(int space);
-    abstract public Shape Copy();
-    abstract public Shape CopyAndSet(Dictionary<string, int[]> attributes);
+  public interface Shape {
+    void WriteJson(JsonTextWriter writer, Shape compare);
+    Dictionary<string, int[]> GetAttributes();
+    bool CompareAttributeValues(int[] a, int[] b);
+    bool CompareAttributeValues(List<int> a, int[] b);
+    void MoveUp(int space);
+    void MoveRight(int space);
+   void MoveDown(int space);
+    void MoveLeft(int space);
+    Shape Copy();
+    Shape CopyAndSet(Dictionary<string, int[]> attributes);
   }
 }

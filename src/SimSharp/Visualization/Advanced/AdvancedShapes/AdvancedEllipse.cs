@@ -18,7 +18,7 @@ namespace SimSharp.Visualization.Advanced.AdvancedShapes {
       Ry = ry;
     }
 
-    public override void WriteValueJson(JsonTextWriter writer, AdvancedShape compare) {
+    public void WriteValueJson(JsonTextWriter writer, AdvancedShape compare) {
       if (compare == null) {
         writer.WritePropertyName("cx");
         writer.WriteValue(Cx.Value);
@@ -56,7 +56,7 @@ namespace SimSharp.Visualization.Advanced.AdvancedShapes {
       }
     }
 
-    public override void WriteValueAtJson(int i, JsonTextWriter writer, Dictionary<string, int[]> compare) {
+    public void WriteValueAtJson(int i, JsonTextWriter writer, Dictionary<string, int[]> compare) {
       if (compare == null) {
         int cx = Cx.GetValueAt(i);
         writer.WritePropertyName("cx");
@@ -113,7 +113,7 @@ namespace SimSharp.Visualization.Advanced.AdvancedShapes {
       }
     }
 
-    public override Dictionary<string, int[]> GetCurrValueAttributes() {
+    public Dictionary<string, int[]> GetCurrValueAttributes() {
       return new Dictionary<string, int[]> {
         { "cx", new int[] { Cx.CurrValue } },
         { "cy", new int[] { Cy.CurrValue } },
@@ -122,7 +122,7 @@ namespace SimSharp.Visualization.Advanced.AdvancedShapes {
       };
     }
 
-    public override bool AllValues() {
+    public bool AllValues() {
       if (Cx.Function != null)
         return false;
       if (Cy.Function != null)

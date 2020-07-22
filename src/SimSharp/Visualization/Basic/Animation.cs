@@ -15,7 +15,7 @@ namespace SimSharp.Visualization.Basic {
     private AnimationBuilder animationBuilder;
     private StringWriter stringWriter;
     private JsonTextWriter writer;
-    private SortedList<DateTime, AnimationProps> propsList;
+    private SortedList<DateTime, AnimationProperties> propsList;
     private List<AnimationUnit> units;
 
     public Animation(string name, Shape shape0, Shape shape1, DateTime time0, DateTime time1, Style style, bool keep, AnimationBuilder animationBuilder) {
@@ -23,14 +23,14 @@ namespace SimSharp.Visualization.Basic {
       this.animationBuilder = animationBuilder;
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
-      this.propsList = new SortedList<DateTime, AnimationProps>();
+      this.propsList = new SortedList<DateTime, AnimationProperties>();
       this.units = new List<AnimationUnit>();
 
       CheckTime(time0, time1);
       int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.Config.FPS) + 1;
       int stop = Convert.ToInt32((time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.Config.FPS);
 
-      AnimationProps props = new AnimationProps(shape0, shape1, time0, time1, style, keep, start, stop);
+      AnimationProperties props = new AnimationProperties(shape0, shape1, time0, time1, style, keep, start, stop);
       propsList.Add(time0, props);
 
       if (animationBuilder.EnableAnimation)
@@ -48,7 +48,7 @@ namespace SimSharp.Visualization.Basic {
       int start = Convert.ToInt32((time0 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.Config.FPS) + 1;
       int stop = Convert.ToInt32((time1 - animationBuilder.Env.StartDate).TotalSeconds * animationBuilder.Config.FPS);
 
-      Update(new AnimationProps(shape0, shape1, time0, time1, style, keep, start, stop));
+      Update(new AnimationProperties(shape0, shape1, time0, time1, style, keep, start, stop));
     }
 
     public void Update(Shape shape1, bool keep = true) {
@@ -88,13 +88,13 @@ namespace SimSharp.Visualization.Basic {
 
       if (attributesAt != null) {
         Shape shape0 = shape1.CopyAndSet(attributesAt);
-        Update(new AnimationProps(shape0, shape1, time0, time1, style, keep, start, stop));
+        Update(new AnimationProperties(shape0, shape1, time0, time1, style, keep, start, stop));
       } else {
-        Update(new AnimationProps(GetLastWrittenProps().Shape1, shape1, time0, time1, style, keep, start, stop));
+        Update(new AnimationProperties(GetLastWrittenProps().Shape1, shape1, time0, time1, style, keep, start, stop));
       }
     }
 
-    private void Update(AnimationProps props) {
+    private void Update(AnimationProperties props) {
       for (int j = propsList.Count - 1; j >= 0; j--) {
         if (propsList.Values[j].Start >= props.Start)
           propsList.RemoveAt(j);
@@ -114,7 +114,7 @@ namespace SimSharp.Visualization.Basic {
         }
 
         if (propsList.Count >= 2) {
-          AnimationProps prev = propsList.Values[propsList.Count - 2];
+          AnimationProperties prev = propsList.Values[propsList.Count - 2];
           FillUnits(props, (!prev.Keep && prev.Stop + 1 < props.Start) ? false : true);
         }
         else {
@@ -150,7 +150,7 @@ namespace SimSharp.Visualization.Basic {
     }
     #endregion
 
-    private void FillUnits(AnimationProps props, bool currVisible) {
+    private void FillUnits(AnimationProperties props, bool currVisible) {
       int totalFrameNumber = props.Stop - props.Start + 1;
 
       if (currVisible && props.Start >= props.Stop && !props.Keep) {
@@ -242,7 +242,7 @@ namespace SimSharp.Visualization.Basic {
       }
     }
 
-    private AnimationProps GetCurrentProps() {
+    private AnimationProperties GetCurrentProps() {
       for (int j = propsList.Count - 1; j >= 0; j--) {
         if (propsList.Keys[j] <= animationBuilder.Env.Now)
           return propsList.Values[j];
@@ -250,9 +250,9 @@ namespace SimSharp.Visualization.Basic {
       return propsList.Values[0];
     }
 
-    private AnimationProps GetLastWrittenProps() {
+    private AnimationProperties GetLastWrittenProps() {
       for (int j = propsList.Count - 1; j >= 0; j--) {
-        AnimationProps props = propsList.Values[j];
+        AnimationProperties props = propsList.Values[j];
         if (props.Written)
           return props;
       }
@@ -278,15 +278,15 @@ namespace SimSharp.Visualization.Basic {
       }
     }
 
-    private bool ShapesEqual(AnimationProps props) {
+    private bool ShapesEqual(AnimationProperties props) {
       return props.Shape0.Equals(props.Shape1);
     }
 
-    private string GetInitFrame(AnimationProps props, int z, bool currVisible) {
+    private string GetInitFrame(AnimationProperties props, int z, bool currVisible) {
       writer.WritePropertyName(Name);
       writer.WriteStartObject();
 
-      AnimationProps prevWritten = GetLastWrittenProps();
+      AnimationProperties prevWritten = GetLastWrittenProps();
       if (prevWritten == null) {
         writer.WritePropertyName("type");
         writer.WriteValue(props.Shape0.GetType().Name.ToLower());
@@ -328,11 +328,11 @@ namespace SimSharp.Visualization.Basic {
       return frame;
     }
 
-    private Dictionary<string, int[]> GetAttributes(AnimationProps props, int z) {
+    private Dictionary<string, int[]> GetAttributes(AnimationProperties props, int z) {
       return z == 0 ? props.Shape0.GetAttributes() : props.Shape1.GetAttributes();
     }
 
-    private void WriteJson(AnimationProps props, int z, JsonTextWriter writer, Shape compare) {
+    private void WriteJson(AnimationProperties props, int z, JsonTextWriter writer, Shape compare) {
       if (z == 0)
         props.Shape0.WriteJson(writer, compare);
       else

@@ -6,21 +6,21 @@ using SimSharp.Visualization.Advanced.AdvancedShapes;
 using SimSharp.Visualization.Advanced.AdvancedStyles;
 
 namespace SimSharp.Visualization.Advanced {
-  public class AdvancedAnimationProps {
+  public class AdvancedAnimationProperties {
     public AdvancedShape Shape { get; set; }
     public AdvancedStyle Style { get; set; }
     public AnimationAttribute<bool> Visibility { get; set; }
 
     public bool Written { get; set; }
 
-    public AdvancedAnimationProps(AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
+    public AdvancedAnimationProperties(AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
       Shape = shape;
       Style = style;
       Visibility = visibility;
       Written = false;
     }
     
-    public void WriteValueJson(JsonTextWriter writer, bool currVisible, AdvancedAnimationProps compare) {
+    public void WriteValueJson(JsonTextWriter writer, bool currVisible, AdvancedAnimationProperties compare) {
       if (compare == null) {
         Style.WriteValueJson(writer, null);
 

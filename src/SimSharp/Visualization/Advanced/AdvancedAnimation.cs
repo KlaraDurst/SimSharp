@@ -13,7 +13,7 @@ namespace SimSharp.Visualization.Advanced {
 
     protected StringWriter stringWriter;
     protected JsonTextWriter writer;
-    protected List<AdvancedAnimationProps> propsList;
+    protected List<AdvancedAnimationProperties> propsList;
     protected bool currVisible;
 
     protected string typeStr;
@@ -23,10 +23,10 @@ namespace SimSharp.Visualization.Advanced {
       Name = Regex.Replace(name, @"\s+", "");
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
-      this.propsList = new List<AdvancedAnimationProps>();
+      this.propsList = new List<AdvancedAnimationProperties>();
       this.currVisible = false;
 
-      AdvancedAnimationProps props = new AdvancedAnimationProps(shape, style, visibility);
+      AdvancedAnimationProperties props = new AdvancedAnimationProperties(shape, style, visibility);
       propsList.Add(props);
 
       this.typeStr = props.Shape.GetType().Name.ToLower();
@@ -68,26 +68,26 @@ namespace SimSharp.Visualization.Advanced {
       }
     }
 
-    protected AdvancedAnimationProps GetLastWrittenProps() {
+    protected AdvancedAnimationProperties GetLastWrittenProps() {
       for (int j = propsList.Count - 1; j >= 0; j--) {
-        AdvancedAnimationProps props = propsList[j];
+        AdvancedAnimationProperties props = propsList[j];
         if (props.Written)
           return props;
       }
       return null;
     }
 
-    protected virtual void WriteValueJson(AdvancedAnimationProps props, AdvancedAnimationProps prevWritten) {
+    protected virtual void WriteValueJson(AdvancedAnimationProperties props, AdvancedAnimationProperties prevWritten) {
       props.WriteValueJson(writer, currVisible, prevWritten);
     }
 
     public virtual string GetValueInitFrame() {
-      AdvancedAnimationProps props = propsList[propsList.Count - 1];
+      AdvancedAnimationProperties props = propsList[propsList.Count - 1];
 
       writer.WritePropertyName(Name);
       writer.WriteStartObject();
 
-      AdvancedAnimationProps prevWritten = GetLastWrittenProps();
+      AdvancedAnimationProperties prevWritten = GetLastWrittenProps();
       if (prevWritten == null && props.Visibility.Value) {
         writer.WritePropertyName("type");
         writer.WriteValue(typeStr.Remove(typeStr.IndexOf(removeStr), removeStr.Length));
@@ -118,17 +118,17 @@ namespace SimSharp.Visualization.Advanced {
     }
 
     public virtual bool AllValues() {
-      AdvancedAnimationProps props = propsList[propsList.Count - 1];
+      AdvancedAnimationProperties props = propsList[propsList.Count - 1];
       return props.AllValues();
     }
 
-    protected virtual void WriteValueAtJson(AdvancedAnimationProps props, int i, AdvancedStyle.State propsState, Dictionary<string, int[]> prevAttributes) {
+    protected virtual void WriteValueAtJson(AdvancedAnimationProperties props, int i, AdvancedStyle.State propsState, Dictionary<string, int[]> prevAttributes) {
       props.WriteValueAtJson(i, writer, currVisible, propsState);
       props.Shape.WriteValueAtJson(i, writer, prevAttributes);
     }
 
     public virtual List<AnimationUnit> FramesFromTo(int start, int stop) {
-      AdvancedAnimationProps props = propsList[propsList.Count - 1];
+      AdvancedAnimationProperties props = propsList[propsList.Count - 1];
       List<AnimationUnit> affectedUnits = new List<AnimationUnit>();
 
       if (AllValues()) {
@@ -146,7 +146,7 @@ namespace SimSharp.Visualization.Advanced {
         AdvancedStyle.State propsState;
         Dictionary<string, int[]> prevAttributes;
 
-        AdvancedAnimationProps prevWritten = GetLastWrittenProps();
+        AdvancedAnimationProperties prevWritten = GetLastWrittenProps();
         if (prevWritten == null) {
           init = true;
           propsState = null;

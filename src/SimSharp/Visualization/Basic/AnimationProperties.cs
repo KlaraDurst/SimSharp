@@ -5,7 +5,7 @@ using SimSharp.Visualization.Basic.Shapes;
 using SimSharp.Visualization.Basic.Styles;
 
 namespace SimSharp.Visualization.Basic {
-  class AnimationProps {
+  class AnimationProperties {
     public Shape Shape0 { get; }
     public Shape Shape1 { get; }
     public DateTime Time0 { get; }
@@ -18,7 +18,7 @@ namespace SimSharp.Visualization.Basic {
 
     public bool Written { get; set; }
 
-    public AnimationProps(Shape shape0, Shape shape1, DateTime time0, DateTime time1, Style style, bool keep, int start, int stop) { 
+    public AnimationProperties(Shape shape0, Shape shape1, DateTime time0, DateTime time1, Style style, bool keep, int start, int stop) { 
       Shape0 = shape0;
       Shape1 = shape1;
       Time0 = time0;

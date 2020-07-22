@@ -88,7 +88,7 @@ namespace SimSharp.Visualization.Advanced {
       }
     }
 
-    protected override void WriteValueJson(AdvancedAnimationProps props, AdvancedAnimationProps prevWritten) {
+    protected override void WriteValueJson(AdvancedAnimationProperties props, AdvancedAnimationProperties prevWritten) {
       base.WriteValueJson(props, prevWritten);
       WriteChildrenValueJson();
     }
@@ -105,7 +105,7 @@ namespace SimSharp.Visualization.Advanced {
       return true;
     }
 
-    protected override void WriteValueAtJson(AdvancedAnimationProps props, int i, AdvancedStyle.State propsState, Dictionary<string, int[]> prevAttributes) {
+    protected override void WriteValueAtJson(AdvancedAnimationProperties props, int i, AdvancedStyle.State propsState, Dictionary<string, int[]> prevAttributes) {
       base.WriteValueAtJson(props, i, propsState, prevAttributes);
       WriteChildrenValueAtJson(i);
     }

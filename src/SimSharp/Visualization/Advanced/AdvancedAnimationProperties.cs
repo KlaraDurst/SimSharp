@@ -19,6 +19,13 @@ namespace SimSharp.Visualization.Advanced {
       Visibility = visibility;
       Written = false;
     }
+
+    public AdvancedAnimationProperties(AdvancedAnimationProperties props) {
+      Shape = props.Shape;
+      Style = props.Style;
+      Visibility = props.Visibility;
+      Written = false;
+    }
     
     public void WriteValueJson(JsonTextWriter writer, bool currVisible, AdvancedAnimationProperties compare) {
       if (compare == null) {

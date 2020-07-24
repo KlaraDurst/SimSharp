@@ -51,14 +51,17 @@ namespace SimSharp.Visualization.Advanced {
     public void SetShape(AdvancedShape shape) {
       CheckType(shape);
       propsList[propsList.Count - 1].Shape = shape;
+      propsList[propsList.Count - 1].Written = false;
     }
 
     public void SetStyle(AdvancedStyle style) {
       propsList[propsList.Count - 1].Style = style;
+      propsList[propsList.Count - 1].Written = false;
     }
 
     public void SetVisibility(AnimationAttribute<bool> visibility) {
       propsList[propsList.Count - 1].Visibility = visibility;
+      propsList[propsList.Count - 1].Written = false;
     }
     #endregion
 
@@ -138,7 +141,6 @@ namespace SimSharp.Visualization.Advanced {
           unit.AddFrame(frame);
           affectedUnits.Add(unit);
         }
-        return affectedUnits;
       } else {
         List<string> frames = new List<string>();
         int unitStart = start;
@@ -211,8 +213,15 @@ namespace SimSharp.Visualization.Advanced {
           unit.AddFrameRange(frames);
           affectedUnits.Add(unit);
         }
-        return affectedUnits;
       }
+
+      if (propsList.Count > 1)
+        propsList.RemoveAt(0);
+
+      AdvancedAnimationProperties propsNew = new AdvancedAnimationProperties(props);
+      propsNew.Written = true;
+      propsList.Add(propsNew);
+      return affectedUnits;
     }
 
     public string GetName() {

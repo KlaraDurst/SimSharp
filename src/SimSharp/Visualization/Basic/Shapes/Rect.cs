@@ -11,6 +11,13 @@ namespace SimSharp.Visualization.Basic.Shapes {
     public int Width { get; }
     public int Height { get; }
 
+    public Rect(int x, int y, int width, int height) {
+      X = x;
+      Y = y;
+      Width = width;
+      Height = height;
+    }
+
     public void WriteJson(JsonTextWriter writer, Shape compare) {
       if (compare == null) {
         writer.WritePropertyName("x");
@@ -47,13 +54,6 @@ namespace SimSharp.Visualization.Basic.Shapes {
           writer.WriteValue(Height);
         }
       }
-    }
-
-    public Rect (int x, int y, int width, int height) {
-      X = x;
-      Y = y;
-      Width = width;
-      Height = height;
     }
 
     public Dictionary<string, int[]> GetAttributes() {

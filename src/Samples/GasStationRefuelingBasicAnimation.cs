@@ -11,7 +11,7 @@ using SimSharp.Visualization.Basic.Shapes;
 using SimSharp.Visualization.Basic;
 using SimSharp.Visualization;
 using SimSharp.Visualization.Basic.Resources;
-using SimSharp.Visualization.Player;
+using SimSharp.Visualization.Processor;
 using SimSharp.Visualization.Basic.Styles;
 
 namespace SimSharp.Samples {
@@ -39,17 +39,17 @@ namespace SimSharp.Samples {
     private const int FuelTankSize = 50; // liters
     private const int MinFuelTankLevel = 5; // Min levels of fuel tanks (in liters)
     private const int MaxFuelTankLevel = 25; // Max levels of fuel tanks (in liters)
-    private const int RefuelingSpeed = 2; // liters / second
+    private const int RefuelingSpeed = 1; // liters / second
 
-    private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(10); // Minutes it takes the tank truck to arrive
-    private static readonly TimeSpan MinTInter = TimeSpan.FromMinutes(5); // Create a car every min seconds
-    private static readonly TimeSpan MaxTInter = TimeSpan.FromMinutes(50); // Create a car every max seconds
-    private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(150); // Simulation time
+    //private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(10); // Minutes it takes the tank truck to arrive
+    //private static readonly TimeSpan MinTInter = TimeSpan.FromMinutes(5); // Create a car every min seconds
+    //private static readonly TimeSpan MaxTInter = TimeSpan.FromMinutes(50); // Create a car every max seconds
+    //private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(150); // Simulation time
 
-    //private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(1); // Minutes it takes the tank truck to arrive
-    //private static readonly TimeSpan MinTInter = TimeSpan.FromSeconds(10); // Create a car every min seconds
-    //private static readonly TimeSpan MaxTInter = TimeSpan.FromSeconds(20); // Create a car every max seconds
-    //private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(3); // Simulation time
+    private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(1); // Minutes it takes the tank truck to arrive
+    private static readonly TimeSpan MinTInter = TimeSpan.FromSeconds(10); // Create a car every min seconds
+    private static readonly TimeSpan MaxTInter = TimeSpan.FromSeconds(20); // Create a car every max seconds
+    private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(3); // Simulation time
 
     // Used for Visualization
     private static readonly int CarHeight = 50; // Height of car rectangles
@@ -175,18 +175,19 @@ namespace SimSharp.Samples {
     public void Simulate(int rseed = RandomSeed) {
       // Setup and start the simulation
       // Create environment and start processes
-      var env = new Simulation(DateTime.Now.Date, rseed, new AnimationBuilder(1000, 1000, "Gas Station Refueling", 1));
+      AnimationBuilder animationBuilder = new AnimationBuilder(1000, 1000, "Gas Station Refueling", 1);
+      var env = new Simulation(DateTime.Now.Date, rseed, animationBuilder);
       env.Log("== Gas Station refuelling push animation ==");
 
       // BuildAnimation has to be turned on before first Animation is created
-      env.AnimationBuilder.DebugAnimation = false;
-      env.AnimationBuilder.EnableAnimation = true;
-      env.AnimationBuilder.Player = new HtmlPlayer();
+      animationBuilder.DebugAnimation = false;
+      animationBuilder.EnableAnimation = true;
+      animationBuilder.Processor = new HtmlPlayer();
 
       // Gas station queue visualization
       Rect queueRect = new Rect(10, 50, 50, 50);
       Style queueStyle = new Style("red", "red", 1);
-      QueueAnimation queue = env.AnimationBuilder.AnimateQueue("gasStationQueue", queueRect, queueStyle, 100, 20);
+      QueueAnimation queue = animationBuilder.AnimateQueue("gasStationQueue", queueRect, queueStyle, 100, 20);
 
       var gasStation = new Resource(env, 2, queue) {
         QueueLength = new TimeSeriesMonitor(env, name: "Waiting cars", collect: true),
@@ -198,13 +199,13 @@ namespace SimSharp.Samples {
       Rect gasStationRectLeft = new Rect(275, 350, 50, 100);
       Rect gasStationRectRight = new Rect(475, 350, 50, 100);
       Style gasStationStyle = new Style("grey", "grey", 1);
-      env.AnimationBuilder.Animate("gasStationLeft", gasStationRectLeft, env.StartDate, gasStationStyle);
-      env.AnimationBuilder.Animate("gasStationRight", gasStationRectRight, env.StartDate, gasStationStyle);
+      animationBuilder.Animate("gasStationLeft", gasStationRectLeft, env.StartDate, gasStationStyle);
+      animationBuilder.Animate("gasStationRight", gasStationRectRight, env.StartDate, gasStationStyle);
 
       // Fuel pump level visualization
       Rect fullFuelPumpRect = new Rect(275, 550, 250, GasStationSize);
       Style fuelPumpTankStyle = new Style("black", "black", 1);
-      LevelAnimation level = env.AnimationBuilder.AnimateLevel("fuelPumpTank", fullFuelPumpRect, fuelPumpTankStyle);
+      LevelAnimation level = animationBuilder.AnimateLevel("fuelPumpTank", fullFuelPumpRect, fuelPumpTankStyle);
 
       var fuelPump = new Container(env, GasStationSize, GasStationSize, level) {
         Fillrate = new TimeSeriesMonitor(env, name: "Tank fill rate")
@@ -213,51 +214,51 @@ namespace SimSharp.Samples {
       // Fuel pump visualization
       Rect fuelPumpRect = new Rect(275, 550, 250, GasStationSize);
       Style fuelPumpStyle = new Style("none", "black", 1);
-      env.AnimationBuilder.Animate("fuelPump", fuelPumpRect, env.StartDate, fuelPumpStyle);
+      animationBuilder.Animate("fuelPump", fuelPumpRect, env.StartDate, fuelPumpStyle);
 
       // Group Test
-      Group carGroup = new Group(0, 0, 50, 35);
-      Group modCarGroup = new Group(1000, 0, 50, 35);
-      Rect carTop = new Rect(10, 0, 20, 15);
-      Rect carBottom = new Rect(0, 15, 50, 15);
-      Ellipse wheelLeft = new Ellipse(7, 30, 5, 5);
-      Ellipse wheelRight = new Ellipse(43, 30, 5, 5);
-      Ellipse modWheelRight = new Ellipse(43, 30, 10, 10);
+      //Group carGroup = new Group(0, 0, 50, 35);
+      //Group modCarGroup = new Group(1000, 0, 50, 35);
+      //Rect carTop = new Rect(10, 0, 20, 15);
+      //Rect carBottom = new Rect(0, 15, 50, 15);
+      //Ellipse wheelLeft = new Ellipse(7, 30, 5, 5);
+      //Ellipse wheelRight = new Ellipse(43, 30, 5, 5);
+      //Ellipse modWheelRight = new Ellipse(43, 30, 10, 10);
 
-      GroupStyle carGroupStyle = new GroupStyle("green", "none", 0);
-      GroupStyle modCarGroupStyle = new GroupStyle("green", "none", 0);
-      Style carStyle = new Style("green", "none", 0);
-      Style modCarStyle = new Style("red", "none", 0);
-      Style wheelStyle = new Style("black", "none", 0);
+      //GroupStyle carGroupStyle = new GroupStyle("green", "none", 0);
+      //GroupStyle modCarGroupStyle = new GroupStyle("green", "none", 0);
+      //Style carStyle = new Style("green", "none", 0);
+      //Style modCarStyle = new Style("red", "none", 0);
+      //Style wheelStyle = new Style("black", "none", 0);
 
-      carGroupStyle.AddChild("carTop", carTop, carStyle);
-      carGroupStyle.AddChild("carBottom", carBottom, carStyle);
-      carGroupStyle.AddChild("wheelLeft", wheelLeft, wheelStyle);
-      carGroupStyle.AddChild("wheelRight", wheelRight, wheelStyle);
+      //carGroupStyle.AddChild("carTop", carTop, carStyle);
+      //carGroupStyle.AddChild("carBottom", carBottom, carStyle);
+      //carGroupStyle.AddChild("wheelLeft", wheelLeft, wheelStyle);
+      //carGroupStyle.AddChild("wheelRight", wheelRight, wheelStyle);
 
-      // modCarGroupStyle.AddChild("carTop", carTop, carStyle);
-      modCarGroupStyle.AddChild("carBottom", carBottom, modCarStyle);
-      modCarGroupStyle.AddChild("wheelLeft", wheelLeft, wheelStyle);
-      modCarGroupStyle.AddChild("wheelRight", modWheelRight, wheelStyle);
+      //// modCarGroupStyle.AddChild("carTop", carTop, carStyle);
+      //modCarGroupStyle.AddChild("carBottom", carBottom, modCarStyle);
+      //modCarGroupStyle.AddChild("wheelLeft", wheelLeft, wheelStyle);
+      //modCarGroupStyle.AddChild("wheelRight", modWheelRight, wheelStyle);
 
-      Animation carAnimation = env.AnimationBuilder.Animate("testCar", carGroup, env.StartDate, carGroupStyle);
-      carAnimation.Update(carGroup, modCarGroup, env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), true);
-      carAnimation.Update(carGroup, env.StartDate + TimeSpan.FromMinutes(60), env.StartDate + TimeSpan.FromMinutes(60), modCarGroupStyle, true);
-      carAnimation.Update(carGroup, env.StartDate + TimeSpan.FromMinutes(100), env.StartDate + TimeSpan.FromMinutes(100), carGroupStyle, true);
-      carAnimation.Update(carGroup, env.StartDate + TimeSpan.FromMinutes(149), env.StartDate + TimeSpan.FromMinutes(149), false);
+      //Animation carAnimation = animationBuilder.Animate("testCar", carGroup, env.StartDate, carGroupStyle);
+      //carAnimation.Update(carGroup, modCarGroup, env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), true);
+      //carAnimation.Update(carGroup, env.StartDate + TimeSpan.FromMinutes(60), env.StartDate + TimeSpan.FromMinutes(60), modCarGroupStyle, true);
+      //carAnimation.Update(carGroup, env.StartDate + TimeSpan.FromMinutes(100), env.StartDate + TimeSpan.FromMinutes(100), carGroupStyle, true);
+      //carAnimation.Update(carGroup, env.StartDate + TimeSpan.FromMinutes(149), env.StartDate + TimeSpan.FromMinutes(149), false);
 
-      // Text Test
-      Text text = new Text(0, 100, 200, 20);
-      Text modText = new Text(1000, 100, 200, 20);
+      //// Text Test
+      //Text text = new Text(0, 100, 200, 20);
+      //Text modText = new Text(1000, 100, 200, 20);
 
-      TextStyle textStyle = new TextStyle("black", "none", 0, "hello world");
-      TextStyle modTextStyle = new TextStyle("black", "none", 0, "ok bye");
+      //TextStyle textStyle = new TextStyle("black", "none", 0, "hello world");
+      //TextStyle modTextStyle = new TextStyle("black", "none", 0, "ok bye");
 
-      Animation textAnimation = env.AnimationBuilder.Animate("testText", text, env.StartDate, textStyle);
-      textAnimation.Update(text, modText, env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), true);
-      textAnimation.Update(text, env.StartDate + TimeSpan.FromMinutes(60), env.StartDate + TimeSpan.FromMinutes(60), modTextStyle, true);
-      textAnimation.Update(text, env.StartDate + TimeSpan.FromMinutes(100), env.StartDate + TimeSpan.FromMinutes(100), textStyle, true);
-      textAnimation.Update(text, env.StartDate + TimeSpan.FromMinutes(149), env.StartDate + TimeSpan.FromMinutes(149), false);
+      //Animation textAnimation = animationBuilder.Animate("testText", text, env.StartDate, textStyle);
+      //textAnimation.Update(text, modText, env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), true);
+      //textAnimation.Update(text, env.StartDate + TimeSpan.FromMinutes(60), env.StartDate + TimeSpan.FromMinutes(60), modTextStyle, true);
+      //textAnimation.Update(text, env.StartDate + TimeSpan.FromMinutes(100), env.StartDate + TimeSpan.FromMinutes(100), textStyle, true);
+      //textAnimation.Update(text, env.StartDate + TimeSpan.FromMinutes(149), env.StartDate + TimeSpan.FromMinutes(149), false);
 
       env.Process(GasStationControl(env, fuelPump));
       // env.Process(GasStationVisualization(env, fuelPump));

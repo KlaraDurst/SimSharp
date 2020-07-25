@@ -7,13 +7,16 @@ using Newtonsoft.Json;
 
 namespace SimSharp.Visualization.Processor {
   public class JsonWriter : FramesProcessor {
-    protected string target = Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName;
+    protected string target;
     protected StringWriter stringWriter;
     protected JsonTextWriter writer;
     protected string name;
     protected bool first = true;
 
-    public JsonWriter() {
+    public JsonWriter() : this(Directory.GetParent(System.Environment.CurrentDirectory).Parent.FullName) { }
+
+    public JsonWriter(string target) {
+      this.target = target;
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
     }

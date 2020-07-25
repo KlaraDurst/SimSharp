@@ -13,7 +13,9 @@ namespace SimSharp.Visualization.Processor {
     protected IModel model;
     protected IConnection connection;
 
-    public Publisher() {
+    public Publisher() : this("guest", "guest", "localhost", "http://localhost:3000") { }
+
+    public Publisher(string userName, string password, string hostName, string url) {
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
 
@@ -21,9 +23,9 @@ namespace SimSharp.Visualization.Processor {
       string targetPlayerPath = Path.Combine(target.Substring(0, index + 10), @"src\SimSharp\Visualization\Processor\Consumer");
 
       var connectionFactory = new ConnectionFactory() {
-        UserName = "guest",
-        Password = "guest",
-        HostName = "localhost"
+        UserName = userName,
+        Password = password,
+        HostName = hostName
       };
 
       //Main entry point to the RabbitMQ .NET AMQP client
@@ -39,14 +41,14 @@ namespace SimSharp.Visualization.Processor {
       // Bind Queue to Exchange
       model.QueueBind("simSharpQueue", "simSharpExchange", "directexchange_key");
 
-      Play(targetPlayerPath);
+      Play(targetPlayerPath, url);
 
       // TODO: Batchvorgang abbrechen
     }
 
-    private void Play(string targetPlayerPath) {
+    private void Play(string targetPlayerPath, string url) {
       NpmStart(targetPlayerPath);
-      OpenUrl("http://localhost:3000");
+      OpenUrl(url);
     }
 
     public void SendStart(AnimationConfig config) {

@@ -10,6 +10,10 @@ namespace SimSharp.Visualization.Processor {
     private string jsFile = @"js\scripts.js";
     private string htmlFile = "Player.html";
 
+    public HtmlPlayer() : base() { }
+
+    public HtmlPlayer(string target) : base(target) { }
+
     public override void SendStop() {
       writer.WriteEndArray();
       writer.WriteEndObject();

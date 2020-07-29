@@ -13,9 +13,9 @@ namespace SimSharp.Visualization.Processor {
     protected IModel model;
     protected IConnection connection;
 
-    public Publisher() : this("guest", "guest", "localhost", "http://localhost:3000") { }
+    public Publisher() : this("guest", "guest", "localhost") { }
 
-    public Publisher(string userName, string password, string hostName, string url) {
+    public Publisher(string userName, string password, string hostName) {
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
 
@@ -41,7 +41,7 @@ namespace SimSharp.Visualization.Processor {
       // Bind Queue to Exchange
       model.QueueBind("simSharpQueue", "simSharpExchange", "directexchange_key");
 
-      Play(targetPlayerPath, url);
+      Play(targetPlayerPath, "http://localhost:3000");
 
       // TODO: Batchvorgang abbrechen
     }

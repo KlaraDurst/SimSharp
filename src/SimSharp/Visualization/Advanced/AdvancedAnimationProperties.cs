@@ -54,7 +54,6 @@ namespace SimSharp.Visualization.Advanced {
 
         writer.WritePropertyName("visibility");
         writer.WriteValue(true);
-        Visibility.CurrValue = true;
       } else {
         Style.WriteValueAtJson(i, writer, compare);
 
@@ -62,8 +61,8 @@ namespace SimSharp.Visualization.Advanced {
           writer.WritePropertyName("visibility");
           writer.WriteValue(true);
         }
-        Visibility.CurrValue = true;
       }
+      Visibility.CurrValue = true;
       Shape.WriteValueAtJson(i, writer, prevAttributes);
 
       Written = true;

@@ -144,18 +144,18 @@ namespace SimSharp.Visualization.Advanced {
         List<string> frames = new List<string>();
         int unitStart = start;
         bool init;
-        AdvancedStyle.State propsState;
-        Dictionary<string, int[]> prevAttributes;
+        AdvancedStyle.State styleState;
+        Dictionary<string, int[]> shapeState;
 
         AdvancedAnimationProperties prevWritten = GetLastWrittenProps();
         if (prevWritten == null) {
           init = true;
-          propsState = null;
-          prevAttributes = new Dictionary<string, int[]>();
+          styleState = null;
+          shapeState = null;
         } else {
           init = false;
-          propsState = prevWritten.Style.GetState();
-          prevAttributes = prevWritten.Shape.GetCurrValueAttributes();
+          styleState = prevWritten.Style.GetState();
+          shapeState = prevWritten.Shape.GetCurrValueAttributes();
         }
 
         for (int i = start; i <= stop; i++) {
@@ -168,18 +168,12 @@ namespace SimSharp.Visualization.Advanced {
               writer.WritePropertyName("type");
               writer.WriteValue(typeStr.Remove(typeStr.IndexOf(removeStr), removeStr.Length));
 
-              WriteValueAtJson(props, i, null, null);
-              propsState = props.Style.GetState();
-              currVisible = props.Visibility.CurrValue;
-              prevAttributes = props.Shape.GetCurrValueAttributes();
-
               init = false;
-            } else {
-              WriteValueAtJson(props, i, propsState, prevAttributes);
-              propsState = props.Style.GetState();
-              currVisible = props.Visibility.CurrValue;
-              prevAttributes = props.Shape.GetCurrValueAttributes();
-            }
+            } 
+            WriteValueAtJson(props, i, styleState, shapeState);
+            styleState = props.Style.GetState();
+            shapeState = props.Shape.GetCurrValueAttributes();
+            currVisible = props.Visibility.CurrValue;
           } else {
             if (currVisible) {
               writer.WritePropertyName("visibility");

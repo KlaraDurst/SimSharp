@@ -16,9 +16,6 @@ namespace SimSharp.Visualization.Advanced {
     protected List<AdvancedAnimationProperties> propsList;
     protected bool currVisible;
 
-    protected string typeStr;
-    protected string removeStr;
-
     public AdvancedAnimation (string name, AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
       Name = Regex.Replace(name, @"\s+", "");
       this.stringWriter = new StringWriter();
@@ -28,9 +25,6 @@ namespace SimSharp.Visualization.Advanced {
 
       AdvancedAnimationProperties props = new AdvancedAnimationProperties(shape, style, visibility);
       propsList.Add(props);
-
-      this.typeStr = props.Shape.GetType().Name.ToLower();
-      this.removeStr = "advanced";
     }
 
     #region Get animation props
@@ -91,16 +85,10 @@ namespace SimSharp.Visualization.Advanced {
       writer.WriteStartObject();
 
       AdvancedAnimationProperties prevWritten = GetLastWrittenProps();
-      if (prevWritten == null && props.Visibility.Value) {
-        writer.WritePropertyName("type");
-        writer.WriteValue(typeStr.Remove(typeStr.IndexOf(removeStr), removeStr.Length));
-
-        WriteValueJson(props, null);
-        currVisible = props.Visibility.Value;
-      } else if (prevWritten != null && props.Visibility.Value) {
+      if (props.Visibility.Value) {
         WriteValueJson(props, prevWritten);
         currVisible = props.Visibility.Value;
-      } else if (prevWritten != null && !props.Visibility.Value) {
+      } else {
         if (currVisible) {
           writer.WritePropertyName("visibility");
           writer.WriteValue(false);
@@ -143,18 +131,15 @@ namespace SimSharp.Visualization.Advanced {
       } else {
         List<string> frames = new List<string>();
         int unitStart = start;
-        bool init;
         AdvancedStyle.State styleState;
         Dictionary<string, int[]> shapeState;
 
         AdvancedAnimationProperties prevWritten = GetLastWrittenProps();
         if (prevWritten == null) {
-          init = true;
           styleState = null;
           shapeState = null;
         } else {
-          init = false;
-          styleState = prevWritten.Style.GetState();
+          styleState = prevWritten.Style.GetCurrValueAttributes();
           shapeState = prevWritten.Shape.GetCurrValueAttributes();
         }
 
@@ -164,14 +149,8 @@ namespace SimSharp.Visualization.Advanced {
 
           bool visibility = props.Visibility.GetValueAt(i);
           if (visibility) {
-            if (init) {
-              writer.WritePropertyName("type");
-              writer.WriteValue(typeStr.Remove(typeStr.IndexOf(removeStr), removeStr.Length));
-
-              init = false;
-            } 
             WriteValueAtJson(props, i, styleState, shapeState);
-            styleState = props.Style.GetState();
+            styleState = props.Style.GetCurrValueAttributes();
             shapeState = props.Shape.GetCurrValueAttributes();
             currVisible = props.Visibility.CurrValue;
           } else {

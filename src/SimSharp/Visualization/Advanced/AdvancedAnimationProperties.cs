@@ -13,11 +13,17 @@ namespace SimSharp.Visualization.Advanced {
 
     public bool Written { get; set; }
 
+    protected string typeStr;
+    protected string removeStr;
+
     public AdvancedAnimationProperties(AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
       Shape = shape;
       Style = style;
       Visibility = visibility;
       Written = false;
+
+      this.typeStr = Shape.GetType().Name.ToLower();
+      this.removeStr = "advanced";
     }
 
     public AdvancedAnimationProperties(AdvancedAnimationProperties props) {
@@ -25,10 +31,16 @@ namespace SimSharp.Visualization.Advanced {
       Style = props.Style;
       Visibility = props.Visibility;
       Written = false;
+
+      this.typeStr = Shape.GetType().Name.ToLower();
+      this.removeStr = "advanced";
     }
     
     public void WriteValueJson(JsonTextWriter writer, bool currVisible, AdvancedAnimationProperties compare) {
       if (compare == null) {
+        writer.WritePropertyName("type");
+        writer.WriteValue(typeStr.Remove(typeStr.IndexOf(removeStr), removeStr.Length));
+
         Style.WriteValueJson(writer, null);
 
         writer.WritePropertyName("visibility");
@@ -50,6 +62,9 @@ namespace SimSharp.Visualization.Advanced {
 
     public void WriteValueAtJson(int i, JsonTextWriter writer, bool currVisible, AdvancedStyle.State compare, Dictionary<string, int[]> prevAttributes) {
       if (compare == null) {
+        writer.WritePropertyName("type");
+        writer.WriteValue(typeStr.Remove(typeStr.IndexOf(removeStr), removeStr.Length));
+
         Style.WriteValueAtJson(i, writer, null);
 
         writer.WritePropertyName("visibility");

@@ -27,7 +27,7 @@ namespace SimSharp.Visualization.Advanced.AdvancedStyles {
       StrokeWidth = strokeWidth;
     }
 
-    public virtual State GetState() {
+    public virtual State GetCurrValueAttributes() {
       return new State(this);
     }
 

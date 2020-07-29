@@ -20,7 +20,7 @@ namespace SimSharp.Visualization.Advanced.AdvancedStyles {
       Text = text;
     }
 
-    public override State GetState() {
+    public override State GetCurrValueAttributes() {
       return new TextState(this);
     }
 

@@ -48,7 +48,7 @@ namespace SimSharp.Visualization.Advanced {
       Written = true;
     }
 
-    public void WriteValueAtJson(int i, JsonTextWriter writer, bool currVisible, AdvancedStyle.State compare) {
+    public void WriteValueAtJson(int i, JsonTextWriter writer, bool currVisible, AdvancedStyle.State compare, Dictionary<string, int[]> prevAttributes) {
       if (compare == null) {
         Style.WriteValueAtJson(i, writer, null);
 
@@ -64,6 +64,8 @@ namespace SimSharp.Visualization.Advanced {
         }
         Visibility.CurrValue = true;
       }
+      Shape.WriteValueAtJson(i, writer, prevAttributes);
+
       Written = true;
     }
 

@@ -126,8 +126,7 @@ namespace SimSharp.Visualization.Advanced {
     }
 
     protected virtual void WriteValueAtJson(AdvancedAnimationProperties props, int i, AdvancedStyle.State propsState, Dictionary<string, int[]> prevAttributes) {
-      props.WriteValueAtJson(i, writer, currVisible, propsState);
-      props.Shape.WriteValueAtJson(i, writer, prevAttributes);
+      props.WriteValueAtJson(i, writer, currVisible, propsState, prevAttributes);
     }
 
     public virtual List<AnimationUnit> FramesFromTo(int start, int stop) {

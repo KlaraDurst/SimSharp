@@ -180,7 +180,8 @@ function updateAttr(shape, key, value) {
       else
         value = 'hidden';
     }
-    shape.setAttribute(key, value);
+    if (value != "" && value != "-1")
+      shape.setAttribute(key, value);
   }
 }
 

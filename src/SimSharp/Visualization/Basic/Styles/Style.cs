@@ -9,7 +9,7 @@ namespace SimSharp.Visualization.Basic.Styles {
     public string Stroke { get; }
     public int StrokeWidth { get; }
 
-    public Style(string fill, string stroke, int strokeWidth) {
+    public Style(string fill = "", string stroke = "", int strokeWidth = -1) {
       Fill = fill;
       Stroke = stroke;
       StrokeWidth = strokeWidth;

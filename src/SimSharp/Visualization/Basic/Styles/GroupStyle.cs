@@ -12,6 +12,10 @@ namespace SimSharp.Visualization.Basic.Styles {
       Children = new Dictionary<string, (Shape, Style)>();
     }
 
+    public void AddChild(string name, Shape shape) {
+      AddChild(name, shape, new Style());
+    }
+
     public void AddChild(string name, Shape shape, Style style) {
       CheckName(name);
       Children.Add(name, (shape, style));

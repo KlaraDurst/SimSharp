@@ -163,6 +163,21 @@ namespace SimSharp.Samples {
       }
     }
 
+    private IEnumerable<Event> GasStationVisualization(Simulation env, Container fuelPump) {
+      /*
+       * Update the visualization of the fuel pump if the level changes 
+       */
+      Text fuelPumpText = new Text(560, 750, fontSize: 24);
+      TextStyle fuelPumpTextStyle = new TextStyle("black", "none", 0, GasStationSize.ToString());
+      Animation textAnimation = env.AnimationBuilder.Animate("fuelPumpText", fuelPumpText, fuelPumpTextStyle);
+
+      while (true) {
+        yield return fuelPump.WhenChange();
+        // Visualization has to be updated
+        TextStyle newfuelPumpTextStyle = new TextStyle("black", "none", 0, Math.Round(fuelPump.Level, 2).ToString());
+        textAnimation.Update(fuelPumpText, newfuelPumpTextStyle);
+      }
+    }
 
     private IEnumerable<Event> GasStationControl(Simulation env, Container fuelPump) {
       /*
@@ -184,17 +199,9 @@ namespace SimSharp.Samples {
       yield return env.Timeout(TankTruckTime);
       env.Log("Tank truck arriving at time {0}", env.Now);
 
-      // Tank truck visualization
-      Rect truckRect = new Rect(575, 550, 50, 100);
-      Style truckStyle = new Style("green", "green", 1);
-      Animation truckAnimation = env.AnimationBuilder.Animate(name, truckRect, truckStyle);
-
       var amount = fuelPump.Capacity - fuelPump.Level;
       yield return fuelPump.Put(amount);
       env.Log("Tank truck finished refuelling {0} liters at time {1}.", amount, env.Now);
-
-      // Remove tank truck visualization
-      truckAnimation.Update(truckRect, env.Now, false);
     }
 
     private IEnumerable<Event> CarGenerator(Simulation env, Resource gasStation, Container fuelPump) {
@@ -276,21 +283,8 @@ namespace SimSharp.Samples {
       Style fuelPumpStyle = new Style("none", "black", 3);
       animationBuilder.Animate("fuelPump", fuelPumpRect, env.StartDate, fuelPumpStyle);
 
-      //// Text Test
-      //Text text = new Text(0, 100, 200, 20);
-      //Text modText = new Text(1000, 100, 200, 20);
-
-      //TextStyle textStyle = new TextStyle("black", "none", 0, "hello world");
-      //TextStyle modTextStyle = new TextStyle("black", "none", 0, "ok bye");
-
-      //Animation textAnimation = animationBuilder.Animate("testText", text, env.StartDate, textStyle);
-      //textAnimation.Update(text, modText, env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), true);
-      //textAnimation.Update(text, env.StartDate + TimeSpan.FromMinutes(60), env.StartDate + TimeSpan.FromMinutes(60), modTextStyle, true);
-      //textAnimation.Update(text, env.StartDate + TimeSpan.FromMinutes(100), env.StartDate + TimeSpan.FromMinutes(100), textStyle, true);
-      //textAnimation.Update(text, env.StartDate + TimeSpan.FromMinutes(149), env.StartDate + TimeSpan.FromMinutes(149), false);
-
       env.Process(GasStationControl(env, fuelPump));
-      // env.Process(GasStationVisualization(env, fuelPump));
+      env.Process(GasStationVisualization(env, fuelPump));
       env.Process(CarGenerator(env, gasStation, fuelPump));
 
       // Execute!

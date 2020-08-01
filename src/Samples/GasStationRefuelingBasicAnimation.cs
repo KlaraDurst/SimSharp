@@ -107,8 +107,8 @@ namespace SimSharp.Samples {
         var litersRequired = FuelTankSize - fuelTankLevel;
 
         // Car visualization (at gas station)
-        Group fullCarRect = new Group(GetFreeGasStation() == 1 ? 275 : 475, 250, Convert.ToInt32(FuelTankSize)+70, CarHeight);
-        Group emptyCarRect = new Group(fullCarRect.X, fullCarRect.Y, Convert.ToInt32(fuelTankLevel), CarHeight);
+        Group fullCar = new Group(GetFreeGasStation() == 1 ? 275 : 475, 250, Convert.ToInt32(FuelTankSize)+70, CarHeight);
+        Group emptyCar = new Group(fullCar.X, fullCar.Y, Convert.ToInt32(fuelTankLevel), CarHeight);
         GroupStyle fullCarStyle = new GroupStyle("green", "none", 0);
         GroupStyle fuelingCarStyle = new GroupStyle("black", "none", 0);
         Style fuelingWindowStyle = new Style("darkgreen", "none", 0);
@@ -136,16 +136,16 @@ namespace SimSharp.Samples {
           yield return fuelPump.Get(level); // draw it empty
 
           // First car tank fill visualization
-          Group tempCarRect = new Group(emptyCarRect.X, emptyCarRect.Y, Convert.ToInt32(level), CarHeight);
-          Animation fillCarAnimation = env.AnimationBuilder.Animate(name+"Tank", emptyCarRect, tempCarRect, env.Now, env.Now + firstRefuelDuration, fuelingCarStyle);
-          Animation carAnimation = env.AnimationBuilder.Animate(name, fullCarRect, fullCarStyle);
+          Group tempCar = new Group(emptyCar.X, emptyCar.Y, Convert.ToInt32(fuelTankLevel + level), CarHeight);
+          Animation fillCarAnimation = env.AnimationBuilder.Animate(name+"Tank", emptyCar, tempCar, env.Now, env.Now + firstRefuelDuration, fuelingCarStyle);
+          Animation carAnimation = env.AnimationBuilder.Animate(name, fullCar, fullCarStyle);
 
           yield return env.Timeout(firstRefuelDuration);
           yield return fuelPump.Get(litersRequired - level); // wait for the rest
 
           // Second car tank fill visualization
-          fillCarAnimation.Update(fullCarRect, env.Now, env.Now + secondRefuelDuration, false);
-          carAnimation.Update(fullCarRect, env.Now, env.Now + secondRefuelDuration, false); 
+          fillCarAnimation.Update(fullCar, env.Now, env.Now + secondRefuelDuration, false);
+          carAnimation.Update(fullCar, env.Now, env.Now + secondRefuelDuration, false); 
 
           yield return env.Timeout(secondRefuelDuration);
         } else {
@@ -153,12 +153,12 @@ namespace SimSharp.Samples {
           yield return fuelPump.Get(litersRequired);
 
           // Car tank fill visualization
-          env.AnimationBuilder.Animate(name+"Tank", emptyCarRect, fullCarRect, env.Now, env.Now + refuelDuration, fuelingCarStyle, false);
-          Animation carAnimation = env.AnimationBuilder.Animate(name, fullCarRect, env.Now, env.Now + refuelDuration, fullCarStyle, false);
+          env.AnimationBuilder.Animate(name+"Tank", emptyCar, fullCar, env.Now, env.Now + refuelDuration, fuelingCarStyle, false);
+          env.AnimationBuilder.Animate(name, fullCar, env.Now, env.Now + refuelDuration, fullCarStyle, false);
 
           yield return env.Timeout(refuelDuration);
         }
-        FreeGasStation(fullCarRect.X == 275 ? 1 : 2);            
+        FreeGasStation(fullCar.X == 275 ? 1 : 2);            
         env.Log("{0} finished refueling in {1} seconds.", name, (env.Now - start).TotalSeconds);
       }
     }
@@ -226,6 +226,7 @@ namespace SimSharp.Samples {
       animationBuilder.EnableAnimation = true;
       animationBuilder.Processor = new HtmlPlayer();
 
+      // Gas station queue visualization
       Group carGroup = new Group(0, 20, 120, CarHeight);
       GroupStyle waitingCarStyle = new GroupStyle("red", "none", 0);
 
@@ -240,7 +241,6 @@ namespace SimSharp.Samples {
       waitingCarStyle.AddChild("wheelBackMiddle", wheelBackMiddle, wheelMiddleStyle);
       waitingCarStyle.AddChild("wheelFrontMiddle", wheelFronMiddle, wheelMiddleStyle);
 
-      // Gas station queue visualization
       QueueAnimation queue = animationBuilder.AnimateQueue("gasStationQueue", carGroup, waitingCarStyle, 150, 20);
 
       var gasStation = new Resource(env, 2, queue) {

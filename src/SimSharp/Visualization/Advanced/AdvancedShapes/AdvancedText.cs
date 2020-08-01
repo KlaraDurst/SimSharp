@@ -10,6 +10,8 @@ namespace SimSharp.Visualization.Advanced.AdvancedShapes {
     public AnimationAttribute<int> TextLength { get; set; }
     public AnimationAttribute<int> FontSize { get; set; }
 
+    public AdvancedText(AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> fontSize) : this (x, y, new AnimationAttribute<int>(default(int)), fontSize) {}
+
     public AdvancedText(AnimationAttribute<int> x, AnimationAttribute<int> y, AnimationAttribute<int> textLength, AnimationAttribute<int> fontSize) {
       X = x;
       Y = y;

@@ -18,12 +18,12 @@ namespace SimSharp.Visualization.Advanced {
     }
 
     public AdvancedAnimation AddChild(string name, AdvancedShape shape) {
-      return AddChild(name, shape, new AdvancedStyle(), propsList[propsList.Count - 1].Visibility);
+      return AddChild(name, shape, new AdvancedStyle(), true);
     }
 
     public AdvancedAnimation AddChild(string name, AdvancedShape shape, AdvancedStyle style) {
       AddName(name);
-      AdvancedAnimation animation = new AdvancedAnimation(Name + "/" + name, shape, style, propsList[propsList.Count - 1].Visibility);
+      AdvancedAnimation animation = new AdvancedAnimation(Name + "/" + name, shape, style, true, isChild: true);
       Children.Add(animation);
       return animation;
     }
@@ -34,7 +34,7 @@ namespace SimSharp.Visualization.Advanced {
 
     public AdvancedAnimation AddChild(string name, AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
       AddName(name);
-      AdvancedAnimation animation = new AdvancedAnimation(Name + "/" + name, shape, style, visibility, true);
+      AdvancedAnimation animation = new AdvancedAnimation(Name + "/" + name, shape, style, visibility, isChild: true);
       Children.Add(animation);
       return animation;
     }

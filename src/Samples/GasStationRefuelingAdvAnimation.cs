@@ -41,19 +41,19 @@ namespace SimSharp.Samples {
     private const int FuelTankSize = 50; // liters
     private const int MinFuelTankLevel = 5; // Min levels of fuel tanks (in liters)
     private const int MaxFuelTankLevel = 25; // Max levels of fuel tanks (in liters)
-    private const int RefuelingSpeed = 2; // liters / second
+    private const int RefuelingSpeed = 1; // liters / second
 
-    private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(10); // Minutes it takes the tank truck to arrive
-    private static readonly TimeSpan MinTInter = TimeSpan.FromMinutes(5); // Create a car every min seconds
-    private static readonly TimeSpan MaxTInter = TimeSpan.FromMinutes(50); // Create a car every max seconds
-    private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(150); // Simulation time
+    //private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(10); // Minutes it takes the tank truck to arrive
+    //private static readonly TimeSpan MinTInter = TimeSpan.FromMinutes(5); // Create a car every min seconds
+    //private static readonly TimeSpan MaxTInter = TimeSpan.FromMinutes(50); // Create a car every max seconds
+    //private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(150); // Simulation time
 
-    //private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(1); // Minutes it takes the tank truck to arrive
-    //private static readonly TimeSpan MinTInter = TimeSpan.FromSeconds(10); // Create a car every min seconds
-    //private static readonly TimeSpan MaxTInter = TimeSpan.FromSeconds(20); // Create a car every max seconds
-    //private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(3); // Simulation time
+    private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(1); // Minutes it takes the tank truck to arrive
+    private static readonly TimeSpan MinTInter = TimeSpan.FromSeconds(10); // Create a car every min seconds
+    private static readonly TimeSpan MaxTInter = TimeSpan.FromSeconds(20); // Create a car every max seconds
+    private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(3); // Simulation time
 
-    private static readonly int CarHeight = 50; // Height of car rectangles
+    private static readonly int CarHeight = 70; // Height of car rectangles
     private static bool[] gasStations = { true, true };
     private static AnimationUtil util;
 
@@ -91,14 +91,25 @@ namespace SimSharp.Samples {
 
         // Car visualization (at gas station)
         Process thisProcess = env.ActiveProcess;
-        AdvancedStyle carStyle = new AdvancedStyle("none", "green", 1);
-        AdvancedStyle carTankStyle = new AdvancedStyle("green", "green", 1);
-        AdvancedRect carRect = new AdvancedRect(GetFreeGasStation() == 1 ? 275 : 475, 250, Convert.ToInt32(litersRequired), CarHeight);
-        AdvancedAnimation fullCarAnimation = env.AnimationBuilder.Animate(
-          name,
-          carRect,
-          carStyle,
-          (Func<int, bool>)(t => gasStation.UsedBy(thisProcess)));
+        AdvancedGroup fullCar = new AdvancedGroup(GetFreeGasStation() == 1 ? 275 : 475, 250, Convert.ToInt32(FuelTankSize)+70, CarHeight);
+        AdvancedRect carTop = new AdvancedRect(20, 5, 65, 30);
+        AdvancedRect carBottom = new AdvancedRect(0, 30, 120, 30);
+        AdvancedRect window = new AdvancedRect(25, 10, 55, 20);
+        AdvancedRect windowMiddle = new AdvancedRect(50, 10, 5, 35);
+        AdvancedRect lightFront = new AdvancedRect(115, 32, 5, 10);
+        AdvancedRect lightBack = new AdvancedRect(0, 32, 5, 10);
+        AdvancedEllipse wheelBack = new AdvancedEllipse(25, 55, 15, 15);
+        AdvancedEllipse wheelFront = new AdvancedEllipse(95, 55, 15, 15);
+        AdvancedEllipse wheelBackMiddle = new AdvancedEllipse(25, 55, 7, 7);
+        AdvancedEllipse wheelFronMiddle = new AdvancedEllipse(95, 55, 7, 7);
+
+        AdvancedStyle fullCarStyle = new AdvancedStyle("green", "none", 0);
+        AdvancedStyle fuelingCarStyle = new AdvancedStyle("black", "none", 0);
+        AdvancedStyle fuelingWindowStyle = new AdvancedStyle("darkgreen", "none", 0);
+        AdvancedStyle lightFrontStyle = new AdvancedStyle("gold", "black", 1);
+        AdvancedStyle lightBackStyle = new AdvancedStyle("red", "black", 1);
+        AdvancedStyle wheelStyle = new AdvancedStyle("dimgrey", "none", 0);
+        AdvancedStyle wheelMiddleStyle = new AdvancedStyle("lightgrey", "none", 0);
 
         if (litersRequired > fuelPump.Level && fuelPump.Level > 0) {
           var level = fuelPump.Level;
@@ -113,17 +124,39 @@ namespace SimSharp.Samples {
           int pauseFrame = Convert.ToInt32((refuelPauseTime - env.StartDate).TotalSeconds * env.AnimationBuilder.Config.FPS);
           int firstRefuelFrames = pauseFrame - entryFrame + 1;
 
-          AdvancedRect carTankRect = new AdvancedRect(
-            carRect.X,
+          AdvancedGroup refuelCar = new AdvancedGroup(
+            fullCar.X,
             250,
-            util.GetIntValueAt(refuelStartTime, refuelPauseTime, 0, Convert.ToInt32(level)),
+            util.GetIntValueAt(refuelStartTime, refuelPauseTime, Convert.ToInt32(fuelTankLevel), Convert.ToInt32(fuelTankLevel + level)),
             CarHeight);
 
-          AdvancedAnimation tempCarAnimation = env.AnimationBuilder.Animate(
+          AdvancedGroupAnimation refuelCarAnimation = env.AnimationBuilder.Animate(
             name + "Tank",
-            carTankRect,
-            carTankStyle,
+            refuelCar,
+            fuelingCarStyle,
             (Func<int, bool>) (t => gasStation.UsedBy(thisProcess)));
+
+          refuelCarAnimation.AddChild("carTop", carTop);
+          refuelCarAnimation.AddChild("carBottom", carBottom);
+          refuelCarAnimation.AddChild("wheelBack", wheelBack);
+          refuelCarAnimation.AddChild("wheelFront", wheelFront);
+
+          AdvancedGroupAnimation fullCarAnimation = env.AnimationBuilder.Animate(
+            name,
+            fullCar,
+            fullCarStyle,
+            (Func<int, bool>)(t => gasStation.UsedBy(thisProcess)));
+
+          fullCarAnimation.AddChild("carTop", carTop);
+          fullCarAnimation.AddChild("carBottom", carBottom);
+          fullCarAnimation.AddChild("window", window, fuelingWindowStyle);
+          fullCarAnimation.AddChild("windowMiddle", windowMiddle);
+          fullCarAnimation.AddChild("lightFront", lightFront, lightFrontStyle);
+          fullCarAnimation.AddChild("lightBack", lightBack, lightBackStyle);
+          fullCarAnimation.AddChild("wheelBack", wheelBack);
+          fullCarAnimation.AddChild("wheelFront", wheelFront);
+          fullCarAnimation.AddChild("wheelBackMiddle", wheelBackMiddle, wheelMiddleStyle);
+          fullCarAnimation.AddChild("wheelFrontMiddle", wheelFronMiddle, wheelMiddleStyle);
 
           yield return env.Timeout(firstRefuelDuration);
           yield return fuelPump.Get(litersRequired - level); // wait for the rest
@@ -135,7 +168,7 @@ namespace SimSharp.Samples {
           int exitFrame = Convert.ToInt32((refuelEndTime - env.StartDate).TotalSeconds * env.AnimationBuilder.Config.FPS);
           int secondRefuelFrames = exitFrame - continueFrame + 1;
 
-          carTankRect.Width = util.GetIntValueAt(refuelContinueTime, refuelEndTime, Convert.ToInt32(level), Convert.ToInt32(litersRequired));
+          refuelCar.Width = util.GetIntValueAt(refuelContinueTime, refuelEndTime, Convert.ToInt32(fuelTankLevel + level), Convert.ToInt32(FuelTankSize+70));
 
           yield return env.Timeout(secondRefuelDuration);
         } else {
@@ -149,21 +182,43 @@ namespace SimSharp.Samples {
           int exitFrame = Convert.ToInt32((refuelEndTime - env.StartDate).TotalSeconds * env.AnimationBuilder.Config.FPS);
           int refuelDurationFrames = exitFrame - entryFrame + 1;
 
-          AdvancedRect carTankRect = new AdvancedRect(
-            carRect.X,
+          AdvancedGroup refuelCar = new AdvancedGroup(
+            fullCar.X,
             250,
-            util.GetIntValueAt(refuelStartTime, refuelEndTime, 0, Convert.ToInt32(litersRequired)),
+            util.GetIntValueAt(refuelStartTime, refuelEndTime, Convert.ToInt32(fuelTankLevel), Convert.ToInt32(FuelTankSize+70)),
             CarHeight);
 
-          env.AnimationBuilder.Animate(
+          AdvancedGroupAnimation refuelCarAnimation = env.AnimationBuilder.Animate(
             name + "Tank",
-            carTankRect,
-            carTankStyle,
+            refuelCar,
+            fuelingCarStyle,
             (Func<int, bool>) (t => gasStation.UsedBy(thisProcess)));
+
+          refuelCarAnimation.AddChild("carTop", carTop);
+          refuelCarAnimation.AddChild("carBottom", carBottom);
+          refuelCarAnimation.AddChild("wheelBack", wheelBack);
+          refuelCarAnimation.AddChild("wheelFront", wheelFront);
+
+          AdvancedGroupAnimation fullCarAnimation = env.AnimationBuilder.Animate(
+            name,
+            fullCar,
+            fullCarStyle,
+            (Func<int, bool>)(t => gasStation.UsedBy(thisProcess)));
+
+          fullCarAnimation.AddChild("carTop", carTop);
+          fullCarAnimation.AddChild("carBottom", carBottom);
+          fullCarAnimation.AddChild("window", window, fuelingWindowStyle);
+          fullCarAnimation.AddChild("windowMiddle", windowMiddle);
+          fullCarAnimation.AddChild("lightFront", lightFront, lightFrontStyle);
+          fullCarAnimation.AddChild("lightBack", lightBack, lightBackStyle);
+          fullCarAnimation.AddChild("wheelBack", wheelBack);
+          fullCarAnimation.AddChild("wheelFront", wheelFront);
+          fullCarAnimation.AddChild("wheelBackMiddle", wheelBackMiddle, wheelMiddleStyle);
+          fullCarAnimation.AddChild("wheelFrontMiddle", wheelFronMiddle, wheelMiddleStyle);
 
           yield return env.Timeout(refuelDuration);
         }
-        FreeGasStation(carRect.X.Value == 275 ? 1 : 2);
+        FreeGasStation(fullCar.X.Value == 275 ? 1 : 2);
         env.Log("{0} finished refueling in {1} seconds.", name, (env.Now - start).TotalSeconds);
       }
     }
@@ -184,16 +239,6 @@ namespace SimSharp.Samples {
     }
 
     private IEnumerable<Event> TankTruck(string name, Simulation env, Container fuelPump) {
-      // Tank truck visualization
-      Process thisProcess = env.ActiveProcess;
-      AdvancedStyle truckStyle = new AdvancedStyle("blue", "blue", 1);
-      AdvancedRect truckRect = new AdvancedRect(575, 550, 50, 100);
-      env.AnimationBuilder.Animate(
-        name,  
-        truckRect,
-        truckStyle, 
-        (Func<int, bool>)(t => fuelPump.PutBy(thisProcess)));
-
       // Arrives at the gas station after a certain delay and refuels it.
       yield return env.Timeout(TankTruckTime);
       env.Log("Tank truck arriving at time {0}", env.Now);
@@ -223,14 +268,42 @@ namespace SimSharp.Samples {
       // BuildAnimation has to be turned on before first Animation is created
       animationBuilder.DebugAnimation = false;
       animationBuilder.EnableAnimation = true;
-      animationBuilder.Processor = new JsonWriter();
+      animationBuilder.Processor = new HtmlPlayer();
 
       util = animationBuilder.GetAnimationUtil();
 
       // Gas station queue visualization
-      Rect queueRect = new Rect(10, 50, 50, 50);
-      Style queueStyle = new Style("red", "red", 1);
-      QueueAnimation queue = animationBuilder.AnimateQueue("gasStationQueue", queueRect, queueStyle, 100, 20);
+      Group carGroup = new Group(0, 20, 120, CarHeight);
+      Rect carTop = new Rect(20, 5, 65, 30);
+      Rect carBottom = new Rect(0, 30, 120, 30);
+      Rect window = new Rect(25, 10, 55, 20);
+      Rect windowMiddle = new Rect(50, 10, 5, 35);
+      Rect lightFront = new Rect(115, 32, 5, 10);
+      Rect lightBack = new Rect(0, 32, 5, 10);
+      Ellipse wheelBack = new Ellipse(25, 55, 15, 15);
+      Ellipse wheelFront = new Ellipse(95, 55, 15, 15);
+      Ellipse wheelBackMiddle = new Ellipse(25, 55, 7, 7);
+      Ellipse wheelFronMiddle = new Ellipse(95, 55, 7, 7);
+
+      GroupStyle waitingCarStyle = new GroupStyle("red", "none", 0);
+      Style waitingWindowStyle = new Style("darkred", "none", 0);
+      Style lightFrontStyle = new Style("gold", "black", 1);
+      Style lightBackStyle = new Style("red", "black", 1);
+      Style wheelStyle = new Style("dimgrey", "none", 0);
+      Style wheelMiddleStyle = new Style("lightgrey", "none", 0);
+
+      waitingCarStyle.AddChild("carTop", carTop);
+      waitingCarStyle.AddChild("carBottom", carBottom);
+      waitingCarStyle.AddChild("window", window, waitingWindowStyle);
+      waitingCarStyle.AddChild("windowMiddle", windowMiddle);
+      waitingCarStyle.AddChild("lightFront", lightFront, lightFrontStyle);
+      waitingCarStyle.AddChild("lightBack", lightBack, lightBackStyle);
+      waitingCarStyle.AddChild("wheelBack", wheelBack, wheelStyle);
+      waitingCarStyle.AddChild("wheelFront", wheelFront, wheelStyle);
+      waitingCarStyle.AddChild("wheelBackMiddle", wheelBackMiddle, wheelMiddleStyle);
+      waitingCarStyle.AddChild("wheelFrontMiddle", wheelFronMiddle, wheelMiddleStyle);
+
+      QueueAnimation queue = animationBuilder.AnimateQueue("gasStationQueue", carGroup, waitingCarStyle, 150, 20);
 
       var gasStation = new Resource(env, 2, queue) {
         QueueLength = new TimeSeriesMonitor(env, name: "Waiting cars", collect: true),
@@ -248,58 +321,46 @@ namespace SimSharp.Samples {
       };
 
       // Gas station visualization
-      AdvancedRect gasStationLeftRect = new AdvancedRect(275, 350, 50, 100);
-      AdvancedRect gasStationRightRect = new AdvancedRect(475, 350, 50, 100);
+      AdvancedGroup gasStationLeft = new AdvancedGroup(245, 300, 100, 150);
+      AdvancedGroup gasStationRight = new AdvancedGroup(445, 300, 100, 150);
+      AdvancedRect gasStationRect = new AdvancedRect(30, 50, 70, 100);
+      AdvancedRect gasStationWindow = new AdvancedRect(40, 60, 50, 30);
+      AdvancedRect hose1 = new AdvancedRect(0, 110, 30, 7);
+      AdvancedRect hose2 = new AdvancedRect(0, 0, 7, 110);
+      AdvancedRect hose3 = new AdvancedRect(0, 0, 30, 7);
       AdvancedStyle gasStationStyle = new AdvancedStyle("grey", "grey", 1);
-      animationBuilder.Animate("gasStationLeft", gasStationLeftRect, gasStationStyle, true);
-      animationBuilder.Animate("gasStationRight", gasStationRightRect, gasStationStyle, true);
+      AdvancedStyle gasStationWindowStyle = new AdvancedStyle("white");
+
+      AdvancedGroupAnimation gasStationLeftAnimation = animationBuilder.Animate("gasStationLeft", gasStationLeft, gasStationStyle, true);
+      AdvancedGroupAnimation gasStationRightAnimation = animationBuilder.Animate("gasStationRight", gasStationRight, gasStationStyle, true);
+
+      gasStationLeftAnimation.AddChild("gasStationRect", gasStationRect, true);
+      gasStationLeftAnimation.AddChild("gasStationWindow", gasStationWindow, gasStationWindowStyle, true);
+      gasStationLeftAnimation.AddChild("hose1", hose1, true);
+      gasStationLeftAnimation.AddChild("hose2", hose2, true);
+      gasStationLeftAnimation.AddChild("hose3", hose3, true);
+
+      gasStationRightAnimation.AddChild("gasStationRect", gasStationRect, true);
+      gasStationRightAnimation.AddChild("gasStationWindow", gasStationWindow, gasStationWindowStyle, true);
+      gasStationRightAnimation.AddChild("hose1", hose1, true);
+      gasStationRightAnimation.AddChild("hose2", hose2, true);
+      gasStationRightAnimation.AddChild("hose3", hose3, true);
 
       // Fuel pump visualization
       AdvancedRect fuelPumpRect = new AdvancedRect(275, 550, 250, GasStationSize);
       AdvancedStyle fuelPumpStyle = new AdvancedStyle("none", "black", 1); 
       animationBuilder.Animate("fuelPump", fuelPumpRect, fuelPumpStyle, true);
 
-      //// Group Test
-      //AdvancedGroup carGroup = new AdvancedGroup(
-      //  util.GetIntValueAt(env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), 0, 1000), 
-      //  0, 
-      //  50, 
-      //  35);
-      //AdvancedRect carTop = new AdvancedRect(10, 0, 20, 15);
-      //AdvancedRect carBottom = new AdvancedRect(0, 15, 50, 15);
-      //AdvancedEllipse wheelLeft = new AdvancedEllipse(7, 30, 5, 5);
-      //AdvancedEllipse wheelRight = new AdvancedEllipse(43, 30, 5, 5);
+      // GasStationVisualiszation
+      AdvancedText text = new AdvancedText(560, 750, 24);
 
-      //AdvancedStyle carStyle = new AdvancedStyle("green", "none", 0);
-      //AdvancedStyle wheelStyle = new AdvancedStyle("black", "none", 0);
-      //AdvancedStyle modCarStyle = new AdvancedStyle(
-      //  util.GetIfTimeBetween<string>(env.StartDate + TimeSpan.FromMinutes(60), env.StartDate + TimeSpan.FromMinutes(100), "red", "green"),
-      //  "none",
-      //  0);
+      AdvancedTextStyle textStyle = new AdvancedTextStyle(
+        "black",
+        "none",
+        0,
+        (Func<int, string>)(t => Math.Round(fuelPump.Level, 2).ToString()));
 
-      //AdvancedGroupAnimation carAnimation = animationBuilder.Animate("testCar", carGroup, carStyle, true);
-      //carAnimation.AddChild(
-      //  carTop, 
-      //  modCarStyle, 
-      //  true);
-      //carAnimation.AddChild(carBottom, carStyle, true);
-      //carAnimation.AddChild(wheelLeft, wheelStyle, true);
-      //carAnimation.AddChild(wheelRight, wheelStyle, true);
-
-      //// Text Test
-      //AdvancedText text = new AdvancedText(
-      //  util.GetIntValueAt(env.StartDate + TimeSpan.FromMinutes(20), env.StartDate + TimeSpan.FromMinutes(50), 0, 1000),
-      //  100, 
-      //  200, 
-      //  20);
-
-      //AdvancedTextStyle textStyle = new AdvancedTextStyle(
-      //  "black", 
-      //  "none", 
-      //  0,
-      //  util.GetIfTimeBetween<string>(env.StartDate + TimeSpan.FromMinutes(60), env.StartDate + TimeSpan.FromMinutes(100), "ok bye", "hello world"));
-
-      //animationBuilder.Animate("testText", text, textStyle, true);
+      animationBuilder.Animate("testText", text, textStyle, true);
 
       env.Process(GasStationControl(env, fuelPump));
       env.Process(CarGenerator(env, gasStation, fuelPump));

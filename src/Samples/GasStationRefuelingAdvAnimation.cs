@@ -312,7 +312,7 @@ namespace SimSharp.Samples {
       };
 
       // Fuel pump level visualization
-      Rect fullFuelPumpRect = new Rect(275, 550, 250, GasStationSize);
+      Rect fullFuelPumpRect = new Rect(275, 550, 270, GasStationSize);
       Style fuelPumpTankStyle = new Style("black", "black", 1);
       LevelAnimation level = animationBuilder.AnimateLevel("fuelPumpTank", fullFuelPumpRect, fuelPumpTankStyle);
 
@@ -347,7 +347,7 @@ namespace SimSharp.Samples {
       gasStationRightAnimation.AddChild("hose3", hose3, true);
 
       // Fuel pump visualization
-      AdvancedRect fuelPumpRect = new AdvancedRect(275, 550, 250, GasStationSize);
+      AdvancedRect fuelPumpRect = new AdvancedRect(275, 550, 270, GasStationSize);
       AdvancedStyle fuelPumpStyle = new AdvancedStyle("none", "black", 1); 
       animationBuilder.Animate("fuelPump", fuelPumpRect, fuelPumpStyle, true);
 

@@ -8,7 +8,7 @@ namespace SimSharp.Visualization.Basic.Styles {
   public class GroupStyle : Style {
     public Dictionary<string, (Shape, Style)> Children { get; }
 
-    public GroupStyle(string fill, string stroke, int strokeWidth) : base (fill, stroke, strokeWidth) {
+    public GroupStyle(string fill = "", string stroke = "", int strokeWidth = -1) : base (fill, stroke, strokeWidth) {
       Children = new Dictionary<string, (Shape, Style)>();
     }
 

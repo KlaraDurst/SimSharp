@@ -7,7 +7,7 @@ namespace SimSharp.Visualization.Basic.Styles {
   public class TextStyle : Style {
     public string Text { get; }
 
-    public TextStyle(string fill, string stroke, int strokeWidth, string text) : base (fill, stroke, strokeWidth) {
+    public TextStyle(string fill = "", string stroke = "", int strokeWidth = -1, string text = "text") : base (fill, stroke, strokeWidth) {
       Text = text;
     }
 

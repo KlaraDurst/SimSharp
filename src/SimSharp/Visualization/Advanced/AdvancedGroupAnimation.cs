@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using SimSharp.Visualization.Advanced.AdvancedShapes;
 using SimSharp.Visualization.Advanced.AdvancedStyles;
+using SimSharp.Visualization.Basic.Styles;
 
 namespace SimSharp.Visualization.Advanced {
   public class AdvancedGroupAnimation : AdvancedAnimation {
@@ -16,8 +17,8 @@ namespace SimSharp.Visualization.Advanced {
       this.names = new List<string>();
     }
 
-    public AdvancedAnimation AddChild(AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
-      return AddChild(GetNextAnimationName(), shape, style, visibility);
+    public AdvancedAnimation AddChild(string name, AdvancedShape shape, AnimationAttribute<bool> visibility) {
+      return AddChild(name, shape, new AdvancedStyle(), visibility);
     }
 
     public AdvancedAnimation AddChild(string name, AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
@@ -25,10 +26,6 @@ namespace SimSharp.Visualization.Advanced {
       AdvancedAnimation animation = new AdvancedAnimation(Name + "/" + name, shape, style, visibility);
       Children.Add(animation);
       return animation;
-    }
-
-    private string GetNextAnimationName() {
-      return "anim" + (Children.Count+1).ToString();
     }
 
     private void AddName(string name) {

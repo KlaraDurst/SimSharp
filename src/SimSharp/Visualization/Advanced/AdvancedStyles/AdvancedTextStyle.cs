@@ -15,6 +15,25 @@ namespace SimSharp.Visualization.Advanced.AdvancedStyles {
 
     public AnimationAttribute<string> Text { get; set; }
 
+    public AdvancedTextStyle()
+    : base() {
+      Text = "Text";
+    }
+
+    public AdvancedTextStyle(AnimationAttribute<string> text)
+    : base() {
+      Text = text;
+    }
+    public AdvancedTextStyle(AnimationAttribute<string> fill, AnimationAttribute<string> text)
+    : base(fill) {
+      Text = text;
+    }
+
+    public AdvancedTextStyle(AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<string> text)
+    : base(stroke, strokeWidth) {
+      Text = text;
+    }
+
     public AdvancedTextStyle(AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth, AnimationAttribute<string> text) 
       : base (fill, stroke, strokeWidth) {
       Text = text;

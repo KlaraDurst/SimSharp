@@ -21,6 +21,12 @@ namespace SimSharp.Visualization.Advanced.AdvancedStyles {
     public AnimationAttribute<string> Stroke { get; set; }
     public AnimationAttribute<int> StrokeWidth { get; set; }
 
+    public AdvancedStyle() : this("", "", -1) { }
+
+    public AdvancedStyle(AnimationAttribute<string> fill) : this(fill, "", -1) {}
+
+    public AdvancedStyle(AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth) : this("", stroke, strokeWidth) {}
+
     public AdvancedStyle(AnimationAttribute<string> fill, AnimationAttribute<string> stroke, AnimationAttribute<int> strokeWidth) {
       Fill = fill;
       Stroke = stroke;

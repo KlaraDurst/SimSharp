@@ -15,8 +15,9 @@ namespace SimSharp.Visualization.Advanced {
 
     protected string typeStr;
     protected string removeStr;
+    protected bool isChild;
 
-    public AdvancedAnimationProperties(AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
+    public AdvancedAnimationProperties(AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility, bool isChild) {
       Shape = shape;
       Style = style;
       Visibility = visibility;
@@ -24,6 +25,7 @@ namespace SimSharp.Visualization.Advanced {
 
       this.typeStr = Shape.GetType().Name.ToLower();
       this.removeStr = "advanced";
+      this.isChild = isChild;
     }
 
     public AdvancedAnimationProperties(AdvancedAnimationProperties props) {
@@ -43,8 +45,11 @@ namespace SimSharp.Visualization.Advanced {
 
         Style.WriteValueJson(writer, null);
 
-        writer.WritePropertyName("visibility");
-        writer.WriteValue(Visibility.Value);
+        // TODO: should be possible to not specify visibility attribute. child elements should habe same visibility as parent element
+        if (!isChild) {
+          writer.WritePropertyName("visibility");
+          writer.WriteValue(Visibility.Value);
+        }
 
         Shape.WriteValueJson(writer, null);
       } else {
@@ -67,8 +72,11 @@ namespace SimSharp.Visualization.Advanced {
 
         Style.WriteValueAtJson(i, writer, null);
 
-        writer.WritePropertyName("visibility");
-        writer.WriteValue(true);
+        // TODO: should be possible to not specify visibility attribute. child elements should habe same visibility as parent element
+        if (!isChild) {
+          writer.WritePropertyName("visibility");
+          writer.WriteValue(true);
+        }
       } else {
         Style.WriteValueAtJson(i, writer, compare);
 

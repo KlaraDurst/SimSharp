@@ -16,14 +16,14 @@ namespace SimSharp.Visualization.Advanced {
     protected List<AdvancedAnimationProperties> propsList;
     protected bool currVisible;
 
-    public AdvancedAnimation (string name, AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility) {
+    public AdvancedAnimation (string name, AdvancedShape shape, AdvancedStyle style, AnimationAttribute<bool> visibility, bool isChild = false) {
       Name = Regex.Replace(name, @"\s+", "");
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
       this.propsList = new List<AdvancedAnimationProperties>();
       this.currVisible = false;
 
-      AdvancedAnimationProperties props = new AdvancedAnimationProperties(shape, style, visibility);
+      AdvancedAnimationProperties props = new AdvancedAnimationProperties(shape, style, visibility, isChild);
       propsList.Add(props);
     }
 

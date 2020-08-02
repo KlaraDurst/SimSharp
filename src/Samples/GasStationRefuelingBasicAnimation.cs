@@ -271,7 +271,7 @@ namespace SimSharp.Samples {
 
       // Fuel pump level visualization
       Rect fullFuelPumpRect = new Rect(275, 550, 270, GasStationSize);
-      Style fuelPumpTankStyle = new Style("black", "black", 1);
+      Style fuelPumpTankStyle = new Style("black", "none", 0);
       LevelAnimation level = animationBuilder.AnimateLevel("fuelPumpTank", fullFuelPumpRect, fuelPumpTankStyle);
 
       var fuelPump = new Container(env, GasStationSize, GasStationSize, level) {

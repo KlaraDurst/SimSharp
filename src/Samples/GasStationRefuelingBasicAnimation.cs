@@ -40,15 +40,15 @@ namespace SimSharp.Samples {
     private const int MinFuelTankLevel = 5; // Min levels of fuel tanks (in liters)
     private const int MaxFuelTankLevel = 25; // Max levels of fuel tanks (in liters)
     private const int RefuelingSpeed = 2; // liters / second
-    //private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(10); // Minutes it takes the tank truck to arrive
-    //private static readonly TimeSpan MinTInter = TimeSpan.FromMinutes(30); // Create a car every min seconds
-    //private static readonly TimeSpan MaxTInter = TimeSpan.FromMinutes(300); // Create a car every max seconds
-    //private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(131400); // Simulation time
+    private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(10); // Minutes it takes the tank truck to arrive
+    private static readonly TimeSpan MinTInter = TimeSpan.FromMinutes(30); // Create a car every min seconds
+    private static readonly TimeSpan MaxTInter = TimeSpan.FromMinutes(300); // Create a car every max seconds
+    private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(131400); // Simulation time
 
-    private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(1); // Minutes it takes the tank truck to arrive
-    private static readonly TimeSpan MinTInter = TimeSpan.FromSeconds(10); // Create a car every min seconds
-    private static readonly TimeSpan MaxTInter = TimeSpan.FromSeconds(20); // Create a car every max seconds
-    private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(3); // Simulation time
+    //private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(1); // Minutes it takes the tank truck to arrive
+    //private static readonly TimeSpan MinTInter = TimeSpan.FromSeconds(10); // Create a car every min seconds
+    //private static readonly TimeSpan MaxTInter = TimeSpan.FromSeconds(20); // Create a car every max seconds
+    //private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(3); // Simulation time
 
     // Used for Visualization
     private static readonly int CarHeight = 70; // Height of car rectangles

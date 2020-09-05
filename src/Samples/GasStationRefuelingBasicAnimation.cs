@@ -39,17 +39,16 @@ namespace SimSharp.Samples {
     private const int FuelTankSize = 50; // liters
     private const int MinFuelTankLevel = 5; // Min levels of fuel tanks (in liters)
     private const int MaxFuelTankLevel = 25; // Max levels of fuel tanks (in liters)
-    private const int RefuelingSpeed = 1; // liters / second
+    private const int RefuelingSpeed = 2; // liters / second
+    private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(10); // Minutes it takes the tank truck to arrive
+    private static readonly TimeSpan MinTInter = TimeSpan.FromMinutes(30); // Create a car every min seconds
+    private static readonly TimeSpan MaxTInter = TimeSpan.FromMinutes(300); // Create a car every max seconds
+    private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(131400); // Simulation time
 
-    //private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(10); // Minutes it takes the tank truck to arrive
-    //private static readonly TimeSpan MinTInter = TimeSpan.FromMinutes(5); // Create a car every min seconds
-    //private static readonly TimeSpan MaxTInter = TimeSpan.FromMinutes(50); // Create a car every max seconds
-    //private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(150); // Simulation time
-
-    private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(1); // Minutes it takes the tank truck to arrive
-    private static readonly TimeSpan MinTInter = TimeSpan.FromSeconds(10); // Create a car every min seconds
-    private static readonly TimeSpan MaxTInter = TimeSpan.FromSeconds(20); // Create a car every max seconds
-    private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(3); // Simulation time
+    //private static readonly TimeSpan TankTruckTime = TimeSpan.FromMinutes(1); // Minutes it takes the tank truck to arrive
+    //private static readonly TimeSpan MinTInter = TimeSpan.FromSeconds(10); // Create a car every min seconds
+    //private static readonly TimeSpan MaxTInter = TimeSpan.FromSeconds(20); // Create a car every max seconds
+    //private static readonly TimeSpan SimTime = TimeSpan.FromMinutes(3); // Simulation time
 
     // Used for Visualization
     private static readonly int CarHeight = 70; // Height of car rectangles
@@ -97,7 +96,7 @@ namespace SimSharp.Samples {
        * depleted, the car has to wait for the tank truck to arrive.
        */
       var fuelTankLevel = env.RandUniform(MinFuelTankLevel, MaxFuelTankLevel + 1);
-      env.Log("{0} arriving at gas station at {1}", name, env.Now);
+      //env.Log("{0} arriving at gas station at {1}", name, env.Now);
       using (var req = gasStation.Request()) {
         var start = env.Now;
         // Request one of the gas pumps
@@ -159,7 +158,7 @@ namespace SimSharp.Samples {
           yield return env.Timeout(refuelDuration);
         }
         FreeGasStation(fullCar.X == 275 ? 1 : 2);            
-        env.Log("{0} finished refueling in {1} seconds.", name, (env.Now - start).TotalSeconds);
+        //env.Log("{0} finished refueling in {1} seconds.", name, (env.Now - start).TotalSeconds);
       }
     }
 
@@ -167,15 +166,23 @@ namespace SimSharp.Samples {
       /*
        * Update the visualization of the fuel pump if the level changes 
        */
-      Text fuelPumpText = new Text(560, 750, fontSize: 24);
-      TextStyle fuelPumpTextStyle = new TextStyle("black", "none", 0, GasStationSize.ToString());
-      Animation textAnimation = env.AnimationBuilder.Animate("fuelPumpText", fuelPumpText, fuelPumpTextStyle);
+      Style style = new Style("black", "none", 0);
+      Text text = new Text(560, 750, fontSize: 24);
+
+      Animation fuelAnimation = env.AnimationBuilder.Animate("fuelPumpTank", new Rect(275, 550, 270, GasStationSize), style);
+      Animation textAnimation = env.AnimationBuilder.Animate("fuelPumpText", text, new TextStyle("black", "none", 0, GasStationSize.ToString()));
 
       while (true) {
         yield return fuelPump.WhenChange();
-        // Visualization has to be updated
-        TextStyle newfuelPumpTextStyle = new TextStyle("black", "none", 0, Math.Round(fuelPump.Level, 2).ToString());
-        textAnimation.Update(fuelPumpText, newfuelPumpTextStyle);
+
+        Rect currFuelPumpRect = (Rect)fuelAnimation.GetShape0();
+        Rect levelFuelPumpRect = new Rect(currFuelPumpRect.X,
+          Convert.ToInt32(currFuelPumpRect.Y + currFuelPumpRect.Height - fuelPump.Level),
+          270,
+          Convert.ToInt32(fuelPump.Level));
+
+        fuelAnimation.Update(levelFuelPumpRect, style);
+        textAnimation.Update(text, new TextStyle("black", "none", 0, Math.Round(fuelPump.Level, 2).ToString()));
       }
     }
 
@@ -188,7 +195,7 @@ namespace SimSharp.Samples {
         yield return fuelPump.WhenAtMost(fuelPump.Capacity * (Threshold / 100.0));
         i++;
         // We need to call the tank truck now!
-        env.Log("Calling tank truck at {0}", env.Now);
+        //env.Log("Calling tank truck at {0}", env.Now);
         // Wait for the tank truck to arrive and refuel the station
         yield return env.Process(TankTruck("Truck " + i, env, fuelPump));
       }
@@ -197,11 +204,11 @@ namespace SimSharp.Samples {
     private IEnumerable<Event> TankTruck(string name, Simulation env, Container fuelPump) {
       // Arrives at the gas station after a certain delay and refuels it.
       yield return env.Timeout(TankTruckTime);
-      env.Log("Tank truck arriving at time {0}", env.Now);
+      //env.Log("Tank truck arriving at time {0}", env.Now);
 
       var amount = fuelPump.Capacity - fuelPump.Level;
       yield return fuelPump.Put(amount);
-      env.Log("Tank truck finished refuelling {0} liters at time {1}.", amount, env.Now);
+      //env.Log("Tank truck finished refuelling {0} liters at time {1}.", amount, env.Now);
     }
 
     private IEnumerable<Event> CarGenerator(Simulation env, Resource gasStation, Container fuelPump) {
@@ -219,12 +226,12 @@ namespace SimSharp.Samples {
       // Create environment and start processes
       AnimationBuilder animationBuilder = new AnimationBuilder(1000, 1000, "Gas Station Refueling", 1);
       var env = new Simulation(DateTime.Now.Date, rseed, animationBuilder);
-      env.Log("== Gas Station refuelling push animation ==");
+      //env.Log("== Gas Station refuelling push animation ==");
 
       // BuildAnimation has to be turned on before first Animation is created
       animationBuilder.DebugAnimation = false;
       animationBuilder.EnableAnimation = true;
-      animationBuilder.Processor = new HtmlPlayer();
+      animationBuilder.Processors = new List<FramesProcessor> { new JsonWriter() };
 
       // Gas station queue visualization
       Group carGroup = new Group(0, 20, 120, CarHeight);
@@ -249,6 +256,10 @@ namespace SimSharp.Samples {
         Utilization = new TimeSeriesMonitor(env, name: "Station utilization"),
       };
 
+      var fuelPump = new Container(env, GasStationSize, GasStationSize) {
+        Fillrate = new TimeSeriesMonitor(env, name: "Tank fill rate")
+      };
+
       // Gas station visualization
       Group gasStationLeft = new Group(245, 300, 100, 150);
       Group gasStationRight = new Group(445, 300, 100, 150);
@@ -269,15 +280,6 @@ namespace SimSharp.Samples {
       animationBuilder.Animate("gasStationLeft", gasStationLeft, env.StartDate, gasStationStyle);
       animationBuilder.Animate("gasStationRight", gasStationRight, env.StartDate, gasStationStyle);
 
-      // Fuel pump level visualization
-      Rect fullFuelPumpRect = new Rect(275, 550, 270, GasStationSize);
-      Style fuelPumpTankStyle = new Style("black", "none", 0);
-      LevelAnimation level = animationBuilder.AnimateLevel("fuelPumpTank", fullFuelPumpRect, fuelPumpTankStyle);
-
-      var fuelPump = new Container(env, GasStationSize, GasStationSize, level) {
-        Fillrate = new TimeSeriesMonitor(env, name: "Tank fill rate")
-      };
-
       // Fuel pump visualization
       Rect fuelPumpRect = new Rect(275, 550, 270, GasStationSize);
       Style fuelPumpStyle = new Style("none", "black", 3);
@@ -288,15 +290,7 @@ namespace SimSharp.Samples {
       env.Process(CarGenerator(env, gasStation, fuelPump));
 
       // Execute!
-      var watch = new System.Diagnostics.Stopwatch();
-
-      watch.Start();
-
       env.Run(SimTime);
-
-      watch.Stop();
-
-      Console.WriteLine($"Execution Time: {watch.ElapsedMilliseconds} ms");
       //env.Log(gasStation.QueueLength.Summarize());
       //env.Log(gasStation.WaitingTime.Summarize());
       //env.Log(gasStation.Utilization.Summarize());

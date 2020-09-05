@@ -17,7 +17,7 @@ namespace SimSharp.Visualization {
   public class AnimationBuilder {
     public AnimationConfig Config { get; }
 
-    public FramesProcessor Processor { get; set; }
+    public List<FramesProcessor> Processors { get; set; }
 
     public Simulation Env { 
       get { return env; } 
@@ -190,8 +190,8 @@ namespace SimSharp.Visualization {
     }
 
     public void StartBuilding() {
-      if (EnableAnimation && Processor != null) {
-        Processor.SendStart(Config);
+      if (EnableAnimation && Processors != null) {
+        SendStart(Config);
       }
     }
 
@@ -202,7 +202,7 @@ namespace SimSharp.Visualization {
     }
 
     public void Step(DateTime now) {
-      if (EnableAnimation && Processor != null) {
+      if (EnableAnimation && Processors != null) {
         int totalStart = Convert.ToInt32((prior - env.StartDate).TotalSeconds * Config.FPS) + 1;
         int totalStop = Convert.ToInt32((now - env.StartDate).TotalSeconds * Config.FPS);
         int totalFrameNumber = totalStop - totalStart + 1;
@@ -263,7 +263,7 @@ namespace SimSharp.Visualization {
                   writer.WriteEndObject();
 
                   string frame = stringWriter.ToString();
-                  Processor.SendFrame(frame);
+                  SendFrame(frame);
                   Flush();
                 }
                 start = stop;
@@ -287,14 +287,14 @@ namespace SimSharp.Visualization {
         writer.WriteEndObject();
 
         string frame = stringWriter.ToString();
-        Processor.SendFrame(frame);
+        SendFrame(frame);
         Flush();
       }
     }
 
     public void StopBuilding() {
-      if (EnableAnimation && Processor != null) {
-        Processor.SendStop();
+      if (EnableAnimation && Processors != null) {
+        SendStop();
       }
     }
 
@@ -310,6 +310,24 @@ namespace SimSharp.Visualization {
       writer.Flush();
       StringBuilder sb = stringWriter.GetStringBuilder();
       sb.Remove(0, sb.Length);
+    }
+
+    private void SendStart(AnimationConfig config) {
+      foreach (FramesProcessor processor in Processors) {
+        processor.SendStart(config);
+      }
+    }
+
+    private void SendFrame(string frame) {
+      foreach (FramesProcessor processor in Processors) {
+        processor.SendFrame(frame);
+      }
+    }
+
+    private void SendStop() {
+      foreach(FramesProcessor processor in Processors) {
+        processor.SendStop();
+      }
     }
   }
 }

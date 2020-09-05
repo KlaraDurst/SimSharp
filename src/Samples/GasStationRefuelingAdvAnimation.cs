@@ -267,7 +267,8 @@ namespace SimSharp.Samples {
       // BuildAnimation has to be turned on before first Animation is created
       animationBuilder.DebugAnimation = false;
       animationBuilder.EnableAnimation = true;
-      animationBuilder.Processors = new List<FramesProcessor> { new JsonWriter() };
+      animationBuilder.AddProcessor(new JsonWriter());
+      animationBuilder.AddProcessor(new HtmlPlayer());
 
       util = animationBuilder.GetAnimationUtil();
 

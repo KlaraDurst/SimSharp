@@ -17,8 +17,6 @@ namespace SimSharp.Visualization {
   public class AnimationBuilder {
     public AnimationConfig Config { get; }
 
-    public List<FramesProcessor> Processors { get; set; }
-
     public Simulation Env { 
       get { return env; } 
       set {
@@ -34,6 +32,7 @@ namespace SimSharp.Visualization {
     private Simulation env;
     private StringWriter stringWriter;
     private JsonTextWriter writer;
+    private List<FramesProcessor> processors;
     private List<FramesProvider> providers;
     private List<string> names; 
     private DateTime prior;
@@ -61,6 +60,7 @@ namespace SimSharp.Visualization {
 
       this.stringWriter = new StringWriter();
       this.writer = new JsonTextWriter(stringWriter);
+      this.processors = new List<FramesProcessor>();
       this.providers = new List<FramesProvider>();
       this.names = new List<string>();
       this.prior = DateTime.MinValue;
@@ -190,19 +190,23 @@ namespace SimSharp.Visualization {
     }
 
     public void StartBuilding() {
-      if (EnableAnimation && Processors != null) {
+      if (EnableAnimation && processors.Count > 0) {
         SendStart(Config);
       }
     }
 
-    public void AddProvider(FramesProvider provider) {
+    public void AddProcessor(FramesProcessor processor) {
+      processors.Add(processor);
+    }
+
+    private void AddProvider(FramesProvider provider) {
       string name = provider.GetName();
       AddName(name);
       providers.Add(provider);
     }
 
     public void Step(DateTime now) {
-      if (EnableAnimation && Processors != null) {
+      if (EnableAnimation && processors.Count > 0) {
         int totalStart = Convert.ToInt32((prior - env.StartDate).TotalSeconds * Config.FPS) + 1;
         int totalStop = Convert.ToInt32((now - env.StartDate).TotalSeconds * Config.FPS);
         int totalFrameNumber = totalStop - totalStart + 1;
@@ -293,7 +297,7 @@ namespace SimSharp.Visualization {
     }
 
     public void StopBuilding() {
-      if (EnableAnimation && Processors != null) {
+      if (EnableAnimation && processors.Count > 0) {
         SendStop();
       }
     }
@@ -313,19 +317,19 @@ namespace SimSharp.Visualization {
     }
 
     private void SendStart(AnimationConfig config) {
-      foreach (FramesProcessor processor in Processors) {
+      foreach (FramesProcessor processor in processors) {
         processor.SendStart(config);
       }
     }
 
     private void SendFrame(string frame) {
-      foreach (FramesProcessor processor in Processors) {
+      foreach (FramesProcessor processor in processors) {
         processor.SendFrame(frame);
       }
     }
 
     private void SendStop() {
-      foreach(FramesProcessor processor in Processors) {
+      foreach(FramesProcessor processor in processors) {
         processor.SendStop();
       }
     }

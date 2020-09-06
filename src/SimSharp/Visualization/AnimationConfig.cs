@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace SimSharp.Visualization {
   public class AnimationConfig {
     public string Name { get; }
-    public int FPS { get; }
+    public double FPS { get; }
 
     public int Width { get; }
     public int Height { get; }
@@ -16,7 +16,7 @@ namespace SimSharp.Visualization {
 
     public bool SetCanvas { get; }
 
-    public AnimationConfig (string name, int fps, int width, int height, int startX, int startY, bool setCanvas) {
+    public AnimationConfig (string name, double fps, int width, int height, int startX, int startY, bool setCanvas) {
       Name = name;
       FPS = fps;
       Width = width;

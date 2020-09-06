@@ -45,14 +45,14 @@ namespace SimSharp.Visualization {
     public AnimationBuilder() : this(0, 0, 0, 0, "Visualization", 1, false) { }
     public AnimationBuilder(int width, int height) : this(width, height, "Visualization") { }
     public AnimationBuilder(int width, int height, string name) : this(width, height, 0, 0, name, 1) { }
-    public AnimationBuilder(int width, int height, int fps) : this(width, height, "Visualization", fps) { }
-    public AnimationBuilder(int width, int height, string name, int fps) : this(width, height, 0, 0, name, fps) { }
+    public AnimationBuilder(int width, int height, double fps) : this(width, height, "Visualization", fps) { }
+    public AnimationBuilder(int width, int height, string name, double fps) : this(width, height, 0, 0, name, fps) { }
     public AnimationBuilder(int width, int height, int startX, int startY) : this(width, height, startX, startY, "Visualization") { }
-    public AnimationBuilder(int width, int height, int startX, int startY, int fps) : this(width, height, startX, startY, "Visualization", fps) { }
+    public AnimationBuilder(int width, int height, int startX, int startY, double fps) : this(width, height, startX, startY, "Visualization", fps) { }
     public AnimationBuilder(int width, int height, int startX, int startY, string name) : this(width, height, startX, startY, name, 1) { }
-    public AnimationBuilder(int width, int height, int startX, int startY, string name, int fps) : this(width, height, startX, startY, name, fps, true) { }
+    public AnimationBuilder(int width, int height, int startX, int startY, string name, double fps) : this(width, height, startX, startY, name, fps, true) { }
 
-    private AnimationBuilder(int width, int height, int startX, int startY, string name, int fps, bool setCanvas) {
+    private AnimationBuilder(int width, int height, int startX, int startY, string name, double fps, bool setCanvas) {
       if (fps > 60)
         throw new ArgumentException("fps can not be higher than 60.");
 

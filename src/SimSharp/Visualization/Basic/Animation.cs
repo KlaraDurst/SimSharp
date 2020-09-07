@@ -39,7 +39,7 @@ namespace SimSharp.Visualization.Basic {
 
     #region Update
     public void Update(Shape shape0, Shape shape1, DateTime time0, DateTime time1, bool keep = true) {
-      Update(shape0, shape1, time0, time1, GetLastWrittenProps().Style, keep);
+      Update(shape0, shape1, time0, time1, GetLastWrittenProps()?.Style, keep);
     }
 
     public void Update(Shape shape0, Shape shape1, DateTime time0, DateTime time1, Style style, bool keep = true) {
@@ -52,7 +52,7 @@ namespace SimSharp.Visualization.Basic {
     }
 
     public void Update(Shape shape1, bool keep = true) {
-      Update(shape1, GetLastWrittenProps().Style, keep);
+      Update(shape1, GetLastWrittenProps()?.Style, keep);
     }
 
     public void Update(Shape shape1, Style style, bool keep = true) {
@@ -60,11 +60,11 @@ namespace SimSharp.Visualization.Basic {
     }
 
     public void Update(Shape shape1, DateTime time1, bool keep = true) {
-      Update(shape1, animationBuilder.Env.Now, time1, GetLastWrittenProps().Style, keep);
+      Update(shape1, animationBuilder.Env.Now, time1, GetLastWrittenProps()?.Style, keep);
     }
 
     public void Update(Shape shape1, DateTime time0, DateTime time1, bool keep = true) {
-      Update(shape1, time0, time1, GetLastWrittenProps().Style, keep);
+      Update(shape1, time0, time1, GetLastWrittenProps()?.Style, keep);
     }
 
     public void Update(Shape shape1, DateTime time0, DateTime time1, Style style, bool keep = true) {
@@ -90,7 +90,7 @@ namespace SimSharp.Visualization.Basic {
         Shape shape0 = shape1.CopyAndSet(attributesAt);
         Update(new AnimationProperties(shape0, shape1, time0, time1, style, keep, start, stop));
       } else {
-        Update(new AnimationProperties(GetLastWrittenProps().Shape1, shape1, time0, time1, style, keep, start, stop));
+        Update(new AnimationProperties(GetLastWrittenProps()?.Shape1, shape1, time0, time1, style, keep, start, stop));
       }
     }
 
